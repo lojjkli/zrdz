@@ -260,6 +260,8 @@ SKINS = sorted(f for f in os.listdir(os.path.join(os.path.dirname(os.path.abspat
 SKINS.remove("lojjkli.png"); SKINS.insert(0, "lojjkli.png")
 skin = lambda i: skin_head(os.path.join(os.path.dirname(SKIN), SKINS[i % len(SKINS)]))
 
+VIEWS = [(-32, 24), (0, 8), (90, 12), (150, 24)]
+
 def sheet(images, cols, ts, path):
     rows = (len(images) + cols - 1) // cols
     out = Image.new("RGB", (cols * ts, rows * ts), "white")
@@ -268,7 +270,7 @@ def sheet(images, cols, ts, path):
     out.save(path)
 
 def build_heads():
-    thumbs, lines, models = [], [], {}
+    thumbs, lines, models, angle_strips = [], [], {}, []
     os.makedirs(f"{PV}/heads", exist_ok=True)
     for i, (name, title, tier, fn) in enumerate(DS.D):
         m = Model(name, title, tier); fn(m)
@@ -277,11 +279,25 @@ def build_heads():
         w(f"{A}/models/item/heads/{name}.json", m.to_json(f"aconite:item/heads/{name}"))
         w(f"{A}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"aconite:item/heads/{name}"}})
         img = render(skin(i) + m.render_elements(), size=384, plain=True)   # each accessory on a different head
-        img.save(f"{PV}/heads/{name}.png"); thumbs.append(img)
+        thumbs.append(img)
+        # multiple photos: 3/4 front, straight front, side, 3/4 back - each on a different head
+        views = [render(skin(i + k) + m.render_elements(), size=300, yaw=yaw, pitch=pitch, plain=True)
+                 for k, (yaw, pitch) in enumerate(VIEWS)]
+        strip = Image.new("RGB", (300 * len(views), 300), "white")
+        for k, v in enumerate(views):
+            strip.paste(v, (300 * k, 0))
+        strip.save(f"{PV}/heads/{name}.png"); angle_strips.append(strip)
         lines.append(f'/give @p minecraft:paper[item_model="aconite:{name}",item_name="{title}",equippable={{slot:"head"}}]')
     with open(os.path.join(ROOT, "give_commands.txt"), "w") as f:
         f.write("\n".join(lines) + "\n")
     sheet(thumbs, 12, 200, f"{PV}/all_heads.png")
+    # angle sheets: 12 accessories per page, 4 photos each
+    for page in range(0, len(angle_strips), 12):
+        group = angle_strips[page:page + 12]
+        out = Image.new("RGB", (1000, 250 * len(group)), "white")
+        for r, st in enumerate(group):
+            out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
+        out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # fit test: the trickiest fits (tight bands, full helmets, brims, side pieces) on all 8 heads
     test = ["cat_ears_black", "top_hat", "gold_crown", "knight_helmet", "headphones", "aviator_goggles",
             "beanie", "sunglasses", "viking_helmet", "flower_crown"]
