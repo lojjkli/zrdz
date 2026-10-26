@@ -228,15 +228,19 @@ def build_aconite():
     os.makedirs(PV + "/aconite", exist_ok=True)
     tiles = []
     for i, (name, lo, hi, label) in enumerate(stages):
-        els = grass_block(seed=i) + cross(pix(lo)) + (cross(pix(hi), 16) if hi else [])
+        els = cross(pix(lo)) + (cross(pix(hi), 16) if hi else [])
         # fixed framing so the plants visibly grow
-        els += [dict(f=[-2, -16, 8], t=[18, 33, 8], rot=None, faces={"north": (np.zeros((1, 1, 4), np.uint8), [0, 0, 1, 1])})]
-        tiles.append(render(els, size=360, yaw=-8, label=f"{i + 1}. {label}", bg=SKY))
-    strip = Image.new("RGB", (360 * len(tiles), 360))
+        els += [dict(f=[-2, 0, 8], t=[18, 33, 8], rot=None, faces={"north": (np.zeros((1, 1, 4), np.uint8), [0, 0, 1, 1])})]
+        tiles.append(render(els, size=480, yaw=-8, label=f"{i + 1}. {label}", bg=SKY))
+    frame = [dict(f=[-2, 0, 8], t=[18, 33, 8], rot=None, faces={"north": (np.zeros((1, 1, 4), np.uint8), [0, 0, 1, 1])})]
+    tiles.append(render(cross(bot) + cross(pix([r.translate(WOLFSBANE) for r in TOP]), 16) + frame, size=480, yaw=-8,
+                        label="7. Yellow Wolfsbane", bg=SKY))
+    strip = Image.new("RGB", (480 * 4, 480 * 2), SKY[1])
     for i, t in enumerate(tiles):
-        strip.paste(t, (i * 360, 0))
+        strip.paste(t, ((i % 4) * 480, (i // 4) * 480))
     strip.save(PV + "/aconite/growth_stages.png")
-    render(grass_block() + cross(bot) + cross(wolf_top, 16), size=512, yaw=-8, label="Yellow Wolfsbane", bg=SKY).save(PV + "/aconite/wolfsbane.png")
+    globals()["_flower_tiles"] = strip
+    render(cross(bot) + cross(wolf_top, 16), size=512, yaw=-8, label="Yellow Wolfsbane", bg=SKY).save(PV + "/aconite/wolfsbane.png")
 
     # 3D chunky aconite (cuboid) for item frames / display entities / hats
     m = Model("aconite_3d", "Aconite (3D)")
@@ -254,10 +258,13 @@ def build_aconite():
     w(os.path.join(A, "items", "aconite_3d.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/aconite_3d"}})
 
     os.makedirs(PV + "/aconite", exist_ok=True)
-    render(grass_block() + cross(bot) + cross(top, 16), size=640, yaw=-8, label="Aconite (2-block flower)", bg=SKY).save(PV + "/aconite/aconite_flower.png")
+    render(cross(bot) + cross(top, 16), size=640, yaw=-8, label="Aconite (2-block flower)", bg=SKY).save(PV + "/aconite/aconite_flower.png")
     pot = [solid([5, 0, 5], [11, 6, 11], (150, 76, 52), 5), solid([6, 5.9, 6], [10, 6, 10], (70, 45, 30), 2)]
     render(pot + cross(small, 4, 0.75, (8, 8)), size=512, label="Potted Aconite").save(PV + "/aconite/potted_aconite.png")
     render(m.render_elements(tex), size=512, label="Aconite (3D model)").save(PV + "/aconite/aconite_3d.png")
+    final = globals()["_flower_tiles"]
+    final.paste(render(m.render_elements(tex), size=480, label="8. Aconite 3D model", bg=SKY), (3 * 480, 480))
+    final.save(PV + "/final_flowers.png")
     big = Image.new("RGBA", (16 * 3 * 16 + 40, 16 * 16 + 20), (20, 10, 32, 255))
     for i, t in enumerate([top, bot, small]):
         big.paste(t.resize((256, 256), Image.NEAREST), (10 + i * 266, 10), t.resize((256, 256), Image.NEAREST))
