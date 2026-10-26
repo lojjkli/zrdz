@@ -253,29 +253,39 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 
     yoff = -0.05 * W if label else 0
     to2 = lambda p: np.array([(p @ right - ctr[0]) * sc + W / 2, -(p @ up - ctr[1]) * sc + W / 2 + yoff])
     col = np.zeros((W, W, 3), np.float32); zb = np.full((W, W), np.inf, np.float32)
-    for o, du, dv, (arr, uv), sh in faces:
+    def raster(o, du, dv, arr, uv):
         P0, PU, PV = to2(o), to2(o + du) - to2(o), to2(o + dv) - to2(o)
         M = np.array([[PU[0], PV[0]], [PU[1], PV[1]]])
         if abs(np.linalg.det(M)) < 1e-6:
-            continue
+            return None
         Mi = np.linalg.inv(M)
         corners = np.array([P0, P0 + PU, P0 + PV, P0 + PU + PV])
         x0, y0 = np.floor(corners.min(0)).astype(int); x1, y1 = np.ceil(corners.max(0)).astype(int)
         x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, W), min(y1, W)
         if x0 >= x1 or y0 >= y1:
-            continue
+            return None
         X, Y = np.meshgrid(np.arange(x0, x1) + 0.5, np.arange(y0, y1) + 0.5)
         dx, dy = X - P0[0], Y - P0[1]
         s_ = Mi[0, 0] * dx + Mi[0, 1] * dy; t_ = Mi[1, 0] * dx + Mi[1, 1] * dy
         m = (s_ >= 0) & (s_ < 1) & (t_ >= 0) & (t_ < 1)
         if not m.any():
-            continue
+            return None
         u0, v0, u1, v1 = uv
         tx = np.clip((u0 + s_ * (u1 - u0)).astype(int), 0, arr.shape[1] - 1)
         ty = np.clip((v0 + t_ * (v1 - v0)).astype(int), 0, arr.shape[0] - 1)
-        px = arr[ty, tx]
-        m &= px[..., 3] > 127
         z = o @ fwd + s_ * (du @ fwd) + t_ * (dv @ fwd)
+        return x0, y0, x1, y1, m, arr[ty, tx], z
+
+    glass = []
+    for o, du, dv, (arr, uv), sh in faces:
+        r = raster(o, du, dv, arr, uv)
+        if r is None:
+            continue
+        x0, y0, x1, y1, m, px, z = r
+        a = px[..., 3]
+        if ((a > 20) & (a < 250) & m).any():
+            glass.append((float(np.mean(z[m])), r, sh))
+        m = m & (a >= 250)
         sub = zb[y0:y1, x0:x1]
         m &= z < sub - 1e-4
         sub[m] = z[m]
@@ -306,6 +316,13 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 
         g = Image.fromarray((glow * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(W * 0.03))
         bgimg += (np.array(g, np.float32) / 255)[..., None] * np.array([70, 40, 110], np.float32) * 0.6
     out = np.where(mask[..., None], col, bgimg)
+    # see-through pixels (glass): blended back to front over whatever is behind them
+    for _, (x0, y0, x1, y1, m, px, z), sh in sorted(glass, key=lambda g: -g[0]):
+        a = px[..., 3].astype(np.float32) / 255
+        m = m & (a > 0.08) & (a < 0.98) & (z < zb[y0:y1, x0:x1] - 1e-4)
+        tile = out[y0:y1, x0:x1]
+        tint = px[..., :3].astype(np.float32) * min(1.2, sh + 0.15)
+        tile[m] = tile[m] * (1 - a[m, None]) + tint[m] * a[m, None]
     img = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)).resize((size, size), Image.LANCZOS)
     if label:
         d = ImageDraw.Draw(img)

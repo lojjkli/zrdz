@@ -1374,3 +1374,27 @@ def _(m):
         m.box(min(s * 6.0, s * 6.15), -0.6, -0.6, max(s * 6.0, s * 6.15), 0.6, 0.6, '#d23c3c' if s < 0 else '#2f6fd8')
     m.box(2.6, 5.1, 2.0, 3.0, 7.8, 2.4, GREY); m.box(2.4, 7.8, 1.8, 3.2, 8.6, 2.6, RED)
     m.box(-3.4, 3.8, 5.1, -1.4, 4.6, 5.25, '#2f6fd8'); m.box(-3.4, 3.0, 5.1, -1.4, 3.8, 5.25, Wh)
+
+@redesign("astronaut")
+def _(m):
+    Wh, Wd, GLS, HI = '#f4f4f8', '#cfd3dc', '#a8dcff66', '#ffffffb0'
+    # white shell: back half, top and sides, with a big opening at the front
+    rbox(m, -5.1, -4.8, 0.4, 5.1, 4.7, 5.1, Wh, r=1.2, top=False)
+    rbox(m, -4.0, 4.7, -3.9, 4.0, 5.4, 4.0, Wh, r=0.8, top=False)
+    m.box(-5.1, 4.0, -5.1, 5.1, 4.7, 1.8, Wh)                      # brow
+    for s in (-1, 1):
+        m.box(min(s * 4.6, s * 5.1), -4.8, -5.1, max(s * 4.6, s * 5.1), 4.7, 1.8, Wh)   # cheeks
+        m.box(min(s * 4.2, s * 4.6), -4.8, -5.1, max(s * 4.2, s * 4.6), 4.0, -4.6, Wd)  # visor rim
+    m.box(-4.6, -4.8, -5.1, 4.6, -3.6, -4.6, Wd)                   # chin
+    m.box(-5.5, -5.6, -5.5, 5.5, -4.8, 5.5, '#9aa1ad')             # neck ring
+    # curved glass visor: deeper in the middle, the face shows through
+    m.box(-2.8, -3.6, -6.1, 2.8, 4.0, -5.1, GLS)
+    for s in (-1, 1):
+        m.box(min(s * 2.8, s * 4.2), -3.6, -5.7, max(s * 2.8, s * 4.2), 4.0, -5.1, GLS)
+    m.box(1.2, 2.2, -6.2, 2.4, 3.4, -6.1, HI); m.box(1.9, 0.9, -6.2, 2.4, 1.9, -6.1, HI)
+    m.box(-3.9, 2.6, -5.8, -3.4, 3.6, -5.7, HI)
+    for s in (-1, 1):                                              # comms pods
+        rbox(m, min(s * 5.1, s * 6.0), -1.6, -1.6, max(s * 5.1, s * 6.0), 1.6, 1.6, Wd, r=0.5)
+        m.box(min(s * 6.0, s * 6.15), -0.6, -0.6, max(s * 6.0, s * 6.15), 0.6, 0.6, '#d23c3c' if s < 0 else '#2f6fd8')
+    m.box(2.6, 5.4, 2.0, 3.0, 8.0, 2.4, GREY); m.box(2.4, 8.0, 1.8, 3.2, 8.8, 2.6, RED)
+    m.box(-3.4, 3.4, 5.1, -1.4, 4.2, 5.25, '#2f6fd8'); m.box(-3.4, 2.6, 5.1, -1.4, 3.4, 5.25, Wh)
