@@ -3,7 +3,7 @@ import json, os, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 sys.path.insert(0, os.path.dirname(__file__))
-from mclib import Model, render, player_head, hex2rgb
+from mclib import Model, render, player_head, skin_head, hex2rgb
 import designs as DS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +22,75 @@ def w(path, data):
 # ---------------- aconite plant pixel art ----------------
 PAL = {'.': (0, 0, 0, 0), 's': hex2rgb(DS.STEM), 'd': hex2rgb(DS.AC_DARK), 'p': hex2rgb(DS.AC),
        'l': hex2rgb(DS.AC_LIGHT), 'g': hex2rgb(DS.AC_GLOW), 'L': hex2rgb(DS.LEAF), 'G': hex2rgb(DS.LEAF_D),
-       'b': hex2rgb('#6fb04a')}
+       'b': hex2rgb('#6fb04a'), 'y': hex2rgb('#f2d43a'), 'Y': hex2rgb('#fff08a'), 'o': hex2rgb('#c9d84a'),
+       'O': hex2rgb('#c9a227')}
+SKIN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "skins", "lojjkli.png")
+
+# growth stages: sprout -> leaves -> yellow buds -> buds turn purple -> 2 blocks tall -> full bloom
+STAGE0 = ["................"] * 11 + [
+          "....LL...LL.....",
+          "...LGLL.LLGL....",
+          ".....LGsGL......",
+          ".......s........",
+          ".......s........"]
+STAGE1 = ["................"] * 7 + [
+          "...L.L....L.L...",
+          "..LGLGL..LGLGL..",
+          "...LGGLsLGGL....",
+          ".L..LGGsGGL..L..",
+          "..LL.LGsGL.LL...",
+          "....LLGsGLL.....",
+          "......LsL.......",
+          ".......s........"]
+STAGE2 = ["................",
+          "................",
+          ".......Y........",
+          "......yYy.......",
+          ".......s.oy.....",
+          "....yo.s........",
+          ".......s.yo.....",
+          "....oy.s........",
+          ".......s........",
+          "...L.L.s..L.L...",
+          "..LGLGLs.LGLGL..",
+          "...LGGLsLGGL....",
+          ".L..LGGsGGL..L..",
+          "..LL.LGsGL.LL...",
+          "....LLGsGLL.....",
+          ".......s........"]
+STAGE3 = [".......Y........",
+          "......yYy.......",
+          ".......s.oy.....",
+          "....yy.s........",
+          ".......s.ddd....",
+          "...ddd.sdlpd....",
+          "..dppl.s.lp.....",
+          "...lp..s........",
+          ".......s........",
+          "...L.L.s..L.L...",
+          "..LGLGLs.LGLGL..",
+          "...LGGLsLGGL....",
+          ".L..LGGsGGL..L..",
+          "..LL.LGsGL.LL...",
+          "....LLGsGLL.....",
+          ".......s........"]
+STAGE4_TOP = ["................",
+              "................",
+              ".......Y........",
+              "......yYy.......",
+              ".......s.yo.....",
+              "....oy.s........",
+              ".......s.ddd....",
+              "...ddd.sdlppd...",
+              "..dppl.s.llld...",
+              "..dlll.s..lp....",
+              "...lp..s........",
+              ".......s.ddd....",
+              "...ddd.sdlppd...",
+              "..dppl.s.lll....",
+              "...lp..s..lp....",
+              ".......s........"]
+WOLFSBANE = str.maketrans({'p': 'y', 'l': 'Y', 'd': 'O', 'g': 'Y'})
 TOP = [".......gl.......",
        "......glpd......",
        "......lppd......",
@@ -102,10 +170,26 @@ def solid(f, t, col, tex_noise=7):
     full = [0, 0, 16, 16]
     return dict(f=f, t=t, rot=None, faces={d: (a, full) for d in ("north", "south", "east", "west", "up", "down")})
 
-def grass_block(y=-16):
-    g = solid([0, y, 0], [16, y + 16, 16], (122, 86, 58))
-    top = solid([0, y + 15.99, 0], [16, y + 16.01, 16], (95, 168, 58), 3)
-    return [g, top]
+def grass_block(y=-16, x=0, z=0, seed=1):
+    """Vanilla-style grass block: tinted grass top, dirt sides with a ragged grass lip."""
+    rng = np.random.default_rng(seed)
+    GR = [(76, 128, 44), (89, 145, 52), (99, 160, 58), (110, 172, 64), (121, 184, 72)]
+    DI = [(89, 61, 41), (105, 74, 51), (121, 85, 58), (134, 96, 67), (150, 108, 75)]
+    pick = lambda pal, wts: pal[rng.choice(len(pal), p=wts)]
+    top = np.zeros((16, 16, 4), np.uint8); side = np.zeros((16, 16, 4), np.uint8); dirt = np.zeros((16, 16, 4), np.uint8)
+    for yy in range(16):
+        for xx in range(16):
+            top[yy, xx] = pick(GR, [.12, .25, .3, .23, .1]) + (255,)
+            dirt[yy, xx] = pick(DI, [.1, .2, .35, .25, .1]) + (255,)
+    side[:] = dirt
+    for xx in range(16):
+        drip = rng.choice([1, 2, 2, 3, 3, 4])
+        for yy in range(drip):
+            side[yy, xx] = tuple(int(c * 0.92) for c in pick(GR, [.15, .3, .3, .2, .05])) + (255,)
+    full = [0, 0, 16, 16]
+    return [dict(f=[x, y, z], t=[x + 16, y + 16, z + 16], rot=None,
+                 faces={"north": (side, full), "south": (side, full), "east": (side, full), "west": (side, full),
+                        "up": (top, full), "down": (dirt, full)})]
 
 def build_aconite():
     top, bot, small = pix(TOP), pix(BOTTOM), pix(SMALL)
@@ -117,6 +201,43 @@ def build_aconite():
     w(f"{M}/block/potted_aconite.json", {"parent": "minecraft:block/flower_pot_cross", "textures": {"plant": "aconite:block/aconite_small"}})
     w(f"{M}/item/aconite.json", {"parent": "minecraft:item/generated", "textures": {"layer0": "aconite:block/aconite_top"}})
     w(os.path.join(A, "items", "aconite.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/aconite"}})
+    # growth stages + yellow wolfsbane
+    stages = [("aconite_stage0", STAGE0, None, "Sprout"), ("aconite_stage1", STAGE1, None, "Leaves"),
+              ("aconite_stage2", STAGE2, None, "Yellow buds"), ("aconite_stage3", STAGE3, None, "Buds turning"),
+              ("aconite_stage4", BOTTOM, STAGE4_TOP, "2 blocks tall"), ("aconite_stage5", BOTTOM, TOP, "Full bloom")]
+    for name, lo, hi, _ in stages:
+        if hi is None:
+            w(f"{T}/{name}.png", pix(lo))
+            w(f"{M}/block/{name}.json", {"parent": "minecraft:block/cross", "textures": {"cross": f"aconite:block/{name}"}})
+            tex_item = name
+        else:
+            w(f"{T}/{name}_bottom.png", pix(lo)); w(f"{T}/{name}_top.png", pix(hi))
+            for half in ("bottom", "top"):
+                w(f"{M}/block/{name}_{half}.json", {"parent": "minecraft:block/cross", "textures": {"cross": f"aconite:block/{name}_{half}"}})
+            tex_item = f"{name}_top"
+        w(f"{M}/item/{name}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"aconite:block/{tex_item}"}})
+        w(os.path.join(A, "items", f"{name}.json"), {"model": {"type": "minecraft:model", "model": f"aconite:item/{name}"}})
+    wolf_top = pix([r.translate(WOLFSBANE) for r in TOP])
+    w(f"{T}/wolfsbane_top.png", wolf_top); w(f"{T}/wolfsbane_bottom.png", bot)
+    for half in ("bottom", "top"):
+        w(f"{M}/block/wolfsbane_{half}.json", {"parent": "minecraft:block/cross", "textures": {"cross": f"aconite:block/wolfsbane_{half}"}})
+    w(f"{M}/item/wolfsbane.json", {"parent": "minecraft:item/generated", "textures": {"layer0": "aconite:block/wolfsbane_top"}})
+    w(os.path.join(A, "items", "wolfsbane.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/wolfsbane"}})
+    build_crop_addon(stages)
+
+    os.makedirs(PV + "/aconite", exist_ok=True)
+    tiles = []
+    for i, (name, lo, hi, label) in enumerate(stages):
+        els = grass_block(seed=i) + cross(pix(lo)) + (cross(pix(hi), 16) if hi else [])
+        # fixed framing so the plants visibly grow
+        els += [dict(f=[-2, -16, 8], t=[18, 33, 8], rot=None, faces={"north": (np.zeros((1, 1, 4), np.uint8), [0, 0, 1, 1])})]
+        tiles.append(render(els, size=360, yaw=-8, label=f"{i + 1}. {label}", bg=SKY))
+    strip = Image.new("RGB", (360 * len(tiles), 360))
+    for i, t in enumerate(tiles):
+        strip.paste(t, (i * 360, 0))
+    strip.save(PV + "/aconite/growth_stages.png")
+    render(grass_block() + cross(bot) + cross(wolf_top, 16), size=512, yaw=-8, label="Yellow Wolfsbane", bg=SKY).save(PV + "/aconite/wolfsbane.png")
+
     # 3D chunky aconite (cuboid) for item frames / display entities / hats
     m = Model("aconite_3d", "Aconite (3D)")
     m.box(-0.35, -5, -0.35, 0.35, 0, 0.35, DS.STEM)
@@ -133,7 +254,7 @@ def build_aconite():
     w(os.path.join(A, "items", "aconite_3d.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/aconite_3d"}})
 
     os.makedirs(PV + "/aconite", exist_ok=True)
-    render(grass_block() + cross(bot) + cross(top, 16), size=640, yaw=-8, label="Aconite (2-block flower)").save(PV + "/aconite/aconite_flower.png")
+    render(grass_block() + cross(bot) + cross(top, 16), size=640, yaw=-8, label="Aconite (2-block flower)", bg=SKY).save(PV + "/aconite/aconite_flower.png")
     pot = [solid([5, 0, 5], [11, 6, 11], (150, 76, 52), 5), solid([6, 5.9, 6], [10, 6, 10], (70, 45, 30), 2)]
     render(pot + cross(small, 4, 0.75, (8, 8)), size=512, label="Potted Aconite").save(PV + "/aconite/potted_aconite.png")
     render(m.render_elements(tex), size=512, label="Aconite (3D model)").save(PV + "/aconite/aconite_3d.png")
@@ -141,6 +262,23 @@ def build_aconite():
     for i, t in enumerate([top, bot, small]):
         big.paste(t.resize((256, 256), Image.NEAREST), (10 + i * 266, 10), t.resize((256, 256), Image.NEAREST))
     big.crop((0, 0, 3 * 266 + 10, 276)).save(PV + "/aconite/textures.png")
+
+SKY = ((121, 166, 255), (196, 222, 255))
+
+def build_crop_addon(stages):
+    """Optional add-on: re-skins the vanilla pitcher crop (age 0-4, grows 2 blocks tall)
+    as a growing aconite. Plant pitcher pods and watch it grow."""
+    C = os.path.join(ROOT, "addon_aconite_crop")
+    w(os.path.join(C, "pack.mcmeta"), {"pack": {"pack_format": 46, "supported_formats": [46, 99],
+                                                 "description": "\u00a75ACONITE \u00a77crop: pitcher crop grows as aconite (needs main pack)"}})
+    w(os.path.join(C, "assets/aconite/models/block/empty.json"), {"textures": {"particle": "aconite:block/aconite_bottom"}, "elements": []})
+    lower = ["aconite_stage0", "aconite_stage1", "aconite_stage2", "aconite_stage4_bottom", "aconite_stage5_bottom"]
+    upper = ["empty", "empty", "empty", "aconite_stage4_top", "aconite_stage5_top"]
+    v = {}
+    for age in range(5):
+        v[f"age={age},half=lower"] = {"model": f"aconite:block/{lower[age]}"}
+        v[f"age={age},half=upper"] = {"model": f"aconite:block/{upper[age]}"}
+    w(os.path.join(C, "assets/minecraft/blockstates/pitcher_crop.json"), {"variants": v})
 
 def build_heads():
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 15)
@@ -152,7 +290,7 @@ def build_heads():
         w(f"{A}/textures/item/heads/{name}.png", tex)
         w(f"{A}/models/item/heads/{name}.json", m.to_json(f"aconite:item/heads/{name}"))
         w(f"{A}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"aconite:item/heads/{name}"}})
-        img = render([player_head()] + m.render_elements(tex), size=384, label=title)
+        img = render(skin_head(SKIN) + m.render_elements(tex), size=384, label=title)
         img.save(f"{PV}/heads/{name}.png") if os.path.isdir(f"{PV}/heads") else (os.makedirs(f"{PV}/heads"), img.save(f"{PV}/heads/{name}.png"))
         thumbs.append((img, tier))
         lines.append(f'/give @p minecraft:carved_pumpkin[item_model="aconite:{name}",item_name="{title}",equippable={{slot:"head"}}]')

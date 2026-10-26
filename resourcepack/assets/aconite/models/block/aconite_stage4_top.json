@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:block/cross",
+ "textures": {
+  "cross": "aconite:block/aconite_stage4_top"
+ }
+}

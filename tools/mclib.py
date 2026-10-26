@@ -179,6 +179,20 @@ def player_head():
                 faces={"north": (face, full), "south": (back, full), "east": (side, full),
                        "west": (side[:, ::-1], full), "up": (top, full), "down": (bot, full)})
 
+def skin_head(path):
+    """Real Minecraft head (base + hat layer) from a standard 64x64 skin."""
+    a = np.array(Image.open(path).convert('RGBA'))
+    def faces(ox):
+        g = lambda x, y: a[y:y + 8, ox + x:ox + x + 8]
+        full = [0, 0, 8, 8]
+        return {"north": (g(8, 8), full), "east": (g(0, 8), full), "west": (g(16, 8), full),
+                "south": (g(24, 8), full), "up": (g(8, 0)[::-1, ::-1].copy(), full), "down": (g(16, 0)[::-1, ::-1].copy(), full)}
+    base = faces(0)
+    for k, (arr, uv) in base.items():   # head base is opaque in-game
+        arr = arr.copy(); arr[..., 3] = 255; base[k] = (arr, uv)
+    return [dict(f=[1.6] * 3, t=[14.4] * 3, rot=None, faces=base),
+            dict(f=[0.8] * 3, t=[15.2] * 3, rot=None, faces=faces(32))]
+
 # ---- renderer (orthographic z-buffer) ---------------------------------
 FACES = {
     "north": ((0, 0, -1), lambda a, b: ((b[0], b[1], a[2]), (-(b[0]-a[0]), 0, 0), (0, -(b[1]-a[1]), 0))),
@@ -197,7 +211,7 @@ def rotmat(axis, ang):
 
 _FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-def render(elements, size=512, yaw=-32, pitch=24, bg=((48, 22, 74), (10, 5, 20)), label=None, ss=3):
+def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 80)), label=None, ss=3):
     ya, pa = math.radians(yaw), math.radians(pitch)
     cam = np.array([math.sin(ya) * math.cos(pa), math.sin(pa), -math.cos(ya) * math.cos(pa)])
     fwd = -cam
@@ -255,7 +269,7 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((48, 22, 74), (10, 5, 20))
         sub = zb[y0:y1, x0:x1]
         m &= z < sub - 1e-4
         sub[m] = z[m]
-        col[y0:y1, x0:x1][m] = px[..., :3][m] * sh
+        col[y0:y1, x0:x1][m] = px[..., :3][m] * sh + max(0.0, sh - 0.5) * 34  # lift so black skins still read in 3D
     mask = np.isfinite(zb)
     # silhouette + crease outline from depth jumps
     zf = np.where(mask, zb, 1e9)
@@ -285,5 +299,5 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((48, 22, 74), (10, 5, 20))
         d = ImageDraw.Draw(img)
         font = ImageFont.truetype(_FONT, size // 17)
         w = d.textlength(label, font=font)
-        d.text(((size - w) / 2, size * 0.885), label, fill=(240, 228, 255), font=font)
+        d.text(((size - w) / 2, size * 0.885), label, fill=(240, 228, 255), font=font, stroke_width=max(2, size // 150), stroke_fill=(28, 16, 48))
     return img
