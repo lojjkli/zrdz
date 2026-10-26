@@ -262,7 +262,8 @@ skin = lambda i: skin_head(os.path.join(os.path.dirname(SKIN), SKINS[i % len(SKI
 
 VIEWS = [(-32, 24), (0, 8), (90, 12), (150, 24)]
 HOME = {"taggy_buddy": "lojjkli", "taggy_wave": "lojjkli", "taggy_froggie_duo": "lojjkli",
-        "froggie_buddy": "kaiib", "taggy_mask": "lojjkli", "froglight_crown": "Emii5287"}
+        "froggie_buddy": "kaiib", "taggy_mask": "lojjkli", "froglight_crown": "Emii5287",
+        "froggie_hat": "kaiib", "taggy_rides_froggie": "lojjkli", "taggy_peek": "lojjkli", "taggy_headphones": "lojjkli"}
 
 def sheet(images, cols, ts, path):
     rows = (len(images) + cols - 1) // cols
@@ -270,6 +271,12 @@ def sheet(images, cols, ts, path):
     for i, im in enumerate(images):
         out.paste(im.resize((ts, ts), Image.LANCZOS), ((i % cols) * ts, (i // cols) * ts))
     out.save(path)
+
+NEW_BATCH = ["froggie_buddy", "froggie_hat", "froglight_crown", "taggy_rides_froggie", "taggy_froggie_duo", "taggy_buddy",
+             "taggy_peek", "taggy_headphones", "six_seven", "six_seven_hands", "tralalero", "tung_tung",
+             "ballerina_cappuccina", "bombardiro", "matcha_latte", "clanker_helmet", "dubai_chocolate", "aura_farmer",
+             "googly_eyes", "plunger", "arrow_head", "banana_peel", "dizzy_stars", "cheese_hat", "frying_pan",
+             "toaster_hat", "big_brain", "duck_floatie", "engineer_goggles"]
 
 def build_heads():
     thumbs, lines, models, angle_strips = [], [], {}, []
@@ -305,7 +312,7 @@ def build_heads():
             out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # trendy batch on its own sheets
-    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie")):
+    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy")):
         idx = [i for i, d in enumerate(DS.D) if d[2] == tier]
         if not idx:
             continue
@@ -314,6 +321,15 @@ def build_heads():
         for k, i in enumerate(idx):
             out.paste(angle_strips[i].resize((1000, 250), Image.LANCZOS), ((k % 2) * 1060, 250 * (k // 2)))
         out.save(f"{PV}/{label}_photos.png")
+    # latest batch (new trends, goofy, Froggie v2 + Taggy updates): hero shots and 4-angle photos
+    new = [i for i, d in enumerate(DS.D) if d[0] in NEW_BATCH]
+    sheet([thumbs[i] for i in new], 6, 280, f"{PV}/new_batch_heads.png")
+    for k in range(0, len(new), 14):
+        grp = new[k:k + 14]
+        out = Image.new("RGB", (1000 * 2 + 60, 250 * ((len(grp) + 1) // 2)), "white")
+        for j, i in enumerate(grp):
+            out.paste(angle_strips[i].resize((1000, 250), Image.LANCZOS), ((j % 2) * 1060, 250 * (j // 2)))
+        out.save(f"{PV}/new_batch_photos_{k // 14 + 1}.png")
     # fit test: the trickiest fits (tight bands, full helmets, brims, side pieces) on all 8 heads
     test = ["cat_ears_black", "top_hat", "gold_crown", "knight_helmet", "headphones", "aviator_goggles",
             "beanie", "sunglasses", "viking_helmet", "flower_crown"]

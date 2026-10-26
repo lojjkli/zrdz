@@ -11,6 +11,32 @@ def hex2rgb(h):
     h = h.lstrip('#')
     return tuple(int(h[i:i+2], 16) for i in (0, 2, 4)) + ((int(h[6:8], 16),) if len(h) == 8 else (255,))
 
+class Tex:
+    """Box faces copied 1:1 from a Java entity texture: cube at texOffs(u, v) with size (w, h, d),
+    using the standard box UV layout. Faces in `skip` (or with zero area) are left transparent."""
+    def __init__(self, img, u, v, w, h, d, skip=(), name=""):
+        self.a = img if isinstance(img, np.ndarray) else np.array(Image.open(img).convert('RGBA'))
+        self.u, self.v, self.w, self.h, self.d, self.skip = u, v, w, h, d, set(skip)
+        self.key = (name, u, v, w, h, d, tuple(sorted(skip)))
+
+    def __hash__(self):
+        return hash(self.key)
+
+    def __eq__(self, o):
+        return isinstance(o, Tex) and o.key == self.key
+
+    def patch(self, face, pw, ph):
+        u, v, w, h, d = self.u, self.v, self.w, self.h, self.d
+        x, y, rw, rh = {"north": (u + d, v + d, w, h), "east": (u, v + d, d, h), "west": (u + d + w, v + d, d, h),
+                        "south": (u + 2 * d + w, v + d, w, h), "up": (u + d, v, w, d), "down": (u + d + w, v, w, d)}[face]
+        if face in self.skip or rw <= 0 or rh <= 0:
+            return np.zeros((ph, pw, 4), np.uint8)
+        p = self.a[int(y):int(y + rh), int(x):int(x + rw)]
+        if face in ("up", "down"):
+            p = p[::-1, ::-1]
+        return np.array(Image.fromarray(np.ascontiguousarray(p)).resize((pw, ph), Image.NEAREST))
+
+
 class Model:
     def __init__(self, name, title, tier="basic"):
         self.name, self.title, self.tier = name, title, tier
@@ -39,6 +65,10 @@ class Model:
     DENS = 2  # texels per head pixel (2x the player-skin resolution)
 
     def _face_size(self, bx, d):
+        if isinstance(bx['c'], Tex):   # textured faces keep their native pixels (crisp, 1:1 with the entity texture)
+            t = bx['c']; w, h, dd = t.w, t.h, t.d
+            fw, fh = {"north": (w, h), "south": (w, h), "east": (dd, h), "west": (dd, h), "up": (w, dd), "down": (w, dd)}[d]
+            return max(1, int(round(fw))), max(1, int(round(fh)))
         dx, dy, dz = (bx['t'][i] - bx['f'][i] for i in range(3))
         w, h = {"north": (dx, dy), "south": (dx, dy), "east": (dz, dy), "west": (dz, dy),
                 "up": (dx, dz), "down": (dx, dz)}[d]
@@ -58,7 +88,8 @@ class Model:
                 key = (w, h, bx['c'], d)
                 if key not in cache:
                     cache[key] = len(patches)
-                    patches.append((key, paint(w, h, bx['c'], d, rng)))
+                    c = bx['c']
+                    patches.append((key, c.patch(d, w, h) if isinstance(c, Tex) else paint(w, h, c, d, rng)))
                 fu[d] = cache[key]
             self.face_uv.append(fu)
         order = sorted(range(len(patches)), key=lambda i: -patches[i][1].shape[0])
@@ -232,7 +263,7 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 
     ya, pa = math.radians(yaw), math.radians(pitch)
     cam = np.array([math.sin(ya) * math.cos(pa), math.sin(pa), -math.cos(ya) * math.cos(pa)])
     fwd = -cam
-    right = -np.cross(fwd, [0, 1, 0]); right /= np.linalg.norm(right)
+    right = np.cross(fwd, [0, 1, 0]); right /= np.linalg.norm(right)   # +x on the left when facing the front, as in-game
     up = np.array([0, 1, 0]) - fwd * fwd[1]; up /= np.linalg.norm(up)
     L = np.array([-0.35, 0.85, -0.55]); L /= np.linalg.norm(L)
     faces = []
