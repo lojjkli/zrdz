@@ -273,14 +273,7 @@ def sheet(images, cols, ts, path):
         out.paste(im.resize((ts, ts), Image.LANCZOS), ((i % cols) * ts, (i // cols) * ts))
     out.save(path)
 
-NEW_BATCH = ["froggie_buddy", "froggie_hat", "froggie_strawberry", "froggie_mushroom", "froggie_princess",
-             "froggie_flower_crown", "axolotl_buddy", "bee_buddy", "sleepy_fox", "cat_loaf", "penguin_buddy",
-             "baby_hippo", "hamster_buddy", "raccoon_buddy", "warden_tendrils", "totem_halo", "end_crystal_hat",
-             "wither_crown", "blaze_halo", "baby_dragon", "turtle_helmet", "armadillo_buddy", "breeze_buddy",
-             "planet_orbit", "chimpanzini_bananini", "lirili_larila", "brr_patapim", "cappuccino_assassino",
-             "lightbulb_idea", "fishbowl_helmet", "ice_cream_splat", "spaghetti_hair", "lampshade", "rubber_chicken",
-             "cone_of_shame", "pancake_stack", "bird_nest", "hot_dog_hat", "pizza_slice", "snorkel_mask",
-             "angler_light", "silly_goose"]
+NEW_BATCH = ['headband_red', 'headband_black', 'headband_aconite', 'headband_rainbow', 'headband_flame', 'headband_galaxy', 'headband_camo', 'headband_checker', 'headband_hearts', 'headband_sakura', 'headband_ninja', 'sweatband', 'cat_ear_headband', 'bunny_ear_headband', 'devil_headband', 'heart_boppers', 'bandana_mask_red', 'bandana_mask_black', 'dreads_black', 'dreads_brown', 'dreads_blonde', 'dreads_purple', 'dreads_beaded', 'dreads_updo', 'turtle_buddy', 'turtle_stack', 'turtle_egg_hat', 'sniffer_buddy', 'allay_buddy', 'slime_buddy', 'bunny_buddy', 'eye_patch', 'pirate_head', 'pirate_parrot', 'netherite_crown', 'emerald_crown', 'soul_crown', 'imperial_crown', 'void_crown', 'tilted_crown', 'medal_gold', 'medal_silver', 'medal_bronze', 'golden_laurel', 'trophy_hat']
 
 def build_heads():
     thumbs, lines, models, angle_strips = [], [], {}, []
@@ -316,7 +309,7 @@ def build_heads():
             out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # trendy batch on its own sheets
-    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy"), ("cute", "cute"), ("cool", "cool")):
+    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy"), ("cute", "cute"), ("cool", "cool"), ("lunar", "headbands"), ("hair", "hair")):
         idx = [i for i, d in enumerate(DS.D) if d[2] == tier]
         if not idx:
             continue
