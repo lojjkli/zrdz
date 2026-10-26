@@ -294,6 +294,9 @@ def build_heads():
     with open(os.path.join(ROOT, "give_commands.txt"), "w") as f:
         f.write("\n".join(lines) + "\n")
     sheet(thumbs, 12, 200, f"{PV}/all_heads.png")
+    # big overview pages: 36 accessories each (6x6)
+    for k in range(0, len(thumbs), 36):
+        sheet(thumbs[k:k + 36], 6, 280, f"{PV}/all_cosmetics_{k // 36 + 1}.png")
     # angle sheets: 12 accessories per page, 4 photos each
     for page in range(0, len(angle_strips), 12):
         group = angle_strips[page:page + 12]

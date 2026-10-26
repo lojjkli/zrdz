@@ -125,7 +125,8 @@ class Model:
         return out
 
 DIRS = ("north", "east", "south", "west", "up", "down")
-SPECKLE = {'#3a2d78', '#2e2366', '#4b3a8f'}  # amethyst-like speckled surfaces (Taggy)
+SPECKLE = {'#3a2d78', '#2e2366', '#4b3a8f'}  # amethyst-like speckled surfaces
+FLAT = {'#a172d0'}  # flat-shaded materials copied 1:1 from the animation (Taggy)
 GLOW = {'#c49bff', '#38f6ff', '#5fe3f0', '#ff4a2a', '#fff6b0', '#ffd34a', '#c45cff', '#38d6b8', '#7cfba5',
         '#b6ffd0', '#b6ff6b', '#fff4b0', '#ff7ad1', '#8affc8', '#d4ffff', '#fff1a0', '#9be7ff'}
 METAL = {'#f2c33a', '#b8861c', '#c9ced8', '#a9adb8', '#9ea2ad', '#8c8f99', '#7c808b', '#9aa1ad', '#6f7682',
@@ -140,6 +141,9 @@ def paint(w, h, color, d, rng):
     base = hex2rgb(color)
     img = np.zeros((h, w, 4), np.uint8)
     metal, glow = color in METAL, color in GLOW
+    if color in FLAT:
+        img[:, :, :3] = base[:3]; img[:, :, 3] = base[3]
+        return img
     for y in range(h):
         for x in range(w):
             k = 1 + rng.choice([-0.06, -0.03, 0, 0, 0.03, 0.05])

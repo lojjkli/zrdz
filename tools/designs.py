@@ -1998,3 +1998,54 @@ def _(m):
 def _(m):
     taggy(m, -1.9, 4.0, 0.6, s=0.75)
     froggie(m, 2.0, 4.0, 0.4, s=0.62, tongue=True)
+
+
+# ---- Taggy, rebuilt from the animation's own model (taggy_model.blend / taggy_dimensions.txt) ----
+TAGGY_P, TAGGY_BAR, TAGGY_EYE = '#a172d0', '#ffffff', '#f6edff'
+GLOW.update({TAGGY_BAR, TAGGY_EYE})
+TAGGY_HEAD_TOP = 0.952 + 0.06   # head made ~12% taller on top in the latest animation
+
+def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False):
+    """Exact Taggy proportions. Blender units (Z up, face -Y) -> head pixels (Y up, face -Z, X mirrored).
+    s = head pixels per Blender unit; the feet bottom (z=-0.136) sits at y."""
+    def T(x1, y1, z1, x2, y2, z2, c, rot=None):
+        m.box(x - x2 * s, y + (z1 + 0.136) * s, z + y1 * s, x - x1 * s, y + (z2 + 0.136) * s, z + y2 * s, c, rot=rot)
+    T(-0.312, -0.281, 0.452, 0.312, 0.281, TAGGY_HEAD_TOP, TAGGY_P)          # head
+    T(-0.156, -0.125, 0.032, 0.156, 0.125, 0.452, TAGGY_P)                   # body
+    for sd in (-1, 1):
+        T(min(sd * 0.031, sd * 0.256), -0.359, -0.136, max(sd * 0.031, sd * 0.256), -0.134, 0.076, TAGGY_P)   # feet
+        if wave and sd == -1:   # raised arm, swung up from the shoulder
+            sx, sy = x - sd * 0.25 * s, y + (0.42 + 0.136) * s
+            T(min(sd * 0.184, sd * 0.316), -0.066, 0.42, max(sd * 0.184, sd * 0.316), 0.066, 0.826, TAGGY_P,
+              rot=('z', -22.5, (sx, sy, z)))
+        else:
+            T(min(sd * 0.184, sd * 0.316), -0.066, 0.014, max(sd * 0.184, sd * 0.316), 0.066, 0.42, TAGGY_P)  # arms
+    T(-0.133, -0.305, 0.52, 0.133, -0.281, 0.592, TAGGY_BAR)                  # smile bar
+    for sd in (-1, 1):
+        T(min(sd * 0.133, sd * 0.205), -0.305, 0.592, max(sd * 0.133, sd * 0.205), -0.281, 0.664, TAGGY_EYE)  # glowing corners
+
+@redesign("taggy_buddy")
+def _(m):
+    taggy(m, 0, 4.0, 0.6, s=5.8)
+    name_tag(m, -2.2, 6.6, 1.6)
+
+@redesign("taggy_wave")
+def _(m):
+    taggy(m, 0, 4.0, 0.6, s=6.2, wave=True)
+
+@redesign("taggy_mask")
+def _(m):
+    # Taggy's head as a full mask: same 0.625 x 0.56 x 0.5 proportions and smile placement, scaled up
+    shell(m, 5.0, TAGGY_P, r=0.6, y1=-5.0, y2=5.6)
+    sc = 10.0 / 0.625; y0 = -5.0
+    def F(x1, z1, x2, z2, c):
+        m.box(-x2 * sc, y0 + (z1 - 0.452) * sc, -5.3, -x1 * sc, y0 + (z2 - 0.452) * sc, -5.0, c)
+    F(-0.133, 0.52, 0.133, 0.592, TAGGY_BAR)
+    for sd in (-1, 1):
+        F(min(sd * 0.133, sd * 0.205), 0.592, max(sd * 0.133, sd * 0.205), 0.664, TAGGY_EYE)
+    name_tag(m, -5.05, 2.0, 2.4)
+
+@redesign("taggy_froggie_duo")
+def _(m):
+    taggy(m, -2.0, 4.0, 0.8, s=4.6)
+    froggie(m, 2.0, 4.0, 0.4, s=0.62, tongue=True)
