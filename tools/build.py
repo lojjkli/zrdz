@@ -298,6 +298,13 @@ def build_heads():
         for r, st in enumerate(group):
             out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
+    # trendy batch on its own sheets
+    trend = [i for i, d in enumerate(DS.D) if d[2] == "trend"]
+    sheet([thumbs[i] for i in trend], 7, 260, f"{PV}/trendy_heads.png")
+    out = Image.new("RGB", (1000 * 2 + 60, 250 * ((len(trend) + 1) // 2)), "white")
+    for k, i in enumerate(trend):
+        out.paste(angle_strips[i].resize((1000, 250), Image.LANCZOS), ((k % 2) * 1060, 250 * (k // 2)))
+    out.save(f"{PV}/trendy_photos.png")
     # fit test: the trickiest fits (tight bands, full helmets, brims, side pieces) on all 8 heads
     test = ["cat_ears_black", "top_hat", "gold_crown", "knight_helmet", "headphones", "aviator_goggles",
             "beanie", "sunglasses", "viking_helmet", "flower_crown"]

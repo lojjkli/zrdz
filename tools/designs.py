@@ -1,6 +1,6 @@
 """All ACONITE head cosmetics. Coords are player-head pixels: head spans -4..4,
 top of head is y=4, face is -z (north)."""
-from mclib import Model
+from mclib import Model, GLOW
 
 # ACONITE palette
 AC_DARK, AC, AC_LIGHT, AC_GLOW = '#2a0f4a', '#5b2a9e', '#8a55d6', '#c49bff'
@@ -1235,11 +1235,11 @@ def _(m):
 # ======================================================================
 # Full-head pieces with real depth: rounded shells, carved/raised relief
 # ======================================================================
-def relief(m, rows, z, spec, cell=1.0, top=5.0, width=None):
+def relief(m, rows, z, spec, cell=1.0, top=5.0, width=None, cx=0.0):
     """Pixel relief on the front (-z) face. rows are read as seen from the front, top row first.
     spec: char -> (colour, thickness). Thickness 0/None = carved hole (nothing drawn)."""
     n = len(rows[0]); width = width or n * cell
-    xl = width / 2  # viewer's left edge is +x
+    xl = cx + width / 2  # viewer's left edge is +x
     for r, row in enumerate(rows):
         y2 = top - r * cell; y1 = y2 - cell
         c = 0
@@ -1398,3 +1398,336 @@ def _(m):
         m.box(min(s * 6.0, s * 6.15), -0.6, -0.6, max(s * 6.0, s * 6.15), 0.6, 0.6, '#d23c3c' if s < 0 else '#2f6fd8')
     m.box(2.6, 5.4, 2.0, 3.0, 8.0, 2.4, GREY); m.box(2.4, 8.0, 1.8, 3.2, 8.8, 2.6, RED)
     m.box(-3.4, 3.4, 5.1, -1.4, 4.2, 5.25, '#2f6fd8'); m.box(-3.4, 2.6, 5.1, -1.4, 3.4, 5.25, Wh)
+
+
+# ======================================================================
+# TRENDY batch: what cosmetic shops / servers push right now
+# ======================================================================
+GLOW.update({'#ff8a1f', '#7af7ff', '#ff5ce1', '#ffe45c', '#ff9fd2', '#a6ffef'})
+GLS = '#bfe8ff70'
+
+def heart(m, cx, cy, z, cell, col, t=0.3, hi=None):
+    relief(m, ["HH.HH", "HHHHH", "HHHHH", ".HHH.", "..H.."], z, {'H': (col, t)}, cell=cell, top=cy + 2.5 * cell, cx=cx)
+    if hi:
+        m.box(cx + 1.2 * cell, cy + 1.2 * cell, z - t - 0.05, cx + 1.8 * cell, cy + 1.8 * cell, z - t, hi)
+
+def star(m, x, y, z, s, col, axis='z'):
+    if axis == 'z':
+        m.box(x - 0.3 * s, y - 1.0 * s, z - 0.25, x + 0.3 * s, y + 1.0 * s, z, col)
+        m.box(x - 1.0 * s, y - 0.3 * s, z - 0.25, x + 1.0 * s, y + 0.3 * s, z, col)
+        m.box(x - 0.55 * s, y - 0.55 * s, z - 0.3, x + 0.55 * s, y + 0.55 * s, z, col)
+    else:  # facing +x
+        m.box(x, y - 1.0 * s, z - 0.3 * s, x + 0.25, y + 1.0 * s, z + 0.3 * s, col)
+        m.box(x, y - 0.3 * s, z - 1.0 * s, x + 0.25, y + 0.3 * s, z + 1.0 * s, col)
+        m.box(x, y - 0.55 * s, z - 0.55 * s, x + 0.3, y + 0.55 * s, z + 0.55 * s, col)
+
+@design("coquette_bow", "Coquette Bow", "trend")
+def _(m):
+    P, PD, PL = '#ff9cc8', '#e2679f', '#ffd1e6'
+    m.box(-4.7, 4.0, -0.5, 4.7, 4.7, 0.5, P)                                   # satin headband
+    for s in (-1, 1):
+        m.box(min(s * 4.6, s * 5.0), 0.2, -0.5, max(s * 4.6, s * 5.0), 4.7, 0.5, P)
+    rbox(m, -0.8, 4.4, -1.6, 0.8, 5.8, -0.2, PD, r=0.3)                       # knot
+    for s in (-1, 1):
+        r = ('z', -22.5 * s, (s * 0.8, 5.1, -0.9))
+        rbox(m, min(s * 0.8, s * 4.0), 4.5, -1.5, max(s * 0.8, s * 4.0), 6.9, -0.3, P, r=0.5, rot=r)
+        m.box(min(s * 1.2, s * 3.2), 5.1, -1.6, max(s * 1.2, s * 3.2), 6.3, -1.5, PL, rot=r)
+        rt = ('z', 22.5 * s, (s * 0.5, 4.6, -1.7))
+        m.box(min(s * 0.2, s * 1.4), 2.2, -1.8, max(s * 0.2, s * 1.4), 4.6, -1.5, P, rot=rt)
+        m.box(min(s * 0.2, s * 1.4), 2.0, -1.8, max(s * 0.2, s * 1.4), 2.4, -1.5, PD, rot=rt)
+    m.box(-0.3, 5.2, -1.75, 0.3, 5.6, -1.6, '#ffffff')
+
+@design("heart_shades", "Heart Shades", "trend")
+def _(m):
+    for s in (-1, 1):
+        heart(m, s * 2.3, -0.2, -4.6, 0.75, '#ff3d7f', t=0.35, hi='#ffd1e6')
+        m.box(min(s * 4.6, s * 4.8), 1.2, -4.6, max(s * 4.6, s * 4.8), 1.6, 2.5, '#ff7aa8')
+    m.box(-0.6, 1.4, -4.9, 0.6, 1.8, -4.6, '#ff7aa8')
+
+@design("kitsune_mask", "Kitsune Mask", "trend")
+def _(m):
+    W, R, G = '#f7f3ea', '#d8323a', '#e8b23a'
+    band(m, 1.0, 1.5, R, 4.6)
+    x0 = 4.6
+    rbox(m, x0, -2.4, -3.0, x0 + 0.8, 3.0, 3.0, W, r=0.6, top=False)                # face plate (worn on the side)
+    m.box(x0 + 0.8, -1.8, -1.0, x0 + 2.2, 0.2, 1.0, W); m.box(x0 + 2.2, -1.6, -0.6, x0 + 2.6, -0.4, 0.6, BLACK)  # snout + nose
+    m.box(x0 + 0.8, -2.2, -1.4, x0 + 1.6, -1.6, 1.4, R)                          # mouth line
+    for zz in (-1.6, 1.6):
+        m.box(x0 + 0.8, 0.8, zz - 0.9, x0 + 0.95, 1.3, zz + 0.9, R)              # eye slits
+        m.box(x0 + 0.8, 1.3, zz - 0.5, x0 + 0.95, 1.6, zz + 0.5, R)
+        for i, w in enumerate([1.8, 1.2, 0.6]):                                   # ears
+            m.box(x0, 3.0 + i * 0.8, zz - w / 2, x0 + 0.8, 3.8 + i * 0.8, zz + w / 2, W)
+        m.box(x0 + 0.8, 3.0, zz - 0.4, x0 + 0.95, 4.4, zz + 0.4, R)
+        m.box(x0 + 0.8, -0.8, zz - 0.2 * (zz < 0) - 0.9 * (zz > 0) + 0.0, x0 + 0.95, -0.4, zz + 0.9 * (zz < 0) + 0.2 * (zz > 0), R)
+    m.box(x0 + 0.8, 2.0, -0.3, x0 + 0.95, 2.6, 0.3, G)
+    m.box(x0 + 0.3, -3.6, 0.6, x0 + 0.6, -2.4, 1.0, R); m.box(x0 + 0.2, -4.4, 0.4, x0 + 0.7, -3.6, 1.2, G)  # tassel
+
+@design("creaking_mask", "Creaking Mask", "trend")
+def _(m):
+    B, BD, BL, E, RS = '#8a7b6e', '#5c4f45', '#a89a8c', '#ff8a1f', '#ffb347'
+    shell(m, 5.0, B, r=0.9)
+    m.box(-3.6, -1.0, -5.05, 3.6, 2.2, -5.0, '#1a120c')
+    relief(m, ["bbBbbbbBbb",
+               "bBbbbBbbbB",
+               "bbbbbbbbbb",
+               "bEEbbbbEEb",
+               "bEEbbbbEEb",
+               "bbbbBBbbbb",
+               "bBbbbbbbBb",
+               "bbbBbbBbbb",
+               "bBbbbbbbbB",
+               "bbbbbBbbbb"], -5.0, {'b': (B, 0.35), 'B': (BD, 0.55), 'E': (E, 0.1)})
+    for x, h, z in [(-3.5, 3.0, -2), (-1.0, 4.4, 1), (2.0, 3.6, -1), (3.6, 2.4, 2.5), (0.5, 2.0, 3.5)]:
+        m.box(x - 0.35, 5.0, z - 0.35, x + 0.35, 5.0 + h, z + 0.35, BD)
+        m.box(x, 5.0 + h * 0.6, z - 0.25, x + 1.4 * (1 if x < 0 else -1) * 0 + 1.2, 5.0 + h * 0.6 + 0.5, z + 0.25, BD)
+    for x, y in [(-4.0, -3.6), (3.6, 3.2), (-4.4, 1.2)]:
+        m.box(x, y, -5.7, x + 0.7, y + 0.7, -5.35, RS)
+    for s in (-1, 1):
+        m.box(min(s * 5.0, s * 5.35), -3.5, -2.5, max(s * 5.0, s * 5.35), 2.5, -1.8, BD)
+
+@design("happy_ghast", "Happy Ghast", "trend")
+def _(m):
+    W, WS = '#f6f6f8', '#e2e2ea'
+    rbox(m, -2.8, 5.6, -2.8, 2.8, 10.6, 2.8, W, r=0.6)
+    for i, (x, z, h) in enumerate([(-1.8, -1.8, 1.4), (0, -1.8, 1.0), (1.8, -1.8, 1.6), (-1.8, 0, 1.1), (1.8, 0, 0.9),
+                                   (-1.8, 1.8, 1.5), (0, 1.8, 1.2), (1.8, 1.8, 1.0), (0, 0, 1.3)]):
+        m.box(x - 0.35, 5.6 - h, z - 0.35, x + 0.35, 5.6, z + 0.35, WS)
+    for x in (-1.6, 1.0):                                    # happy closed eyes ^ ^
+        m.box(x, 8.4, -2.95, x + 0.6, 8.8, -2.8, BLACK); m.box(x - 0.3, 8.0, -2.95, x, 8.4, -2.8, BLACK); m.box(x + 0.6, 8.0, -2.95, x + 0.9, 8.4, -2.8, BLACK)
+    m.box(-0.6, 7.0, -2.95, 0.6, 7.3, -2.8, BLACK)
+    m.box(-2.6, 7.3, -2.95, -1.8, 7.8, -2.8, '#ffb7cf'); m.box(1.8, 7.3, -2.95, 2.6, 7.8, -2.8, '#ffb7cf')
+    m.box(-2.9, 9.6, -2.9, 2.9, 10.0, 2.9, '#7a4a26')           # harness
+    m.box(-2.9, 5.8, -0.3, 2.9, 10.0, 0.3, '#7a4a26')
+    rbox(m, -2.2, 10.6, -1.4, -0.2, 11.6, 0.4, '#5ad1ff', r=0.3); rbox(m, 0.2, 10.6, -1.4, 2.2, 11.6, 0.4, '#5ad1ff', r=0.3)
+    m.box(-0.2, 10.8, -0.8, 0.2, 11.2, -0.2, '#7a4a26')
+    m.box(-0.6, 4.0, -0.6, 0.6, 4.6, 0.6, '#7a4a26')
+
+@design("copper_golem", "Copper Golem Buddy", "trend")
+def _(m):
+    C, CD, CL, OX = '#c8714b', '#9c5235', '#e59a6e', '#5fa58c'
+    rbox(m, -1.4, 4.0, -1.0, 1.4, 6.2, 1.0, C, r=0.3)
+    rbox(m, -1.8, 6.2, -1.6, 1.8, 8.8, 1.6, C, r=0.4)
+    m.box(-0.4, 6.6, -2.4, 0.4, 7.8, -1.6, CD)                   # nose
+    m.box(-1.3, 7.6, -1.65, -0.6, 8.2, -1.6, '#2a1a12'); m.box(0.6, 7.6, -1.65, 1.3, 8.2, -1.6, '#2a1a12')
+    m.box(-0.3, 8.8, -0.3, 0.3, 10.2, 0.3, CL); rbox(m, -0.6, 10.2, -0.6, 0.6, 11.2, 0.6, CL, r=0.25)   # lightning rod
+    for s in (-1, 1):
+        m.box(min(s * 1.4, s * 2.0), 4.4, -0.4, max(s * 1.4, s * 2.0), 6.0, 0.4, CD)                     # arms
+        m.box(s * 0.8 - 0.35, 4.0, -2.2, s * 0.8 + 0.35, 4.6, -0.8, CD)                                  # legs dangling
+    for x, y, z in [(-1.8, 7.0, 0.2), (1.2, 8.4, 1.0), (-0.8, 4.6, 1.0), (1.4, 5.2, -1.05)]:
+        m.box(x, y, z, x + 0.6, y + 0.6, z + 0.06, OX)
+
+@design("capybara", "Capybara Buddy", "trend")
+def _(m):
+    Bn, BD, Bl = '#a0703f', '#7d5530', '#b9864f'
+    rbox(m, -2.4, 4.0, -2.6, 2.4, 7.0, 3.6, Bn, r=0.8)
+    rbox(m, -1.9, 4.8, -5.0, 1.9, 7.6, -2.2, Bl, r=0.6)
+    m.box(-1.5, 4.9, -5.6, 1.5, 6.4, -4.8, BD)                   # snout
+    m.box(-0.8, 5.8, -5.7, -0.4, 6.2, -5.6, '#2a1a12'); m.box(0.4, 5.8, -5.7, 0.8, 6.2, -5.6, '#2a1a12')
+    m.box(-1.6, 6.8, -5.05, -0.8, 7.2, -5.0, '#2a1a12'); m.box(0.8, 6.8, -5.05, 1.6, 7.2, -5.0, '#2a1a12')
+    for s in (-1, 1):
+        m.box(s * 1.5 - 0.4, 7.6, -3.4, s * 1.5 + 0.4, 8.2, -2.8, BD)
+        m.box(s * 1.6 - 0.5, 4.0, -2.4, s * 1.6 + 0.5, 4.6, -1.2, BD)
+    rbox(m, -0.8, 7.6, -4.2, 0.8, 9.0, -2.8, ORANGE, r=0.35)     # the orange
+    m.box(-0.1, 9.0, -3.6, 0.1, 9.4, -3.4, '#4d7a26'); m.box(0.1, 9.1, -3.7, 0.9, 9.3, -3.3, LEAF)
+
+@design("shark_hood", "Shark Hood", "trend")
+def _(m):
+    S, SD, Wb, T = '#6f8fb3', '#56728f', '#e8eef5', '#ffffff'
+    rbox(m, -5.0, -4.8, 0.2, 5.0, 4.9, 5.0, S, r=1.0, top=False)
+    m.box(-5.0, 4.0, -5.0, 5.0, 5.4, 1.4, S); rbox(m, -4.0, 5.4, -4.0, 4.0, 6.0, 4.0, S, r=0.8, top=False)
+    for s in (-1, 1):
+        m.box(min(s * 4.6, s * 5.0), -4.8, -5.0, max(s * 4.6, s * 5.0), 4.0, 1.4, S)
+        m.box(min(s * 5.0, s * 5.15), 0.6, -2.2, max(s * 5.0, s * 5.15), 1.4, -1.4, BLACK)              # eyes
+        for k in range(3):
+            m.box(min(s * 5.0, s * 5.15), -2.6 + k * 0.7, 0.4, max(s * 5.0, s * 5.15), -2.4 + k * 0.7, 1.8, SD)  # gills
+    m.box(-4.6, 4.0, -5.0, 4.6, 4.4, -4.6, Wb)
+    for i in range(8):                                            # teeth around the face opening
+        x = -4.0 + i * 1.14
+        m.box(x - 0.35, 3.4, -5.05, x + 0.35, 4.0, -4.7, T)
+    for s in (-1, 1):
+        for k in range(5):
+            y = 3.0 - k * 1.5
+            m.box(min(s * 4.0, s * 4.6), y - 0.35, -5.05, max(s * 4.0, s * 4.4), y + 0.35, -4.7, T)
+    for i, (z, h) in enumerate([(0.5, 2.6), (1.5, 2.0), (2.5, 1.3), (3.4, 0.7)]):   # dorsal fin
+        m.box(-0.35, 6.0, z - 0.5, 0.35, 6.0 + h, z + 0.5, S if i % 2 == 0 else SD)
+    m.box(-4.6, -4.8, -5.0, 4.6, -4.2, -4.6, Wb)
+
+@design("frog_bucket", "Froggy Bucket Hat", "trend")
+def _(m):
+    G, GD = '#7cc65a', '#5ea544'
+    m.box(-5.8, 3.0, -5.8, 5.8, 3.4, 5.8, GD)
+    m.box(-5.0, 3.4, -5.0, 5.0, 3.9, 5.0, GD)
+    dome(m, 3.9, [(4.6, 1.8), (4.2, 0.6), (3.6, 0.3)], G)
+    for s in (-1, 1):
+        rbox(m, s * 2.2 - 1.3, 6.2, -3.0, s * 2.2 + 1.3, 8.0, -0.6, G, r=0.5)
+        m.box(s * 2.2 - 0.8, 6.6, -3.1, s * 2.2 + 0.8, 7.7, -3.0, WHITE)
+        m.box(s * 2.2 - 0.4, 6.7, -3.2, s * 2.2 + 0.4, 7.3, -3.1, BLACK)
+        m.box(s * 3.2 - 0.5, 4.6, -4.75, s * 3.2 + 0.5, 5.1, -4.6, '#ff9fb5')
+    m.box(-1.6, 4.4, -4.75, 1.6, 4.7, -4.6, '#e0607a')
+
+@design("strawberry_hat", "Strawberry Hat", "trend")
+def _(m):
+    R, RD, L = '#e8343f', '#c22632', '#4fa83a'
+    dome(m, 3.0, [(4.7, 2.0), (4.4, 1.0), (3.8, 0.8), (2.8, 0.6), (1.6, 0.4)], R)
+    for x, y, z in [(-3.0, 3.6, -4.8), (-1.0, 4.4, -4.8), (1.2, 3.4, -4.8), (3.0, 4.2, -4.8), (-2.0, 5.4, -4.5),
+                    (0.4, 5.6, -4.5), (2.2, 5.6, -4.5), (-4.8, 4.0, -1.0), (4.8, 3.6, 1.0), (-4.8, 4.6, 2.2), (4.8, 4.8, -2.4)]:
+        if abs(z) > 4.6:
+            m.box(x - 0.2, y - 0.25, z, x + 0.2, y + 0.25, z + 0.15, '#ffe45c')
+        else:
+            m.box(x - 0.15 * (x < 0), y - 0.25, z - 0.2, x + 0.15 * (x > 0), y + 0.25, z + 0.2, '#ffe45c')
+    for ang in (0, 45, 90, 135):
+        m.box(-2.6, 7.7, -0.5, 2.6, 8.0, 0.5, L, rot=('y', [0, 22.5, 45, -22.5][ang // 45], (0, 7.8, 0)))
+    m.box(-0.3, 7.8, -0.3, 0.3, 9.2, 0.3, '#3d7d2c')
+
+@design("boba_buddy", "Boba Tea Buddy", "trend")
+def _(m):
+    m.box(-1.5, 4.1, -1.5, 1.5, 7.0, 1.5, '#cfa37a')               # milk tea
+    for x, z in [(-0.9, -1.0), (0.2, -1.1), (1.0, -0.6), (-0.4, -0.2)]:
+        m.box(x - 0.35, 4.15, z - 0.4, x + 0.35, 4.85, z + 0.3, '#2a1a14')   # pearls
+    m.box(-1.8, 4.0, -1.8, 1.8, 8.0, 1.8, GLS)                      # clear cup
+    m.box(-1.9, 8.0, -1.9, 1.9, 8.3, 1.9, '#ffb7d5')               # sealed lid
+    m.box(-1.2, 5.6, -1.95, 1.2, 6.8, -1.8, '#ff9cc8'); m.box(-0.6, 5.9, -2.0, 0.6, 6.5, -1.95, WHITE)  # cute label
+    m.box(0.3, 8.3, -0.3, 0.9, 11.6, 0.3, '#ff5ab4', rot=('z', -22.5, (0.6, 8.3, 0)))   # straw
+
+@design("gaming_headset", "RGB Gaming Headset", "trend")
+def _(m):
+    m.box(-4.0, 4.6, -0.8, 4.0, 5.4, 0.8, '#1d1d26'); m.box(-3.0, 5.4, -0.4, 3.0, 5.6, 0.4, '#ff5ce1')
+    for s in (-1, 1):
+        m.box(min(s * 4.0, s * 4.7), 2.0, -0.6, max(s * 4.0, s * 4.7), 5.4, 0.6, '#1d1d26')
+        rbox(m, min(s * 4.6, s * 6.0), -2.0, -2.2, max(s * 4.6, s * 6.0), 2.2, 2.2, '#24242e', r=0.7, top=False)
+        m.box(min(s * 6.0, s * 6.15), -1.6, -1.8, max(s * 6.0, s * 6.15), 1.8, -1.2, '#7af7ff')
+        m.box(min(s * 6.0, s * 6.15), -1.6, 1.2, max(s * 6.0, s * 6.15), 1.8, 1.8, '#ff5ce1')
+        m.box(min(s * 6.0, s * 6.2), -0.6, -0.6, max(s * 6.0, s * 6.2), 0.8, 0.6, '#ffe45c')
+    m.box(4.8, -1.4, -2.2, 5.4, -0.8, -0.8, '#1d1d26')                       # mic boom
+    m.box(2.6, -2.4, -5.4, 5.2, -1.8, -4.8, '#1d1d26', rot=('y', -22.5, (5.0, -2.1, -2.0)))
+    m.box(4.8, -1.4, -4.6, 5.4, -0.8, -2.2, '#1d1d26')
+    m.box(4.6, -1.6, -5.2, 5.6, -0.6, -4.4, '#ff5ce1')
+
+@design("butterfly_clips", "Butterfly Clips", "trend")
+def _(m):
+    cols = [('#c49bff', '#ff9fd2'), ('#9be7ff', '#a6ffef'), ('#ffb7d5', '#ffe45c'), ('#a6ffef', '#c49bff')]
+    spots = [(4.6, 2.6, -2.4, 'x'), (4.6, 0.6, -0.4, 'x'), (-2.6, 4.6, -2.0, 'y'), (1.4, 4.6, 1.6, 'y')]
+    for (x, y, z, ax), (c1, c2) in zip(spots, cols):
+        if ax == 'x':
+            m.box(x, y - 0.15, z - 0.9, x + 0.35, y + 0.15, z + 0.9, '#2a2440')
+            for s in (-1, 1):
+                m.box(x, y, z + s * 0.2 if s > 0 else z - 1.6, x + 0.25, y + 1.3, z + 1.6 if s > 0 else z - 0.2, c1, rot=('x', 22.5 * s, (x, y, z)))
+                m.box(x, y - 1.0, z + 0.2 if s > 0 else z - 1.1, x + 0.25, y, z + 1.1 if s > 0 else z - 0.2, c2, rot=('x', -22.5 * s, (x, y, z)))
+        else:
+            m.box(x - 0.15, y, z - 0.9, x + 0.15, y + 0.35, z + 0.9, '#2a2440')
+            for s in (-1, 1):
+                m.box(x + 0.2 if s > 0 else x - 1.6, y, z - 0.1, x + 1.6 if s > 0 else x - 0.2, y + 0.25, z + 1.3, c1, rot=('z', 22.5 * s, (x, y, z)))
+                m.box(x + 0.2 if s > 0 else x - 1.1, y, z - 1.0, x + 1.1 if s > 0 else x - 0.2, y + 0.25, z, c2, rot=('z', 22.5 * s, (x, y, z)))
+
+@design("star_clips", "Star Clips", "trend")
+def _(m):
+    for (y, z, sc, c) in [(3.0, -2.6, 0.9, '#ffe45c'), (1.4, -0.6, 0.6, '#ff9fd2'), (3.2, 0.9, 0.5, '#7af7ff'), (-0.2, -2.4, 0.45, '#ffe45c')]:
+        star(m, 4.6, y, z, sc, c, axis='x')
+    star(m, -1.5, 5.2, -4.6, 0.7, '#ffe45c')
+    m.box(-1.8, 4.0, -4.7, -1.2, 4.6, -4.6, SILVER)
+
+@design("cherry_blossom_crown", "Cherry Blossom Crown", "trend")
+def _(m):
+    Br = '#5a3a2e'
+    band(m, 3.7, 4.2, Br, 4.6)
+    pink = ['#ffb7d5', '#ff9cc8', '#ffd1e6']
+    k = 0
+    for x in (-3.4, -1.2, 1.0, 3.2):
+        flower(m, x, 4.3, -4.6, pink[k % 3], centre='#ffe45c', s=0.8); k += 1
+    for z in (-2.4, 0.2, 2.6):
+        for s in (-1, 1):
+            m.box(min(s * 4.6, s * 4.95), 3.6, z - 0.7, max(s * 4.6, s * 4.95), 4.4, z + 0.7, pink[k % 3]); k += 1
+            m.box(min(s * 4.95, s * 5.05), 3.85, z - 0.2, max(s * 4.95, s * 5.05), 4.15, z + 0.2, '#ffe45c')
+    for x in (-2.0, 0.6, 2.4):
+        flower(m, x, 4.2, 4.6, pink[(k := k + 1) % 3], centre='#ffe45c', s=0.7)
+    for x, y, z in [(-3.8, 6.2, -2.0), (2.6, 7.0, -3.0), (0.2, 6.6, 1.0)]:     # drifting petals
+        m.box(x, y, z, x + 0.5, y + 0.15, z + 0.5, '#ffd1e6')
+    m.box(2.6, 4.2, -4.8, 4.2, 4.5, -4.6, Br, rot=('z', 22.5, (2.6, 4.3, -4.7)))
+
+@design("heart_halo", "Heart Halo", "trend")
+def _(m):
+    ring(m, 6.6, 3.6, '#ff9fd2', t=0.8, h=0.6)
+    for (x, z, rot) in [(0, -3.6, 0), (0, 3.6, 0)]:
+        heart(m, x, 8.0, z - 0.3 if z < 0 else z + 0.3, 0.45, '#ff5ab4', t=0.3, hi='#ffffff')
+    for s in (-1, 1):
+        m.box(min(s * 3.6, s * 3.9), 7.5, -0.5, max(s * 3.6, s * 3.9), 8.5, 0.5, '#ff5ab4')
+        m.box(min(s * 3.6, s * 3.9), 8.0, -0.9, max(s * 3.6, s * 3.9), 8.5, 0.9, '#ff5ab4')
+
+@design("allay_buddy", "Allay Buddy", "trend")
+def _(m):
+    A, AD = '#4fd8ff', '#2fb0e0'
+    rbox(m, -1.4, 8.2, -1.4, 1.4, 10.8, 1.4, A, r=0.4)
+    m.box(-0.8, 6.4, -0.7, 0.8, 8.2, 0.7, AD); m.box(-0.5, 5.6, -0.5, 0.5, 6.4, 0.5, AD)
+    m.box(-1.0, 9.2, -1.5, -0.4, 9.8, -1.4, '#1d2a40'); m.box(0.4, 9.2, -1.5, 1.0, 9.8, -1.4, '#1d2a40')
+    for s in (-1, 1):
+        m.box(min(s * 0.8, s * 4.0), 6.6, 0.6, max(s * 0.8, s * 4.0), 8.6, 0.8, '#c6f6ff80', rot=('y', 22.5 * s, (s * 0.8, 7.6, 0.7)))
+        m.box(min(s * 0.8, s * 1.4), 6.8, -0.3, max(s * 0.8, s * 1.4), 7.8, 0.3, AD)
+    rbox(m, -0.5, 4.8, -1.6, 0.5, 5.8, -0.6, '#ffe45c', r=0.25)
+
+@design("sniffer_buddy", "Sniffer Buddy", "trend")
+def _(m):
+    Rd, RdD, Ms, Ns = '#a4413a', '#7e2f2a', '#5d8a3a', '#e3b04a'
+    rbox(m, -2.4, 4.6, -2.4, 2.4, 7.6, 3.4, Rd, r=0.6)
+    rbox(m, -2.0, 7.6, -1.6, 2.0, 8.4, 3.0, Ms, r=0.6)
+    for x, z in [(-1.4, 0.0), (0.6, 1.6), (1.2, -0.8)]:
+        m.box(x - 0.2, 8.4, z - 0.2, x + 0.2, 9.0, z + 0.2, '#7cc65a')
+    rbox(m, -1.8, 5.2, -4.6, 1.8, 7.6, -2.4, RdD, r=0.5)
+    m.box(-1.0, 5.0, -6.0, 1.0, 6.4, -4.6, Ns)
+    m.box(-1.4, 6.8, -4.65, -0.7, 7.3, -4.6, BLACK); m.box(0.7, 6.8, -4.65, 1.4, 7.3, -4.6, BLACK)
+    for x in (-1.6, 1.6):
+        for z in (-1.6, 0.6, 2.6):
+            m.box(x - 0.4, 4.0, z - 0.4, x + 0.4, 4.6, z + 0.4, RdD)
+
+@design("duck_buddy", "Duck Buddy (Shades)", "trend")
+def _(m):
+    Y, O = '#ffd93a', '#ff9a1f'
+    rbox(m, -2.2, 4.0, -2.0, 2.2, 6.4, 3.0, Y, r=0.7)
+    rbox(m, -1.6, 6.0, -2.4, 1.6, 8.8, 0.6, Y, r=0.6)
+    m.box(-1.0, 6.6, -3.6, 1.0, 7.3, -2.4, O)
+    m.box(-1.7, 7.6, -2.5, 1.7, 8.2, -2.4, BLACK); m.box(-1.6, 7.3, -2.5, -0.2, 7.6, -2.4, BLACK); m.box(0.2, 7.3, -2.5, 1.6, 7.6, -2.4, BLACK)
+    m.box(1.0, 7.9, -2.55, 1.4, 8.1, -2.5, '#9a8ad6')
+    m.box(-0.6, 5.4, 3.0, 0.6, 6.6, 3.6, Y)
+    for s in (-1, 1):
+        m.box(min(s * 2.2, s * 2.5), 4.6, -0.6, max(s * 2.2, s * 2.5), 5.8, 1.8, '#f5c52e')
+
+@design("neon_horns", "Neon Cyber Horns", "trend")
+def _(m):
+    band(m, 3.2, 3.8, '#14141c', 4.6)
+    for s in (-1, 1):
+        x = s * 2.6
+        r = ('z', -22.5 * s, (x, 4.0, -1.0))
+        m.box(x - 0.6, 4.0, -1.6, x + 0.6, 7.4, -0.4, '#14141c', rot=r)
+        m.box(x - 0.4, 7.4, -1.4, x + 0.4, 8.6, -0.6, '#14141c', rot=r)
+        m.box(x - 0.65, 4.4, -1.7, x - 0.45, 8.0, -1.5, '#7af7ff', rot=r)
+        m.box(x + 0.45, 4.4, -1.7, x + 0.65, 7.0, -1.5, '#ff5ce1', rot=r)
+        m.box(x - 0.2, 8.6, -1.2, x + 0.2, 9.2, -0.8, '#7af7ff', rot=r)
+    m.box(-1.6, 3.3, -4.75, 1.6, 3.7, -4.6, '#7af7ff')
+
+@design("bear_beanie", "Bear Beanie", "trend")
+def _(m):
+    Cr, CrD, Br = '#efe2cf', '#ddcdb4', '#8a5a36'
+    for i, x in enumerate([-4.6 + 0.92 * k for k in range(10)]):
+        m.box(x, 1.4, -4.6, x + 0.92, 3.0, 4.6, CrD if i % 2 else Cr)
+    dome(m, 3.0, [(4.6, 1.6), (4.3, 1.0), (3.6, 0.6), (2.6, 0.3)], Cr)
+    for s in (-1, 1):
+        rbox(m, s * 2.9 - 1.3, 5.6, -0.8, s * 2.9 + 1.3, 8.0, 0.8, Cr, r=0.6)
+        rbox(m, s * 2.9 - 0.7, 6.0, -1.0, s * 2.9 + 0.7, 7.4, -0.8, Br, r=0.3, top=False)
+    m.box(-1.2, 3.4, -4.75, 1.2, 4.6, -4.6, Br); m.box(-0.4, 4.0, -4.85, 0.4, 4.4, -4.75, BLACK)
+    m.box(-2.0, 4.8, -4.75, -1.4, 5.4, -4.6, BLACK); m.box(1.4, 4.8, -4.75, 2.0, 5.4, -4.6, BLACK)
+
+
+def mirrored(fn):
+    """Same accessory on the other side of the head (so side pieces face the hero camera)."""
+    def g(m):
+        n0 = len(m.boxes); fn(m)
+        for b in m.boxes[n0:]:
+            (fx, fy, fz), (tx, ty, tz) = b['f'], b['t']
+            b['f'], b['t'] = (-tx, fy, fz), (-fx, ty, tz)
+            if b['rot']:
+                ax, ang, (ox, oy, oz) = b['rot']
+                b['rot'] = (ax, ang if ax == 'x' else -ang, (-ox, oy, oz))
+    return g
+
+for _i, (_n, _t, _tier, _fn) in enumerate(D):
+    if _n in ("kitsune_mask", "butterfly_clips", "star_clips", "gaming_headset"):
+        D[_i] = (_n, _t, _tier, mirrored(_fn))

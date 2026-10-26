@@ -1,7 +1,7 @@
 # zrdz
 ## ACONITE Minecraft pack
 
-Minecraft-style **Aconite (monkshood) flower** + **96 custom head cosmetics** (cat ears, crowns, horns, hats, buddies...), all in the ACONITE purple/green palette where it fits.
+Minecraft-style **Aconite (monkshood) flower** + **117 custom head cosmetics** (incl. a 21-piece trendy batch: coquette bow, kitsune mask, Happy Ghast, copper golem, shark hood, boba, capybara...) (cat ears, crowns, horns, hats, buddies...), all in the ACONITE purple/green palette where it fits.
 
 - `resourcepack/` — drop into `.minecraft/resourcepacks` (made for Java 1.21.4+). Every model is a Blockbench-compatible Java JSON with its own hand-shaded texture atlas (2x player-skin pixel density, per-face shading, edge highlights, metal sheen).
 - `give_commands.txt` — one `/give` per head, e.g. `/give @p minecraft:paper[item_model="aconite:cat_ears_black",equippable={slot:"head"}]`
