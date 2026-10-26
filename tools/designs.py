@@ -1731,3 +1731,270 @@ def mirrored(fn):
 for _i, (_n, _t, _tier, _fn) in enumerate(D):
     if _n in ("kitsune_mask", "butterfly_clips", "star_clips", "gaming_headset"):
         D[_i] = (_n, _t, _tier, mirrored(_fn))
+
+
+# ======================================================================
+# MEME batch
+# ======================================================================
+@design("deal_with_it", "Deal With It Shades", "meme")
+def _(m):
+    K, Wt = '#0d0d10', '#ffffff'
+    relief(m, ["KKKKKKKKKKKKKKKKKK",
+               "KKKKKKKK..KKKKKKKK",
+               ".KKWKKKK...KKWKKK.",
+               ".KWKKKK.....KWKKK.",
+               "..KKKK.......KKK.."], -4.6, {'K': (K, 0.45), 'W': (Wt, 0.5)}, cell=0.52, top=2.4)
+    for s in (-1, 1):
+        m.box(min(s * 4.6, s * 4.8), 1.5, -4.6, max(s * 4.6, s * 4.8), 2.0, 2.5, K)
+
+@design("chicken_jockey", "Chicken Jockey", "meme")
+def _(m):
+    W, Y, R, Z, ZD, Sh = '#f4f4f0', '#f2b33a', '#d8323a', '#5aa04a', '#3f7a35', '#3c9fd8'
+    rbox(m, -2.0, 4.0, -2.4, 2.0, 7.0, 2.6, W, r=0.6)                      # chicken body
+    rbox(m, -1.3, 6.4, -3.4, 1.3, 9.2, -1.2, W, r=0.4)                     # chicken head
+    m.box(-0.8, 7.4, -4.4, 0.8, 8.2, -3.4, Y); m.box(-0.5, 6.6, -3.6, 0.5, 7.4, -3.4, R)
+    m.box(-1.0, 8.4, -3.45, -0.5, 8.9, -3.4, BLACK); m.box(0.5, 8.4, -3.45, 1.0, 8.9, -3.4, BLACK)
+    for s in (-1, 1):
+        m.box(min(s * 2.0, s * 2.4), 4.6, -1.6, max(s * 2.0, s * 2.4), 6.4, 1.8, '#e4e4de')
+    m.box(-0.8, 7.0, 1.2, 0.8, 7.6, 2.6, W)
+    # baby zombie rider
+    rbox(m, -1.2, 7.0, -0.6, 1.2, 9.2, 1.4, Sh, r=0.3)                     # shirt
+    for s in (-1, 1):
+        m.box(s * 0.7 - 0.45, 7.0, -1.8, s * 0.7 + 0.45, 7.6, -0.4, '#3b3f8f')   # legs
+        m.box(min(s * 1.2, s * 1.9), 8.4, -2.4, max(s * 1.2, s * 1.9), 9.0, 0.2, Z)  # arms out front
+    rbox(m, -1.6, 9.2, -1.2, 1.6, 12.2, 1.8, Z, r=0.3)
+    m.box(-1.0, 10.4, -1.25, -0.4, 11.0, -1.2, BLACK); m.box(0.4, 10.4, -1.25, 1.0, 11.0, -1.2, BLACK)
+    m.box(-0.6, 9.6, -1.25, 0.6, 9.9, -1.2, ZD)
+
+@design("lava_chicken", "Lava Chicken", "meme")
+def _(m):
+    Ck, CkD, Bn, L, LD = '#c98a4a', '#9e6532', '#efe6d6', '#ff7a1f', '#ffc23a'
+    m.box(-3.2, 4.0, -3.2, 3.2, 4.4, 3.2, '#d9d4cc')                       # plate
+    rbox(m, -2.4, 4.4, -1.8, 2.4, 7.0, 2.2, Ck, r=0.8)                     # roast chicken
+    for s in (-1, 1):
+        m.box(s * 1.4 - 0.6, 5.6, -3.4, s * 1.4 + 0.6, 6.6, -1.8, CkD)
+        m.box(s * 1.4 - 0.3, 5.8, -4.2, s * 1.4 + 0.3, 6.4, -3.4, Bn)
+    for x, z, h in [(-1.2, -1.0, 1.2), (0.4, 0.4, 1.8), (1.4, -0.6, 0.9)]:  # lava pouring over it
+        m.box(x - 0.45, 6.6, z - 0.45, x + 0.45, 7.2, z + 0.45, LD)
+        m.box(x - 0.3, 7.0 - h - 1.2, -1.95, x + 0.3, 7.0, -1.8, L)
+    m.box(-0.5, 8.6, -0.5, 0.5, 11.0, 0.5, L); m.box(-0.8, 7.0, -0.8, 0.8, 8.6, 0.8, LD)
+
+@design("banana_cat", "Banana Cat", "meme")
+def _(m):
+    Y, YD, Br = '#ffd93a', '#e6b81c', '#5a3a1e'
+    rbox(m, -5.0, -4.8, 0.2, 5.0, 4.9, 5.0, Y, r=1.0, top=False)           # banana peel hood
+    m.box(-5.0, 4.0, -5.0, 5.0, 5.4, 1.4, Y); rbox(m, -4.0, 5.4, -4.0, 4.0, 6.0, 4.0, Y, r=0.8, top=False)
+    for s in (-1, 1):
+        m.box(min(s * 4.6, s * 5.0), -4.8, -5.0, max(s * 4.6, s * 5.0), 4.0, 1.4, Y)
+        m.box(min(s * 5.0, s * 5.15), -4.8, -2.0, max(s * 5.0, s * 5.15), 4.0, -1.6, YD)          # peel seams
+        for i, w in enumerate([2.4, 1.6, 0.8]):                                                   # cat ears
+            m.box(s * 2.6 - w / 2, 6.0 + i * 0.7, -0.6, s * 2.6 + w / 2, 6.7 + i * 0.7, 0.6, Y)
+    m.box(-0.5, 6.0, 4.0, 0.5, 8.6, 5.0, YD); m.box(-0.4, 8.6, 4.2, 0.4, 9.2, 4.8, Br)          # banana stem
+    m.box(-4.6, 4.0, -5.0, 4.6, 4.4, -4.6, YD)
+
+@design("bread_face", "Bread Face", "meme")
+def _(m):
+    Cr, In = '#b0672b', '#f3d9a4'
+    # slice of toast with the face poking through the hole
+    m.box(-5.6, -5.0, -5.4, 5.6, 4.0, -4.6, In)
+    rbox(m, -6.0, 3.0, -5.4, 6.0, 7.4, -4.6, In, r=1.6, top=False)
+    m.box(-6.0, -5.0, -5.4, -5.6, 4.0, -4.6, Cr); m.box(5.6, -5.0, -5.4, 6.0, 4.0, -4.6, Cr)
+    m.box(-5.6, -5.4, -5.4, 5.6, -5.0, -4.6, Cr)
+    rbox(m, -6.4, 3.0, -5.4, 6.4, 7.8, -4.6, Cr, r=1.8, top=False)
+    m.box(-4.4, -4.0, -5.5, 4.4, 3.6, -5.35, '#ffffff00')  # (hole is just not drawn)
+
+@redesign("bread_face")
+def _(m):
+    Cr, In = '#b0672b', '#f3d9a4'
+    z1, z2 = -5.4, -4.6
+    m.box(-6.0, -5.4, z1, 6.0, -4.2, z2, Cr)                                 # bottom crust
+    m.box(-5.4, -4.2, z1, 5.4, -3.6, z2, In)
+    for s in (-1, 1):
+        m.box(min(s * 5.4, s * 6.0), -4.2, z1, max(s * 5.4, s * 6.0), 4.2, z2, Cr)
+        m.box(min(s * 4.0, s * 5.4), -3.6, z1, max(s * 4.0, s * 5.4), 4.2, z2, In)
+    # domed top of the slice
+    m.box(-5.4, 4.2, z1, 5.4, 6.2, z2, In); m.box(-6.0, 4.2, z1, 6.0, 5.4, z2, Cr)
+    m.box(-5.4, 6.2, z1, 5.4, 6.8, z2, Cr); m.box(-4.4, 6.8, z1, 4.4, 7.4, z2, Cr)
+    m.box(-5.4, 5.4, z1, -4.4, 6.8, z2, Cr); m.box(4.4, 5.4, z1, 5.4, 6.8, z2, Cr)
+    m.box(-4.4, 3.6, z1, 4.4, 4.2, z2, In)
+    for x, y in [(-4.8, 1.0), (4.6, -2.0), (-2.0, 5.6), (2.6, 5.0)]:
+        m.box(x, y, z1 - 0.05, x + 0.5, y + 0.4, z1, '#e2c08a')
+
+@design("tinfoil_hat", "Tinfoil Hat", "meme")
+def _(m):
+    F1, F2 = '#d7dbe2', '#aeb4be'
+    for i, w in enumerate([9.6, 8.0, 6.4, 4.8, 3.2, 1.8, 0.8]):
+        r = ('y', 22.5 if i % 2 else 0, (0, 4, 0))
+        m.box(-w / 2, 4.0 + i * 0.9, -w / 2, w / 2, 4.9 + i * 0.9, w / 2, F1 if i % 2 == 0 else F2, rot=r)
+    for x, y, z in [(-3.0, 4.4, -4.85), (1.6, 5.4, -4.05), (-1.0, 6.6, -3.2), (3.4, 4.6, -4.85)]:
+        m.box(x, y, z - 0.1, x + 0.6, y + 0.4, z, '#ffffff')
+
+@design("bucket_head", "Bucket Head", "meme")
+def _(m):
+    I1, I2, I3 = '#c9ced8', '#a3a9b4', '#7d838e'
+    rbox(m, -5.0, 0.6, -5.0, 5.0, 6.4, 5.0, I1, r=1.0, top=False)
+    rbox(m, -4.0, 6.4, -4.0, 4.0, 7.2, 4.0, I2, r=0.8, top=False)
+    m.box(-5.3, 0.6, -5.3, 5.3, 1.4, 5.3, I3)
+    for s in (-1, 1):
+        m.box(min(s * 5.0, s * 5.4), 3.2, -0.5, max(s * 5.0, s * 5.4), 4.2, 0.5, I3)
+    m.box(-5.6, 0.4, -0.25, -5.4, 3.6, 0.25, I3); m.box(5.4, 0.4, -0.25, 5.6, 3.6, 0.25, I3)
+    m.box(-5.6, 0.2, -0.25, 5.6, 0.6, 0.25, I3)          # handle swinging under the chin
+    m.box(-3.2, 2.0, -5.15, -2.4, 2.8, -5.0, '#e6e8ee')
+
+@design("shiba_buddy", "Shiba Buddy", "meme")
+def _(m):
+    O, Cr = '#e3a052', '#f6ead6'
+    rbox(m, -2.2, 4.0, -1.6, 2.2, 6.6, 3.0, O, r=0.7)
+    rbox(m, -2.0, 6.0, -3.2, 2.0, 8.8, -0.4, O, r=0.6)
+    m.box(-1.2, 6.0, -4.2, 1.2, 7.2, -3.2, Cr); m.box(-0.4, 6.9, -4.3, 0.4, 7.3, -4.2, BLACK)
+    m.box(-1.6, 7.4, -3.25, -0.8, 7.7, -3.2, BLACK); m.box(0.8, 7.4, -3.25, 1.6, 7.7, -3.2, BLACK)  # smug eyes
+    m.box(-1.7, 7.9, -3.25, -1.2, 8.1, -3.2, Cr); m.box(1.2, 7.9, -3.25, 1.7, 8.1, -3.2, Cr)
+    for s in (-1, 1):
+        steps(m, s * 1.3, -1.8, 8.8, [1.2, 0.8, 0.4], O, depth=0.6, h=0.5)
+    m.box(-0.4, 6.0, 3.0, 0.4, 7.6, 3.8, O); m.box(-0.4, 7.6, 2.2, 0.4, 8.2, 3.6, Cr)            # curly tail
+    m.box(-1.6, 4.0, -1.7, 1.6, 5.4, -1.6, Cr)
+
+@design("fish_slap", "Fish On Head", "meme")
+def _(m):
+    F, FD, FL = '#7fb3c8', '#5b8ea3', '#c9e6ef'
+    rbox(m, -0.9, 4.0, -3.6, 0.9, 5.6, 2.4, F, r=0.4)
+    m.box(-0.9, 4.0, -3.6, 0.9, 4.6, 2.4, FL)
+    m.box(-0.5, 4.2, 2.4, 0.5, 5.4, 3.2, FD); m.box(-0.6, 3.8, 3.2, 0.6, 5.8, 3.8, FD)            # tail
+    m.box(-0.2, 5.6, -1.6, 0.2, 6.2, 0.6, FD)
+    m.box(-0.95, 4.9, -3.0, -0.9, 5.3, -2.6, BLACK); m.box(0.9, 4.9, -3.0, 0.95, 5.3, -2.6, BLACK)
+    m.box(-0.5, 4.3, -3.9, 0.5, 4.8, -3.6, '#e88aa0')
+
+@design("groucho_disguise", "Disguise Glasses", "meme")
+def _(m):
+    K, Sk, Mu = '#141418', '#e8a98a', '#2a1a12'
+    for s in (-1, 1):
+        m.box(s * 2.2 - 1.6, 0.0, -4.85, s * 2.2 + 1.6, 0.4, -4.6, K); m.box(s * 2.2 - 1.6, 1.8, -4.85, s * 2.2 + 1.6, 2.2, -4.6, K)
+        m.box(s * 2.2 - 1.6, 0.4, -4.85, s * 2.2 - 1.2, 1.8, -4.6, K); m.box(s * 2.2 + 1.2, 0.4, -4.85, s * 2.2 + 1.6, 1.8, -4.6, K)
+        m.box(s * 2.2 - 1.4, 2.4, -4.9, s * 2.2 + 1.4, 3.2, -4.6, K)                                   # bushy brows
+        m.box(min(s * 4.6, s * 4.8), 1.6, -4.85, max(s * 4.6, s * 4.8), 2.0, 2.0, K)
+    m.box(-0.6, 0.6, -4.85, 0.6, 1.0, -4.6, K)
+    rbox(m, -0.8, -1.4, -6.4, 0.8, 1.0, -4.6, Sk, r=0.3)                                               # big nose
+    m.box(-2.6, -2.2, -5.0, 2.6, -1.4, -4.6, Mu); m.box(-2.2, -2.6, -5.0, -1.0, -2.2, -4.6, Mu); m.box(1.0, -2.6, -5.0, 2.2, -2.2, -4.6, Mu)
+
+@design("clown_wig", "Clown Wig", "meme")
+def _(m):
+    cols = ['#ff4040', ORANGE, YELLOW, '#4cc34a', '#3b8cff', '#b066ff']
+    k = 0
+    for x in (-4.4, -1.5, 1.5, 4.4):
+        for y in (3.4, 5.8):
+            for z in (-2.6, 0.2, 3.0):
+                if abs(x) < 3 and y < 4 and z < 0:
+                    continue
+                rbox(m, x - 1.6, y - 1.4, z - 1.6, x + 1.6, y + 1.4, z + 1.6, cols[k % 6], r=0.6); k += 1
+    rbox(m, -0.9, -1.0, -5.8, 0.9, 0.8, -4.6, '#e8202a', r=0.4)
+    m.box(-0.3, 0.2, -5.85, 0.2, 0.6, -5.8, '#ff9a9a')
+
+@design("herobrine_eyes", "Herobrine Eyes", "meme")
+def _(m):
+    for s in (-1, 1):
+        m.box(s * 2.2 - 1.1, 0.0, -4.85, s * 2.2 + 1.1, 1.0, -4.6, '#ffffff')
+    m.box(-4.6, 0.0, -4.7, 4.6, 1.0, -4.62, '#c9f7ff60')  # faint glow haze
+
+@design("watermelon_helmet", "Watermelon Helmet", "meme")
+def _(m):
+    G, GD, Wr, R = '#3f8f3a', '#2c6b28', '#e8f2d0', '#e8343f'
+    dome(m, 2.0, [(5.0, 2.4), (4.7, 1.2), (4.2, 0.8), (3.4, 0.6), (2.2, 0.4)], G)
+    for x in (-3.4, -1.1, 1.1, 3.4):
+        m.box(x - 0.4, 2.0, -5.05, x + 0.4, 5.4, -4.95, GD); m.box(x - 0.4, 2.0, 4.95, x + 0.4, 5.4, 5.05, GD)
+    m.box(-5.0, 1.4, -5.0, 5.0, 2.0, 5.0, Wr)
+    m.box(-4.7, 0.8, -4.7, 4.7, 1.4, 4.7, R)
+    for x, z in [(-3.0, -4.75), (-0.8, -4.75), (1.6, -4.75), (3.4, -4.75), (-4.75, -1.0), (4.75, 1.4)]:
+        m.box(x - 0.2, 1.0, z - 0.05, x + 0.2, 1.3, z + 0.05, BLACK)
+
+
+# ======================================================================
+# TAGGY & FROGGIE (from lojjkli's animation)
+# ======================================================================
+TG, TGD, TGL, SMILE = '#3a2d78', '#2e2366', '#4b3a8f', '#fdfdff'
+FG, FGD, FGL, FTAN, FMOUTH, FTONGUE = '#568022', '#3a5a19', '#63902e', '#bead6a', '#2e1d10', '#ff8a8a'
+GLOW.add(SMILE)
+
+def taggy(m, x=0.0, y=4.0, z=0.0, s=1.0, wave=False):
+    """Taggy: small speckled-amethyst buddy, head a bit taller than a cube, glowing pixel smile."""
+    S = lambda v: v * s
+    # feet dangling over the front + body
+    for sd in (-1, 1):
+        m.box(x + sd * S(0.7) - S(0.45), y, z - S(2.0), x + sd * S(0.7) + S(0.45), y + S(0.7), z - S(0.6), TGD)
+    rbox(m, x - S(1.3), y, z - S(0.8), x + S(1.3), y + S(2.0), z + S(0.9), TG, r=S(0.3))
+    for sd in (-1, 1):  # arms
+        ay2 = y + S(3.4) if (wave and sd < 0) else y + S(1.8)
+        m.box(min(x + sd * S(1.3), x + sd * S(1.9)), y + S(0.4) if not (wave and sd < 0) else y + S(1.4), z - S(0.35),
+              max(x + sd * S(1.3), x + sd * S(1.9)), ay2, z + S(0.35), TGD)
+    hy = y + S(2.0)
+    rbox(m, x - S(1.8), hy, z - S(1.6), x + S(1.8), hy + S(3.6), z + S(1.6), TG, r=S(0.35))
+    m.box(x - S(1.85), hy + S(3.2), z - S(1.65), x + S(1.85), hy + S(3.65), z + S(1.65), TGL)
+    # glowing smile: corner pixels + bar
+    f = z - S(1.6)
+    px = S(0.45)
+    m.box(x + S(1.1) - px, hy + S(1.6), f - 0.12, x + S(1.1), hy + S(1.6) + px, f, SMILE)
+    m.box(x - S(1.1), hy + S(1.6), f - 0.12, x - S(1.1) + px, hy + S(1.6) + px, f, SMILE)
+    m.box(x - S(1.1) + px, hy + S(1.6) - px, f - 0.12, x + S(1.1) - px, hy + S(1.6), f, SMILE)
+
+def froggie(m, x=0.0, y=4.0, z=0.0, s=1.0, tongue=True):
+    """Froggie: vanilla-style frog in its own texture colours (green body, tan back, dark mouth)."""
+    S = lambda v: v * s
+    for sd in (-1, 1):  # splayed feet + legs
+        m.box(x + sd * S(2.6) - S(1.0), y, z + S(0.4), x + sd * S(2.6) + S(1.0), y + S(0.2), z + S(2.6), FGD)
+        m.box(x + sd * S(1.8) - S(0.6), y, z - S(3.4), x + sd * S(1.8) + S(0.6), y + S(0.2), z - S(2.2), FGD)
+        rbox(m, x + sd * S(2.4) - S(0.7), y, z + S(0.6), x + sd * S(2.4) + S(0.7), y + S(1.6), z + S(2.4), FG, r=S(0.25))
+    rbox(m, x - S(2.4), y + S(0.4), z - S(3.2), x + S(2.4), y + S(1.4), z + S(2.6), FMOUTH, r=S(0.3), top=False)  # dark jaw line
+    rbox(m, x - S(2.4), y + S(0.2), z - S(3.0), x + S(2.4), y + S(0.6), z + S(2.6), FG, r=S(0.3), top=False)   # lower jaw
+    rbox(m, x - S(2.4), y + S(1.2), z - S(3.2), x + S(2.4), y + S(2.6), z + S(2.6), FG, r=S(0.4))             # upper head/body
+    m.box(x - S(1.8), y + S(2.6), z - S(0.6), x + S(1.8), y + S(2.8), z + S(2.4), FTAN)                       # tan back
+    for sd in (-1, 1):  # eyes
+        rbox(m, x + sd * S(1.5) - S(0.8), y + S(2.4), z - S(2.8), x + sd * S(1.5) + S(0.8), y + S(3.6), z - S(1.2), FGL, r=S(0.2))
+        m.box(x + sd * S(1.5) - S(0.6), y + S(2.8), z - S(2.9), x + sd * S(1.5) + S(0.6), y + S(3.2), z - S(2.8), FMOUTH)
+    if tongue:
+        m.box(x - S(0.4), y + S(0.6), z - S(4.6), x + S(0.4), y + S(0.8), z - S(3.2), FTONGUE)
+        m.box(x - S(0.6), y + S(0.5), z - S(5.1), x + S(0.6), y + S(0.9), z - S(4.5), '#e55e5e')
+
+def name_tag(m, x, y, z, col='#c9a46a'):
+    """Little Minecraft name tag hanging off the side."""
+    m.box(x - 0.1, y, z - 1.4, x + 0.1, y + 1.0, z + 0.6, col)
+    m.box(x - 0.1, y + 0.2, z + 0.6, x + 0.1, y + 0.8, z + 1.0, col)
+    m.box(x - 0.15, y + 0.4, z + 0.7, x + 0.15, y + 0.6, z + 0.9, '#5a3a1e')
+    m.box(x - 0.15, y + 0.35, z - 1.1, x + 0.15, y + 0.45, z + 0.3, '#5a3a1e')
+    m.box(x - 0.05, y + 0.6, z + 1.0, x + 0.05, y + 1.8, z + 1.1, '#e8e2d2')
+
+@design("taggy_buddy", "Taggy Buddy", "custom")
+def _(m):
+    taggy(m, 0, 4.0, 0.4, s=1.0)
+    name_tag(m, -2.0, 6.4, 1.2)
+
+@design("taggy_wave", "Taggy Waving", "custom")
+def _(m):
+    taggy(m, 0.6, 4.0, 0.2, s=1.1, wave=True)
+
+@design("taggy_mask", "Taggy Head", "custom")
+def _(m):
+    shell(m, 5.0, TG, r=0.9, y1=-5.0, y2=5.6)
+    m.box(-5.05, 4.6, -5.05, 5.05, 5.0, 5.05, TGL)
+    relief(m, ["..W....W..",
+               "...WWWW..."], -5.0, {'W': (SMILE, 0.25)}, top=-0.2, cell=0.9)
+    name_tag(m, -5.05, 2.0, 2.4)
+
+@design("froggie_buddy", "Froggie Buddy", "custom")
+def _(m):
+    froggie(m, 0, 4.0, 0.6, s=1.0)
+    name_tag(m, 2.6, 5.2, 1.6)
+
+@design("froglight_crown", "Froglight Crown", "custom")
+def _(m):
+    band(m, 3.6, 4.4, FGD, 4.6)
+    for (x, c, cl) in [(-3.0, '#f3d27a', '#fff2c2'), (0.0, '#e9c8e8', '#fff0ff'), (3.0, '#b8e6a6', '#effff0')]:
+        rbox(m, x - 1.1, 4.4, -5.1, x + 1.1, 6.6, -2.9, c, r=0.3)
+        m.box(x - 0.6, 4.9, -5.15, x + 0.6, 6.1, -5.1, cl)
+    GLOW.update({'#fff2c2', '#fff0ff', '#effff0'})
+    for s in (-1, 1):  # frog eyes peeking over the back
+        rbox(m, s * 1.6 - 0.9, 4.4, 1.6, s * 1.6 + 0.9, 6.0, 3.4, FG, r=0.3)
+        m.box(s * 1.6 - 0.6, 4.9, 1.5, s * 1.6 + 0.6, 5.5, 1.6, FMOUTH)
+
+@design("taggy_froggie_duo", "Taggy & Froggie Duo", "custom")
+def _(m):
+    taggy(m, -1.9, 4.0, 0.6, s=0.75)
+    froggie(m, 2.0, 4.0, 0.4, s=0.62, tongue=True)

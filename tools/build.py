@@ -261,6 +261,8 @@ SKINS.remove("lojjkli.png"); SKINS.insert(0, "lojjkli.png")
 skin = lambda i: skin_head(os.path.join(os.path.dirname(SKIN), SKINS[i % len(SKINS)]))
 
 VIEWS = [(-32, 24), (0, 8), (90, 12), (150, 24)]
+HOME = {"taggy_buddy": "lojjkli", "taggy_wave": "lojjkli", "taggy_froggie_duo": "lojjkli",
+        "froggie_buddy": "kaiib", "taggy_mask": "lojjkli", "froglight_crown": "Emii5287"}
 
 def sheet(images, cols, ts, path):
     rows = (len(images) + cols - 1) // cols
@@ -278,10 +280,11 @@ def build_heads():
         w(f"{A}/textures/item/heads/{name}.png", tex)
         w(f"{A}/models/item/heads/{name}.json", m.to_json(f"aconite:item/heads/{name}"))
         w(f"{A}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"aconite:item/heads/{name}"}})
-        img = render(skin(i) + m.render_elements(), size=384, plain=True)   # each accessory on a different head
+        base = SKINS.index(HOME[name] + ".png") if name in HOME else i   # Taggy/Froggie start on their own rider
+        img = render(skin(base) + m.render_elements(), size=384, plain=True)   # each accessory on a different head
         thumbs.append(img)
         # multiple photos: 3/4 front, straight front, side, 3/4 back - each on a different head
-        views = [render(skin(i + k) + m.render_elements(), size=300, yaw=yaw, pitch=pitch, plain=True)
+        views = [render(skin(base + k) + m.render_elements(), size=300, yaw=yaw, pitch=pitch, plain=True)
                  for k, (yaw, pitch) in enumerate(VIEWS)]
         strip = Image.new("RGB", (300 * len(views), 300), "white")
         for k, v in enumerate(views):
@@ -299,12 +302,15 @@ def build_heads():
             out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # trendy batch on its own sheets
-    trend = [i for i, d in enumerate(DS.D) if d[2] == "trend"]
-    sheet([thumbs[i] for i in trend], 7, 260, f"{PV}/trendy_heads.png")
-    out = Image.new("RGB", (1000 * 2 + 60, 250 * ((len(trend) + 1) // 2)), "white")
-    for k, i in enumerate(trend):
-        out.paste(angle_strips[i].resize((1000, 250), Image.LANCZOS), ((k % 2) * 1060, 250 * (k // 2)))
-    out.save(f"{PV}/trendy_photos.png")
+    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie")):
+        idx = [i for i, d in enumerate(DS.D) if d[2] == tier]
+        if not idx:
+            continue
+        sheet([thumbs[i] for i in idx], min(7, len(idx)), 260, f"{PV}/{label}_heads.png")
+        out = Image.new("RGB", (1000 * 2 + 60, 250 * ((len(idx) + 1) // 2)), "white")
+        for k, i in enumerate(idx):
+            out.paste(angle_strips[i].resize((1000, 250), Image.LANCZOS), ((k % 2) * 1060, 250 * (k // 2)))
+        out.save(f"{PV}/{label}_photos.png")
     # fit test: the trickiest fits (tight bands, full helmets, brims, side pieces) on all 8 heads
     test = ["cat_ears_black", "top_hat", "gold_crown", "knight_helmet", "headphones", "aviator_goggles",
             "beanie", "sunglasses", "viking_helmet", "flower_crown"]

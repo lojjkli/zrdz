@@ -125,6 +125,7 @@ class Model:
         return out
 
 DIRS = ("north", "east", "south", "west", "up", "down")
+SPECKLE = {'#3a2d78', '#2e2366', '#4b3a8f'}  # amethyst-like speckled surfaces (Taggy)
 GLOW = {'#c49bff', '#38f6ff', '#5fe3f0', '#ff4a2a', '#fff6b0', '#ffd34a', '#c45cff', '#38d6b8', '#7cfba5',
         '#b6ffd0', '#b6ff6b', '#fff4b0', '#ff7ad1', '#8affc8', '#d4ffff', '#fff1a0', '#9be7ff'}
 METAL = {'#f2c33a', '#b8861c', '#c9ced8', '#a9adb8', '#9ea2ad', '#8c8f99', '#7c808b', '#9aa1ad', '#6f7682',
@@ -149,6 +150,8 @@ def paint(w, h, color, d, rng):
             if glow:
                 cx, cy = (w - 1) / 2, (h - 1) / 2
                 k *= 1.12 - 0.25 * (abs(x - cx) / max(cx, 1) + abs(y - cy) / max(cy, 1)) / 2
+            if color in SPECKLE:
+                k *= rng.choice([1, 1, 1, 1, 1, 1.22, 0.84, 1.1])
             if w > 2 and h > 2:
                 if x == 0 or y == 0:
                     k *= 1.14                               # bevel highlight
