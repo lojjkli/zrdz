@@ -3548,7 +3548,7 @@ def _(m):
     turtle(m, 0, y, 0.3, 0.6)                                                           # baby turtle riding on top
 
 # ---------- more buddies ----------
-@design("sniffer_buddy", "Sniffer Buddy", "cute")
+@design("baby_sniffer", "Baby Sniffer", "cute")
 def _(m):
     R, RD, MOSS, NOSE, K = '#b2493a', '#8a3328', '#5fae46', '#e2b44a', '#1a1418'
     y0 = 4.6
@@ -3568,7 +3568,7 @@ def _(m):
         m.box(min(sd * 1.4, sd * 1.8), y0 + 1.4, -2.6, max(sd * 1.4, sd * 1.8), y0 + 2.5, -1.8, RD)   # floppy ears
     m.box(-1.0, y0 + 2.9, -3.0, 1.0, y0 + 3.15, -1.8, MOSS)
 
-@design("allay_buddy", "Allay Buddy", "cute")
+@design("allay_cookie", "Allay with Cookie", "cute")
 def _(m):
     B1, B2, WG = '#5fd3f5', '#3aa8d8', '#d8f4ffa0'
     GLOW.update({B1})
@@ -3587,7 +3587,7 @@ def _(m):
     for x, y in ((-1.8, 6.0), (1.6, 9.4)):
         star(m, x, y, -0.5, 0.3, '#a6ffef')
 
-@design("slime_buddy", "Slime Buddy", "cute")
+@design("jelly_slime", "Jelly Slime", "cute")
 def _(m):
     y0 = 4.6
     m.box(-1.2, y0 + 0.6, -1.2, 1.2, y0 + 3.0, 1.2, '#4fa83e')                          # core
