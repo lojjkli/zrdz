@@ -1,4 +1,4 @@
-"""Export the aconite models to Blender (.blend + .glb).  python tools/export_blender.py
+"""Export the aconite growth stages to Blender (.blend + .glb).  python tools/export_blender.py
 Pixel-perfect: nearest-neighbour textures, alpha clip for the 2D plants. 1 Blender unit = 1 block."""
 import json, math, os, sys
 import bpy
@@ -77,12 +77,6 @@ def cross_quads(y0=0):
 def coll(name):
     c = bpy.data.collections.new(name); bpy.context.scene.collection.children.link(c); return c
 
-# 3D chunky aconite
-c3d = coll("Aconite_3D")
-j = json.load(open(os.path.join(A, "models/item/aconite_3d.json")))
-q = [qq for el in j["elements"] for qq in element_quads(el)]
-build("Aconite_3D", q, os.path.join(A, "textures/item/aconite_3d.png"), c3d)
-
 # 2D cross-plant growth stages (+ full flower and wolfsbane), lined up along X
 c2d = coll("Aconite_2D_Growth")
 T = os.path.join(A, "textures/block")
@@ -98,9 +92,5 @@ for i, (name, texs) in enumerate(plants):
 
 bpy.ops.file.pack_all()
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "aconite_models.blend"))
-# glb of just the 3D aconite, and one of everything
-for ob in bpy.data.objects:
-    ob.select_set(ob.name == "Aconite_3D")
-bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, "aconite_3d.glb"), use_selection=True)
 bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, "aconite_all.glb"), use_selection=False)
 print("exported", [o.name for o in bpy.data.objects])

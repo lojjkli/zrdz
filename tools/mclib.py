@@ -4,6 +4,7 @@ import json, math, os, hashlib
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
+HAT_CLEAR = 4.6
 S = 1.6  # 1 player-head pixel = 1.6 model units when worn (head = 1.6..14.4)
 
 def hex2rgb(h):
@@ -22,6 +23,15 @@ class Model:
         if c not in self.colors:
             self.colors.append(c)
         a, b = sorted((x1, x2)), (sorted((y1, y2)), sorted((z1, z2)))
+        # fit: the skin's hat layer sits 0.5px outside the head (+-4.5). Any outer surface that would land
+        # inside that shell is pushed to +-4.6 so hair/hat pixels never poke through the cosmetic.
+        def clear(lo, hi):
+            if 4 < hi < HAT_CLEAR:
+                hi = HAT_CLEAR
+            if -HAT_CLEAR < lo < -4:
+                lo = -HAT_CLEAR
+            return [lo, hi]
+        a, b = clear(*a), (clear(*b[0]), clear(*b[1]))
         self.boxes.append(dict(f=(a[0], b[0][0], b[1][0]), t=(a[1], b[0][1], b[1][1]), c=c, rot=rot))
         return self
 
@@ -97,7 +107,7 @@ class Model:
         return {"credit": "ACONITE cosmetics", "texture_size": [W, H],
                 "textures": {"0": texref, "particle": texref},
                 "elements": els,
-                "display": {"head": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
+                "display": {"head": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
                             "gui": {"rotation": [30, 45, 0], "translation": [0, -1, 0], "scale": [0.5, 0.5, 0.5]},
                             "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375] * 3},
                             "firstperson_righthand": {"rotation": [0, 45, 0], "scale": [0.4] * 3},
@@ -211,7 +221,7 @@ def rotmat(axis, ang):
 
 _FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 80)), label=None, ss=3):
+def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 80)), label=None, ss=3, plain=False):
     ya, pa = math.radians(yaw), math.radians(pitch)
     cam = np.array([math.sin(ya) * math.cos(pa), math.sin(pa), -math.cos(ya) * math.cos(pa)])
     fwd = -cam
@@ -282,8 +292,10 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 
     t = np.linspace(0, 1, W)[:, None, None]
     bgimg = np.array(bg[0], np.float32) * (1 - t) + np.array(bg[1], np.float32) * t
     bgimg = np.broadcast_to(bgimg, (W, W, 3)).copy()
+    if plain:
+        bgimg[:] = 255
     ys, xs = np.nonzero(mask)
-    if len(ys):
+    if len(ys) and not plain:
         cy, cx = ys.max() + W * 0.01, (xs.min() + xs.max()) / 2
         rx, ry = (xs.max() - xs.min()) * 0.55, W * 0.035
         Y, X = np.mgrid[0:W, 0:W]

@@ -225,50 +225,19 @@ def build_aconite():
     w(os.path.join(A, "items", "wolfsbane.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/wolfsbane"}})
     build_crop_addon(stages)
 
+    # previews: plain white, no text, no blocks
     os.makedirs(PV + "/aconite", exist_ok=True)
-    tiles = []
-    for i, (name, lo, hi, label) in enumerate(stages):
-        els = cross(pix(lo)) + (cross(pix(hi), 16) if hi else [])
-        # fixed framing so the plants visibly grow
-        els += [dict(f=[-2, 0, 8], t=[18, 33, 8], rot=None, faces={"north": (np.zeros((1, 1, 4), np.uint8), [0, 0, 1, 1])})]
-        tiles.append(render(els, size=480, yaw=-8, label=f"{i + 1}. {label}", bg=SKY))
     frame = [dict(f=[-2, 0, 8], t=[18, 33, 8], rot=None, faces={"north": (np.zeros((1, 1, 4), np.uint8), [0, 0, 1, 1])})]
-    tiles.append(render(cross(bot) + cross(pix([r.translate(WOLFSBANE) for r in TOP]), 16) + frame, size=480, yaw=-8,
-                        label="7. Yellow Wolfsbane", bg=SKY))
-    strip = Image.new("RGB", (480 * 4, 480 * 2), SKY[1])
+    plants = [(f"stage{i + 1}", cross(pix(lo)) + (cross(pix(hi), 16) if hi else [])) for i, (name, lo, hi, _) in enumerate(stages)]
+    plants.append(("wolfsbane", cross(bot) + cross(wolf_top, 16)))
+    tiles = []
+    for name, els in plants:
+        img = render(els + frame, size=480, yaw=-8, plain=True)   # same framing so the plants visibly grow
+        img.save(f"{PV}/aconite/{name}.png"); tiles.append(img)
+    strip = Image.new("RGB", (400 * len(tiles), 480), "white")
     for i, t in enumerate(tiles):
-        strip.paste(t, ((i % 4) * 480, (i // 4) * 480))
-    strip.save(PV + "/aconite/growth_stages.png")
-    globals()["_flower_tiles"] = strip
-    render(cross(bot) + cross(wolf_top, 16), size=512, yaw=-8, label="Yellow Wolfsbane", bg=SKY).save(PV + "/aconite/wolfsbane.png")
-
-    # 3D chunky aconite (cuboid) for item frames / display entities / hats
-    m = Model("aconite_3d", "Aconite (3D)")
-    m.box(-0.35, -5, -0.35, 0.35, 0, 0.35, DS.STEM)
-    for (lx, lz, ly, rot) in [(-1, 0, -4.6, 0), (1, 0, -3.6, 0), (0, -1, -2.6, 0), (0, 1, -1.6, 0)]:
-        # deeply-cut palmate leaves: three fingers each
-        for f, (fx, fz) in enumerate([(lx, lz), (lx + lz * 0.7, lz + lx * 0.7), (lx - lz * 0.7, lz - lx * 0.7)]):
-            ex, ez = fx * 3.2, fz * 3.2
-            m.box(min(0, ex) - 0.45, ly, min(0, ez) - 0.45, max(0, ex) + 0.45, ly + 0.4, max(0, ez) + 0.45, DS.LEAF if f else DS.LEAF_D)
-    DS.aconite_spike(m, 0, -1, 0, h=6, s=1.7)
-    tex = m.texture()
-    w(f"{A}/textures/item/aconite_3d.png", tex)
-    j = m.to_json("aconite:item/aconite_3d"); j["display"]["head"] = {"translation": [0, 8, 0]}
-    w(f"{M}/item/aconite_3d.json", j)
-    w(os.path.join(A, "items", "aconite_3d.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/aconite_3d"}})
-
-    os.makedirs(PV + "/aconite", exist_ok=True)
-    render(cross(bot) + cross(top, 16), size=640, yaw=-8, label="Aconite (2-block flower)", bg=SKY).save(PV + "/aconite/aconite_flower.png")
-    pot = [solid([5, 0, 5], [11, 6, 11], (150, 76, 52), 5), solid([6, 5.9, 6], [10, 6, 10], (70, 45, 30), 2)]
-    render(pot + cross(small, 4, 0.75, (8, 8)), size=512, label="Potted Aconite").save(PV + "/aconite/potted_aconite.png")
-    render(m.render_elements(tex), size=512, label="Aconite (3D model)").save(PV + "/aconite/aconite_3d.png")
-    final = globals()["_flower_tiles"]
-    final.paste(render(m.render_elements(tex), size=480, label="8. Aconite 3D model", bg=SKY), (3 * 480, 480))
-    final.save(PV + "/final_flowers.png")
-    big = Image.new("RGBA", (16 * 3 * 16 + 40, 16 * 16 + 20), (20, 10, 32, 255))
-    for i, t in enumerate([top, bot, small]):
-        big.paste(t.resize((256, 256), Image.NEAREST), (10 + i * 266, 10), t.resize((256, 256), Image.NEAREST))
-    big.crop((0, 0, 3 * 266 + 10, 276)).save(PV + "/aconite/textures.png")
+        strip.paste(t.crop((40, 0, 440, 480)), (i * 400, 0))
+    strip.save(PV + "/final_flowers.png")
 
 SKY = ((121, 166, 255), (196, 222, 255))
 
@@ -287,32 +256,39 @@ def build_crop_addon(stages):
         v[f"age={age},half=upper"] = {"model": f"aconite:block/{upper[age]}"}
     w(os.path.join(C, "assets/minecraft/blockstates/pitcher_crop.json"), {"variants": v})
 
+SKINS = sorted(f for f in os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "skins")) if f.endswith(".png"))
+SKINS.remove("lojjkli.png"); SKINS.insert(0, "lojjkli.png")
+skin = lambda i: skin_head(os.path.join(os.path.dirname(SKIN), SKINS[i % len(SKINS)]))
+
+def sheet(images, cols, ts, path):
+    rows = (len(images) + cols - 1) // cols
+    out = Image.new("RGB", (cols * ts, rows * ts), "white")
+    for i, im in enumerate(images):
+        out.paste(im.resize((ts, ts), Image.LANCZOS), ((i % cols) * ts, (i // cols) * ts))
+    out.save(path)
+
 def build_heads():
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 15)
-    thumbs = []
-    lines = []
-    for name, title, tier, fn in DS.D:
+    thumbs, lines, models = [], [], {}
+    os.makedirs(f"{PV}/heads", exist_ok=True)
+    for i, (name, title, tier, fn) in enumerate(DS.D):
         m = Model(name, title, tier); fn(m)
-        tex = m.texture()
+        tex = m.texture(); models[name] = m
         w(f"{A}/textures/item/heads/{name}.png", tex)
         w(f"{A}/models/item/heads/{name}.json", m.to_json(f"aconite:item/heads/{name}"))
         w(f"{A}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"aconite:item/heads/{name}"}})
-        img = render(skin_head(SKIN) + m.render_elements(tex), size=384, label=title)
-        img.save(f"{PV}/heads/{name}.png") if os.path.isdir(f"{PV}/heads") else (os.makedirs(f"{PV}/heads"), img.save(f"{PV}/heads/{name}.png"))
-        thumbs.append((img, tier))
-        lines.append(f'/give @p minecraft:carved_pumpkin[item_model="aconite:{name}",item_name="{title}",equippable={{slot:"head"}}]')
+        img = render(skin(i) + m.render_elements(), size=384, plain=True)   # each accessory on a different head
+        img.save(f"{PV}/heads/{name}.png"); thumbs.append(img)
+        lines.append(f'/give @p minecraft:paper[item_model="aconite:{name}",item_name="{title}",equippable={{slot:"head"}}]')
     with open(os.path.join(ROOT, "give_commands.txt"), "w") as f:
         f.write("\n".join(lines) + "\n")
-    # contact sheets
-    cols, ts = 10, 192
-    rows = (len(thumbs) + cols - 1) // cols
-    sheet = Image.new("RGB", (cols * ts, rows * ts), (10, 5, 18))
-    for i, (im, tier) in enumerate(thumbs):
-        t = im.resize((ts, ts), Image.LANCZOS)
-        if tier == "cool":
-            ImageDraw.Draw(t).rectangle([1, 1, ts - 2, ts - 2], outline=(196, 155, 255), width=3)
-        sheet.paste(t, ((i % cols) * ts, (i // cols) * ts))
-    sheet.save(f"{PV}/all_heads.png")
+    sheet(thumbs, 12, 200, f"{PV}/all_heads.png")
+    # fit test: the trickiest fits (tight bands, full helmets, brims, side pieces) on all 8 heads
+    test = ["cat_ears_black", "top_hat", "gold_crown", "knight_helmet", "headphones", "aviator_goggles",
+            "beanie", "sunglasses", "viking_helmet", "flower_crown"]
+    fit = [render(skin(j) + models[n].render_elements(), size=300, plain=True) for n in test for j in range(len(SKINS))]
+    sheet(fit, len(SKINS), 200, f"{PV}/fit_check.png")
+    # bare heads, for reference
+    sheet([render(skin(j), size=300, plain=True) for j in range(len(SKINS))], len(SKINS), 200, f"{PV}/test_heads.png")
     print(len(thumbs), "heads")
 
 if __name__ == "__main__":
