@@ -263,7 +263,8 @@ skin = lambda i: skin_head(os.path.join(os.path.dirname(SKIN), SKINS[i % len(SKI
 VIEWS = [(-32, 24), (0, 8), (90, 12), (150, 24)]
 HOME = {"taggy_buddy": "lojjkli", "taggy_wave": "lojjkli", "taggy_froggie_duo": "lojjkli",
         "froggie_buddy": "kaiib", "taggy_mask": "lojjkli", "froglight_crown": "Emii5287",
-        "froggie_hat": "kaiib", "taggy_rides_froggie": "lojjkli", "taggy_peek": "lojjkli", "taggy_headphones": "lojjkli"}
+        "froggie_hat": "kaiib", "taggy_rides_froggie": "lojjkli", "taggy_peek": "lojjkli", "taggy_headphones": "lojjkli",
+        "froggie_strawberry": "kaiib", "froggie_mushroom": "kaiib", "froggie_princess": "kaiib", "froggie_flower_crown": "kaiib"}
 
 def sheet(images, cols, ts, path):
     rows = (len(images) + cols - 1) // cols
@@ -272,11 +273,14 @@ def sheet(images, cols, ts, path):
         out.paste(im.resize((ts, ts), Image.LANCZOS), ((i % cols) * ts, (i // cols) * ts))
     out.save(path)
 
-NEW_BATCH = ["froggie_buddy", "froggie_hat", "froglight_crown", "taggy_rides_froggie", "taggy_froggie_duo", "taggy_buddy",
-             "taggy_peek", "taggy_headphones", "six_seven", "six_seven_hands", "tralalero", "tung_tung",
-             "ballerina_cappuccina", "bombardiro", "matcha_latte", "clanker_helmet", "dubai_chocolate", "aura_farmer",
-             "googly_eyes", "plunger", "arrow_head", "banana_peel", "dizzy_stars", "cheese_hat", "frying_pan",
-             "toaster_hat", "big_brain", "duck_floatie", "engineer_goggles"]
+NEW_BATCH = ["froggie_buddy", "froggie_hat", "froggie_strawberry", "froggie_mushroom", "froggie_princess",
+             "froggie_flower_crown", "axolotl_buddy", "bee_buddy", "sleepy_fox", "cat_loaf", "penguin_buddy",
+             "baby_hippo", "hamster_buddy", "raccoon_buddy", "warden_tendrils", "totem_halo", "end_crystal_hat",
+             "wither_crown", "blaze_halo", "baby_dragon", "turtle_helmet", "armadillo_buddy", "breeze_buddy",
+             "planet_orbit", "chimpanzini_bananini", "lirili_larila", "brr_patapim", "cappuccino_assassino",
+             "lightbulb_idea", "fishbowl_helmet", "ice_cream_splat", "spaghetti_hair", "lampshade", "rubber_chicken",
+             "cone_of_shame", "pancake_stack", "bird_nest", "hot_dog_hat", "pizza_slice", "snorkel_mask",
+             "angler_light", "silly_goose"]
 
 def build_heads():
     thumbs, lines, models, angle_strips = [], [], {}, []
@@ -312,7 +316,7 @@ def build_heads():
             out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # trendy batch on its own sheets
-    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy")):
+    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy"), ("cute", "cute"), ("cool", "cool")):
         idx = [i for i, d in enumerate(DS.D) if d[2] == tier]
         if not idx:
             continue

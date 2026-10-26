@@ -57,7 +57,8 @@ class Model:
             if -HAT_CLEAR < lo < -4:
                 lo = -HAT_CLEAR
             return [lo, hi]
-        a, b = clear(*a), (clear(*b[0]), clear(*b[1]))
+        if b[0][0] < 4.5:   # pieces sitting fully above the hat layer can't clip it, so they keep their exact size
+            a, b = clear(*a), (clear(*b[0]), clear(*b[1]))
         self.boxes.append(dict(f=(a[0], b[0][0], b[1][0]), t=(a[1], b[0][1], b[1][1]), c=c, rot=rot))
         return self
 
