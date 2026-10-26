@@ -1230,3 +1230,147 @@ def _(m):
     m.box(-1.6, 4.9, -5.5, 1.6, 5.1, -5.4, WHITE, rot=('z', -22.5, (0, 5, -5.45)))
     m.box(-4.4, 0.9, -4.75, -0.9, 2.6, -4.6, BLACK)
     m.box(-4.6, 2.2, -4.7, 4.6, 2.5, 4.7, '#3a3540')
+
+
+# ======================================================================
+# Full-head pieces with real depth: rounded shells, carved/raised relief
+# ======================================================================
+def relief(m, rows, z, spec, cell=1.0, top=5.0, width=None):
+    """Pixel relief on the front (-z) face. rows are read as seen from the front, top row first.
+    spec: char -> (colour, thickness). Thickness 0/None = carved hole (nothing drawn)."""
+    n = len(rows[0]); width = width or n * cell
+    xl = width / 2  # viewer's left edge is +x
+    for r, row in enumerate(rows):
+        y2 = top - r * cell; y1 = y2 - cell
+        c = 0
+        while c < n:
+            ch = row[c]; e = c
+            while e + 1 < n and row[e + 1] == ch:
+                e += 1
+            col, t = spec.get(ch, (None, 0))
+            if t:
+                m.box(xl - (e + 1) * cell, y1, z - t, xl - c * cell, y2, z, col)
+            c = e + 1
+
+def shell(m, h, c, r=1.0, y1=-5.1, y2=5.1, dome_top=True):
+    """Rounded full-head shell, kept outside the skin's hat layer."""
+    m.box(-4.6, -4.6, -4.6, 4.6, 4.6, 4.6, c)   # core: hides the head + hat layer inside the rounded corners
+    rbox(m, -h, y1, -h, h, y2 - (0.6 if dome_top else 0), h, c, r=r, top=False)
+    if dome_top:
+        rbox(m, -h + r, y2 - 0.6, -h + r, h - r, y2, h - r, c, r=0.5, top=False)
+
+@redesign("creeper_mask")
+def _(m):
+    G, GL, GD, K = '#5ec04a', '#8ee07a', '#45a036', '#101410'
+    shell(m, 5.0, G, r=0.8)
+    # front: creeper face carved in, lighter pixels raised
+    m.box(-3.0, -4.0, -5.05, 3.0, 2.0, -5.0, K)   # dark cavity behind the carved face
+    relief(m, ["gLggggLggg",
+               "ggggLggggg",
+               "gKKKggKKKg",
+               "gKKKggKKKg",
+               "ggggKKgggd",
+               "gggKKKKggg",
+               "gLgKKKKggg",
+               "gggKggKgLg",
+               "dggggggggg",
+               "gggLgggggg"], -5.0,
+           {'g': (G, 0.35), 'L': (GL, 0.6), 'd': (GD, 0.2), 'K': (None, 0)})
+    for x, y, zz in [(-5.0, 2.5, -2), (-5.0, -1.5, 1.5), (5.0, 1.0, -1), (5.0, -3, 2.5)]:
+        m.box(x - 0.3 if x < 0 else x, y, zz, x if x < 0 else x + 0.3, y + 1.0, zz + 1.0, GL)
+    for x, zz in [(-2, -2), (1.5, 1.5), (-1, 2.5)]:
+        m.box(x, 5.1, zz, x + 1.0, 5.4, zz + 1.0, GL)
+
+@redesign("pumpkin_head")
+def _(m):
+    O, OD, OL, GLOW, IN = ORANGE, '#c8621a', '#f59a3c', '#ffd34a', '#ff9a1f'
+    shell(m, 5.0, O, r=1.4)
+    m.box(-4.0, -4.0, -5.05, 4.0, 3.0, -5.0, GLOW)  # candle glow inside the carving
+    relief(m, ["ooRooooRoo",
+               "ooRooooRoo",
+               "ohhhoohhho",
+               "oohhoohhoo",
+               "ooRohhoRoo",
+               "ooRooooRoo",
+               "ohhhhhhhho",
+               "oohhohhhoo",
+               "ooRooooRoo",
+               "ooRooooRoo"], -5.0, {'o': (O, 0.4), 'R': (OL, 0.65), 'h': (None, 0)})
+    for z in (-2.5, 0, 2.5):  # ribs round the sides and back
+        for s in (-1, 1):
+            m.box(min(s * 5.0, s * 5.3), -4.2, z - 0.4, max(s * 5.0, s * 5.3), 4.0, z + 0.4, OL)
+    for x in (-2.5, 0, 2.5):
+        m.box(x - 0.4, -4.2, 5.0, x + 0.4, 4.0, 5.3, OL)
+    rbox(m, -0.7, 5.1, -0.7, 0.7, 6.8, 0.7, '#4d7a26', r=0.25)
+    m.box(0.7, 6.2, -0.4, 2.2, 6.6, 0.4, '#4d7a26'); m.box(1.8, 5.6, -0.4, 2.2, 6.2, 0.4, '#4d7a26')
+    m.box(-0.6, 5.1, -0.6, -3.2, 5.5, 1.6, LEAF, rot=('y', 22.5, (-0.6, 5.3, 0)))
+    m.box(-1.2, 5.5, -0.1, -2.8, 5.6, 0.9, LEAF_D, rot=('y', 22.5, (-0.6, 5.3, 0)))
+
+@redesign("ghost_sheet")
+def _(m):
+    W, WS, K = '#f2f2f6', '#dcdce6', '#15151c'
+    shell(m, 5.0, W, r=1.5, y1=-5.0, y2=5.4)
+    rbox(m, -3.2, 5.4, -3.2, 3.2, 6.2, 3.2, W, r=1.0)
+    # wavy hem hanging below
+    hem = [(-5.0, -3.0, 1.6), (-3.0, -1.0, 0.8), (-1.0, 1.0, 1.9), (1.0, 3.0, 0.7), (3.0, 5.0, 1.5)]
+    for a, b, d in hem:
+        m.box(a, -5.0 - d, -5.0, b, -5.0, -4.2, W); m.box(a, -5.0 - (2.4 - d), 4.2, b, -5.0, 5.0, WS)
+        m.box(-5.0, -5.0 - d, a, -4.2, -5.0, b, WS); m.box(4.2, -5.0 - (2.4 - d), a, 5.0, -5.0, b, W)
+    # face: big carved eyes + mouth, cheeks puffed out
+    m.box(-3.0, -2.5, -5.05, 3.0, 2.6, -5.0, K)
+    relief(m, ["wwwwwwwwww",
+               "wwwwwwwwww",
+               "wwKKwwKKww",
+               "wwKKwwKKww",
+               "wwKKwwKKww",
+               "wwwwwwwwww",
+               "wpwwKKwwpw",
+               "wwwwKKwwww",
+               "wwwwwwwwww"], -5.0, {'w': (W, 0.3), 'p': ('#ffc2d6', 0.45), 'K': (None, 0)}, top=4.6, cell=1.0)
+    for z in (-2.5, 0.5, 3.0):  # cloth folds
+        for s in (-1, 1):
+            m.box(min(s * 5.0, s * 5.25), -5.6, z - 0.3, max(s * 5.0, s * 5.25), 3.0, z + 0.3, WS)
+    for s in (-1, 1):  # little arms
+        rbox(m, min(s * 5.0, s * 6.2), -2.6, -1.2, max(s * 5.0, s * 6.2), -0.6, 1.2, W, r=0.4)
+
+@redesign("knight_helmet")
+def _(m):
+    S1, S2, S3, K = '#b4b8c4', '#9ea2ad', '#7c808b', '#101014'
+    shell(m, 5.0, S1, r=1.1)
+    m.box(-0.5, 5.0, -4.6, 0.5, 6.0, 4.6, S3)                 # top ridge
+    m.box(-5.4, -5.3, -5.4, 5.4, -4.4, 5.4, S3)              # flared gorget
+    # visor sticks out with an eye slit and breathing holes punched through
+    m.box(-4.0, -3.4, -5.05, 4.0, 2.2, -5.0, K)
+    relief(m, ["vvvvvvvvvv",
+               "vvvvvvvvvv",
+               "SSSSSSSSSS",
+               "vvvvvvvvvv",
+               "vvvvvrvvvv",
+               "vhvhvrvhvh",
+               "vvvvvrvvvv",
+               "vhvhvrvhvh",
+               "vvvvvrvvvv"], -5.0,
+           {'v': (S2, 0.7), 'r': (S1, 1.0), 'S': (None, 0), 'h': (None, 0)}, top=4.2, cell=0.9)
+    for x, y in [(-4.0, 3.6), (4.0, 3.6), (-4.0, -3.8), (4.0, -3.8)]:
+        m.box(x - 0.35, y - 0.35, -5.95, x + 0.35, y + 0.35, -5.6, '#e6e8ee')
+    for s in (-1, 1):                                       # visor hinges
+        rbox(m, min(s * 5.0, s * 5.6), -0.8, -1.2, max(s * 5.0, s * 5.6), 1.0, 0.6, S3, r=0.3)
+    m.box(-0.8, 6.0, -2.5, 0.8, 8.0, 3.0, '#c8282c')       # plume
+    m.box(-0.7, 3.4, 3.0, 0.7, 7.6, 6.4, '#e0403f', rot=('x', -22.5, (0, 7.0, 3.0)))
+
+@redesign("astronaut")
+def _(m):
+    Wh, Wd, V, VL = '#f4f4f8', '#cfd3dc', '#e0a833', '#ffe08a'
+    shell(m, 5.1, Wh, r=1.4, y1=-4.8, y2=5.3)
+    m.box(-5.5, -5.6, -5.5, 5.5, -4.6, 5.5, '#9aa1ad')       # neck ring
+    m.box(-5.1, -4.6, -5.3, 5.1, -3.9, 5.3, Wd)
+    # bulging gold visor, layered so it curves out
+    rbox(m, -4.2, -2.6, -5.5, 4.2, 3.6, -5.0, Wd, r=0.6, top=False)
+    rbox(m, -3.7, -2.2, -5.9, 3.7, 3.2, -5.4, V, r=0.6, top=False)
+    rbox(m, -2.9, -1.6, -6.2, 2.9, 2.6, -5.8, '#efbb44', r=0.6, top=False)
+    m.box(1.2, 1.2, -6.3, 2.4, 2.2, -6.15, VL); m.box(1.8, 0.3, -6.3, 2.4, 1.0, -6.15, VL)
+    for s in (-1, 1):                                        # side comms pods
+        rbox(m, min(s * 5.1, s * 6.0), -1.6, -1.6, max(s * 5.1, s * 6.0), 1.6, 1.6, Wd, r=0.5)
+        m.box(min(s * 6.0, s * 6.15), -0.6, -0.6, max(s * 6.0, s * 6.15), 0.6, 0.6, '#d23c3c' if s < 0 else '#2f6fd8')
+    m.box(2.6, 5.1, 2.0, 3.0, 7.8, 2.4, GREY); m.box(2.4, 7.8, 1.8, 3.2, 8.6, 2.6, RED)
+    m.box(-3.4, 3.8, 5.1, -1.4, 4.6, 5.25, '#2f6fd8'); m.box(-3.4, 3.0, 5.1, -1.4, 3.8, 5.25, Wh)
