@@ -17,12 +17,17 @@ def design(name, title, tier="basic"):
     return deco
 
 # ---------- helpers ----------
-def steps(m, cx, cz, y, widths, c, depth=None, h=1, dx=0.0, dz=0.0):
-    """Stacked shrinking squares (cones / ears). depth=None -> square; else fixed depth."""
+def steps(m, cx, cz, y, widths, c, depth=None, h=1, dx=0.0, dz=0.0, smooth=2):
+    """Stacked shrinking squares (cones / ears), interpolated `smooth`x finer."""
+    ws = []
     for i, w in enumerate(widths):
+        nxt = widths[i + 1] if i + 1 < len(widths) else w * 0.5
+        ws += [w + (nxt - w) * k / smooth for k in range(smooth)]
+    hh = h / smooth
+    for i, w in enumerate(ws):
         dd = w if depth is None else depth
-        ox, oz = cx + dx * i, cz + dz * i
-        m.box(ox - w / 2, y + i * h, oz - dd / 2, ox + w / 2, y + (i + 1) * h, oz + dd / 2, c)
+        ox, oz = cx + dx * i / smooth, cz + dz * i / smooth
+        m.box(ox - w / 2, y + i * hh, oz - dd / 2, ox + w / 2, y + (i + 1) * hh, oz + dd / 2, c)
 
 def band(m, y1, y2, c, r=4.25):
     m.box(-r, y1, -r, r, y2, -4, c); m.box(-r, y1, 4, r, y2, r, c)
@@ -34,29 +39,42 @@ def brim(m, r, y, c, t=0.5):
 def cap(m, c, h=1.0):
     m.box(-4.25, 4, -4.25, 4.25, 4 + h, 4.25, c)
 
-def ears(m, outer, inner, widths=(4, 3, 2, 1), x=2.6, tilt=0, depth=1):
+def ears(m, outer, inner, widths=(4, 3, 2, 1), x=2.6, tilt=0, depth=1, tuft=None):
+    """Smooth triangular ears: half-pixel steps, angled outward, inner colour + fluffy tuft."""
+    ws = []
+    for i, w in enumerate(widths):
+        nxt = widths[i + 1] if i + 1 < len(widths) else 0.3
+        ws += [w, (w + nxt) / 2]
     for s in (-1, 1):
         cx = s * x
-        for i, w in enumerate(widths):
-            m.box(cx - w / 2 + s * tilt * i, 4 + i, -depth / 2, cx + w / 2 + s * tilt * i, 5 + i, depth / 2, outer)
+        r = ('z', -22.5 * s * 0.0 if tilt == 0 else -22.5 * s, (cx, 4, 0))
+        r = r if tilt else None
+        for i, w in enumerate(ws):
+            off = 0 if tilt else s * 0.1 * i
+            m.box(cx - w / 2 + off, 4 + i * 0.5, -depth / 2, cx + w / 2 + off, 4.5 + i * 0.5, depth / 2, outer, rot=r)
         if inner:
-            for i, w in enumerate(widths[:-1]):
-                iw = max(0.6, w - 1.6)
-                m.box(cx - iw / 2 + s * tilt * i, 4 + i, -depth / 2 - 0.2, cx + iw / 2 + s * tilt * i, 5 + i, -depth / 2, inner)
+            for i, w in enumerate(ws[:-3]):
+                iw = max(0.5, w - 1.4); off = 0 if tilt else s * 0.1 * i
+                m.box(cx - iw / 2 + off, 4 + i * 0.5, -depth / 2 - 0.25, cx + iw / 2 + off, 4.5 + i * 0.5, -depth / 2, inner, rot=r)
+        if tuft:
+            m.box(cx - 0.6, 4, -depth / 2 - 0.5, cx + 0.6, 5.2, -depth / 2 - 0.2, tuft, rot=r)
 
 def ring(m, y, r, c, t=0.6, h=0.6):
     m.box(-r, y, -r, r, y + h, -r + t, c); m.box(-r, y, r - t, r, y + h, r, c)
     m.box(-r, y, -r + t, -r + t, y + h, r - t, c); m.box(r - t, y, -r + t, r, y + h, r - t, c)
 
 def aconite_spike(m, x, y, z, h=4, s=1.0):
-    """Little monkshood raceme: stem + hooded purple blooms getting smaller."""
-    m.box(x - 0.2 * s, y, z - 0.2 * s, x + 0.2 * s, y + h * s, z + 0.2 * s, STEM)
+    """Monkshood raceme: stem, then hooded blooms (helmet + lip + two side petals), smaller toward the tip."""
+    m.box(x - 0.2 * s, y, z - 0.2 * s, x + 0.2 * s, y + (h + 0.6) * s, z + 0.2 * s, STEM)
     for i in range(h):
-        w = (1.4 - 0.25 * i) * s
-        yy = y + (0.4 + i) * s
-        m.box(x - w / 2, yy, z - w / 2, x + w / 2, yy + 0.8 * s, z + w / 2, AC if i % 2 == 0 else AC_LIGHT)
-        m.box(x - w / 2, yy + 0.8 * s, z - w / 2 - 0.15, x + w / 4, yy + 1.0 * s, z + w / 4, AC_DARK)  # the "hood"
-    m.box(x - 0.3 * s, y + h * s, z - 0.3 * s, x + 0.3 * s, y + (h + 0.6) * s, z + 0.3 * s, AC_GLOW)
+        k = (1 - 0.5 * i / h) * s
+        yy = y + (0.3 + i * 1.05) * s
+        m.box(x - 0.7 * k, yy, z - 0.7 * k, x + 0.7 * k, yy + 0.5 * k, z + 0.5 * k, AC_LIGHT)          # lip / lower petals
+        m.box(x - 0.55 * k, yy + 0.5 * k, z - 0.85 * k, x + 0.55 * k, yy + 1.15 * k, z + 0.35 * k, AC)  # helmet
+        m.box(x - 0.4 * k, yy + 1.15 * k, z - 0.75 * k, x + 0.4 * k, yy + 1.35 * k, z + 0.1 * k, AC_DARK)  # hood crest
+        for sd in (-1, 1):
+            m.box(x + sd * 0.55 * k, yy + 0.3 * k, z - 0.4 * k, x + sd * 0.85 * k, yy + 0.9 * k, z + 0.3 * k, AC_LIGHT)
+    m.box(x - 0.3 * s, y + (h + 0.4) * s, z - 0.3 * s, x + 0.3 * s, y + (h + 0.9) * s, z + 0.3 * s, AC_GLOW)
 
 def leaf(m, x, y, z, c=LEAF, rot=0):
     m.box(x - 0.9, y, z - 0.35, x + 0.9, y + 0.5, z + 0.35, c, rot=('y', rot, (x, y, z)) if rot else None)
@@ -67,7 +85,7 @@ for key, title, outer, inner in [("cat_ears_black", "Cat Ears (Black)", BLACK, P
                                  ("cat_ears_ginger", "Cat Ears (Ginger)", ORANGE, '#ffd2a8'),
                                  ("cat_ears_aconite", "Cat Ears (Aconite)", AC, AC_GLOW)]:
     def f(m, o=outer, i=inner):
-        ears(m, o, i)
+        ears(m, o, i, widths=(4.4, 3.6, 2.8, 2.0, 1.2), tilt=0, tuft='#f4f2ee' if o != WHITE else '#ffd6e6')
     design(key, title, "basic")(f)
 
 @design("cat_ears_bell", "Kitty Ears + Bell", "cool")
@@ -496,6 +514,11 @@ def _(m):
     m.box(-4.6, 0.2, -4.7, 4.6, 0.9, -4.5, BLACK); m.box(-0.3, -3, -4.7, 0.3, 0.2, -4.5, '#7c808b')
     m.box(-4.6, 4.5, -4.6, 4.6, 5.0, 4.6, '#7c808b')
     m.box(-0.8, 5.0, -2.5, 0.8, 7.5, 4.0, '#c8282c'); m.box(-0.7, 3.0, 4.0, 0.7, 7.0, 6.5, '#e0403f')
+    for x in (-3, -2, -1, 1, 2, 3):
+        m.box(x - 0.2, -2.0, -4.65, x + 0.2, -1.6, -4.5, BLACK)
+    for x, y in [(-4, 3.8), (4, 3.8), (-4, -4), (4, -4)]:
+        m.box(x - 0.35, y - 0.1, -4.75, x + 0.35, y + 0.6, -4.5, '#e6e8ee')
+    m.box(-4.6, -4.6, -4.6, 4.6, -3.8, 4.6, '#7c808b')
 
 @design("bucket_hat", "Bucket Hat", "basic")
 def _(m):

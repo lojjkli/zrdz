@@ -119,16 +119,13 @@ def build_aconite():
     w(os.path.join(A, "items", "aconite.json"), {"model": {"type": "minecraft:model", "model": "aconite:item/aconite"}})
     # 3D chunky aconite (cuboid) for item frames / display entities / hats
     m = Model("aconite_3d", "Aconite (3D)")
-    m.box(-0.3, -5, -0.3, 0.3, 4.5, 0.3, DS.STEM)
-    for s, y in [(-1, -4.5), (1, -3.3), (-1, -2.0)]:
-        m.box(min(0, s * 3.2), y, -1.2, max(0, s * 3.2), y + 0.4, 1.2, DS.LEAF)
-        m.box(min(0, s * 2.4), y + 0.4, -0.5, max(0, s * 2.4), y + 0.7, 0.5, DS.LEAF_D)
-    for i in range(6):
-        y = -0.6 + i * 1.1; wd = 1.8 - i * 0.22; s = 1 if i % 2 else -1
-        x = s * 0.8 * (1 - i / 7)
-        m.box(x - wd / 2, y, -wd / 2, x + wd / 2, y + 0.8, wd / 2, DS.AC if i % 2 else DS.AC_LIGHT)
-        m.box(x - wd / 2, y + 0.8, -wd / 2 - 0.2, x + wd / 3, y + 1.05, wd / 3, DS.AC_DARK)
-    m.box(-0.35, 6, -0.35, 0.35, 6.8, 0.35, DS.AC_GLOW)
+    m.box(-0.35, -5, -0.35, 0.35, 0, 0.35, DS.STEM)
+    for (lx, lz, ly, rot) in [(-1, 0, -4.6, 0), (1, 0, -3.6, 0), (0, -1, -2.6, 0), (0, 1, -1.6, 0)]:
+        # deeply-cut palmate leaves: three fingers each
+        for f, (fx, fz) in enumerate([(lx, lz), (lx + lz * 0.7, lz + lx * 0.7), (lx - lz * 0.7, lz - lx * 0.7)]):
+            ex, ez = fx * 3.2, fz * 3.2
+            m.box(min(0, ex) - 0.45, ly, min(0, ez) - 0.45, max(0, ex) + 0.45, ly + 0.4, max(0, ez) + 0.45, DS.LEAF if f else DS.LEAF_D)
+    DS.aconite_spike(m, 0, -1, 0, h=6, s=1.7)
     tex = m.texture()
     w(f"{A}/textures/item/aconite_3d.png", tex)
     j = m.to_json("aconite:item/aconite_3d"); j["display"]["head"] = {"translation": [0, 8, 0]}

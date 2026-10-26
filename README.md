@@ -3,7 +3,7 @@
 
 Minecraft-style **Aconite (monkshood) flower** + **96 custom head cosmetics** (cat ears, crowns, horns, hats, buddies...), all in the ACONITE purple/green palette where it fits.
 
-- `resourcepack/` — drop into `.minecraft/resourcepacks` (made for Java 1.21.4+). Every model is a Blockbench-compatible Java JSON with a 16x16 texture.
+- `resourcepack/` — drop into `.minecraft/resourcepacks` (made for Java 1.21.4+). Every model is a Blockbench-compatible Java JSON with its own hand-shaded texture atlas (2x player-skin pixel density, per-face shading, edge highlights, metal sheen).
 - `give_commands.txt` — one `/give` per head, e.g. `/give @p minecraft:carved_pumpkin[item_model="aconite:cat_ears_black",equippable={slot:"head"}]`
 - `previews/all_heads.png` — every head (purple frame = "cool" tier). Single renders in `previews/heads/`, flower renders in `previews/aconite/`.
 - `tools/build.py` — regenerates everything (`python tools/build.py`, needs numpy + pillow). Designs live in `tools/designs.py`.

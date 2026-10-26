@@ -2,7 +2,7 @@
 write Java resource-pack JSON + 16x16 textures, and render previews."""
 import json, math, os, hashlib
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 S = 1.6  # 1 player-head pixel = 1.6 model units when worn (head = 1.6..14.4)
 
@@ -26,36 +26,75 @@ class Model:
         return self
 
     # ---- export -------------------------------------------------------
-    def texture(self):
-        assert len(self.colors) <= 16, (self.name, len(self.colors))
-        img = np.zeros((16, 16, 4), np.uint8)
-        rng = np.random.default_rng(int(hashlib.md5(self.name.encode()).hexdigest()[:8], 16))
-        for i, c in enumerate(self.colors):
-            r, g, b, a = hex2rgb(c)
-            u, v = (i % 4) * 4, (i // 4) * 4
-            for y in range(4):
-                for x in range(4):
-                    k = 1 + rng.choice([-0.07, -0.035, 0, 0, 0.035, 0.06])
-                    img[v + y, u + x] = [min(255, int(r * k)), min(255, int(g * k)), min(255, int(b * k)), a]
-        return Image.fromarray(img, 'RGBA')
+    DENS = 2  # texels per head pixel (2x the player-skin resolution)
 
-    def uv(self, c):
-        i = self.colors.index(c)
-        return [(i % 4) * 4, (i // 4) * 4, (i % 4) * 4 + 4, (i // 4) * 4 + 4]
+    def _face_size(self, bx, d):
+        dx, dy, dz = (bx['t'][i] - bx['f'][i] for i in range(3))
+        w, h = {"north": (dx, dy), "south": (dx, dy), "east": (dz, dy), "west": (dz, dy),
+                "up": (dx, dz), "down": (dx, dz)}[d]
+        return max(1, round(w * self.DENS)), max(1, round(h * self.DENS))
+
+    def bake(self):
+        """Paint every face its own shaded patch and shelf-pack them into one atlas."""
+        if hasattr(self, '_atlas'):
+            return self._atlas
+        rng = np.random.default_rng(int(hashlib.md5(self.name.encode()).hexdigest()[:8], 16))
+        cache, patches = {}, []
+        self.face_uv = []
+        for bx in self.boxes:
+            fu = {}
+            for d in DIRS:
+                w, h = self._face_size(bx, d)
+                key = (w, h, bx['c'], d)
+                if key not in cache:
+                    cache[key] = len(patches)
+                    patches.append((key, paint(w, h, bx['c'], d, rng)))
+                fu[d] = cache[key]
+            self.face_uv.append(fu)
+        order = sorted(range(len(patches)), key=lambda i: -patches[i][1].shape[0])
+        total = sum(p.shape[0] * p.shape[1] for _, p in patches)
+        W = 16
+        while W * W < total * 1.3 or W < max(p.shape[1] for _, p in patches):
+            W *= 2
+        while True:
+            pos, x, y, rowh, ok = {}, 0, 0, 0, True
+            for i in order:
+                ph, pw = patches[i][1].shape[:2]
+                if x + pw > W:
+                    x, y, rowh = 0, y + rowh, 0
+                pos[i] = (x, y); x += pw; rowh = max(rowh, ph)
+            H = y + rowh
+            if H <= W:
+                break
+            W *= 2
+        H = W
+        atlas = np.zeros((H, W, 4), np.uint8)
+        for i, (x, y) in pos.items():
+            p = patches[i][1]; atlas[y:y + p.shape[0], x:x + p.shape[1]] = p
+        self.rects = {i: (x, y, x + patches[i][1].shape[1], y + patches[i][1].shape[0]) for i, (x, y) in pos.items()}
+        self._atlas = Image.fromarray(atlas, 'RGBA')
+        return self._atlas
+
+    def texture(self):
+        return self.bake()
 
     def to_json(self, texref):
+        W, H = self.bake().size
         els = []
-        for bx in self.boxes:
+        for bx, fu in zip(self.boxes, self.face_uv):
             f = [round(8 + S * v, 3) for v in bx['f']]
             t = [round(8 + S * v, 3) for v in bx['t']]
-            e = {"from": f, "to": t,
-                 "faces": {d: {"uv": self.uv(bx['c']), "texture": "#0"} for d in
-                           ("north", "east", "south", "west", "up", "down")}}
+            faces = {}
+            for d in DIRS:
+                x0, y0, x1, y1 = self.rects[fu[d]]
+                faces[d] = {"uv": [round(x0 * 16 / W, 4), round(y0 * 16 / H, 4), round(x1 * 16 / W, 4), round(y1 * 16 / H, 4)],
+                            "texture": "#0"}
+            e = {"from": f, "to": t, "faces": faces}
             if bx['rot']:
                 ax, ang, o = bx['rot']
                 e["rotation"] = {"angle": ang, "axis": ax, "origin": [round(8 + S * v, 3) for v in o]}
             els.append(e)
-        return {"credit": "ACONITE cosmetics", "texture_size": [16, 16],
+        return {"credit": "ACONITE cosmetics", "texture_size": [W, H],
                 "textures": {"0": texref, "particle": texref},
                 "elements": els,
                 "display": {"head": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
@@ -65,34 +104,82 @@ class Model:
                             "ground": {"translation": [0, 3, 0], "scale": [0.25] * 3},
                             "fixed": {"scale": [0.5] * 3}}}
 
-    def render_elements(self, tex):
-        """Elements in renderer format (model units, rgba texture, uv per face)."""
-        arr = np.array(tex)
+    def render_elements(self, tex=None):
+        arr = np.array(self.bake())
         out = []
-        for bx in self.boxes:
+        for bx, fu in zip(self.boxes, self.face_uv):
             f = [8 + S * v for v in bx['f']]
             t = [8 + S * v for v in bx['t']]
-            u = self.uv(bx['c'])
             out.append(dict(f=f, t=t, rot=bx['rot'] and (bx['rot'][0], bx['rot'][1], [8 + S * v for v in bx['rot'][2]]),
-                            faces={d: (arr, u) for d in ("north", "east", "south", "west", "up", "down")}))
+                            faces={d: (arr, list(self.rects[fu[d]])) for d in DIRS}, glow=bx['c'] in GLOW))
         return out
 
-# ---- player head for previews ----------------------------------------
+DIRS = ("north", "east", "south", "west", "up", "down")
+GLOW = {'#c49bff', '#38f6ff', '#5fe3f0', '#ff4a2a', '#fff6b0', '#ffd34a', '#c45cff', '#38d6b8', '#7cfba5',
+        '#b6ffd0', '#b6ff6b', '#fff4b0', '#ff7ad1', '#8affc8', '#d4ffff', '#fff1a0', '#9be7ff'}
+METAL = {'#f2c33a', '#b8861c', '#c9ced8', '#a9adb8', '#9ea2ad', '#8c8f99', '#7c808b', '#9aa1ad', '#6f7682',
+         '#bfeff2', '#4ee6e6', '#e0a833', '#fff1a0'}
+
+def _adj(c, k):
+    return np.clip(np.array(c[:3], float) * k, 0, 255)
+
+def paint(w, h, color, d, rng):
+    """Hand-painted look: noise, light-from-top gradient, darker rim, top-left highlight,
+    metal sheen and soft glow cores."""
+    base = hex2rgb(color)
+    img = np.zeros((h, w, 4), np.uint8)
+    metal, glow = color in METAL, color in GLOW
+    for y in range(h):
+        for x in range(w):
+            k = 1 + rng.choice([-0.06, -0.03, 0, 0, 0.03, 0.05])
+            if d not in ("up", "down") and h > 2:
+                k *= 1.08 - 0.2 * (y / (h - 1))          # top lit, bottom shaded
+            if metal and ((x + y) % 7 in (0, 1)):
+                k *= 1.22                                   # diagonal sheen
+            if glow:
+                cx, cy = (w - 1) / 2, (h - 1) / 2
+                k *= 1.12 - 0.25 * (abs(x - cx) / max(cx, 1) + abs(y - cy) / max(cy, 1)) / 2
+            if w > 2 and h > 2:
+                if x == 0 or y == 0:
+                    k *= 1.14                               # bevel highlight
+                elif x == w - 1 or y == h - 1:
+                    k *= 0.78                               # rim shade
+            img[y, x, :3] = _adj(base, k)
+            img[y, x, 3] = base[3]
+    return img
+
+# ---- player head for previews (16px per face) ------------------------
 def player_head():
-    sk = np.zeros((8, 8, 4), np.uint8); sk[:] = (198, 150, 116, 255)
-    hair = (62, 40, 30, 255)
-    face = sk.copy(); face[0:2] = hair; face[2, 0] = hair; face[2, 7] = hair
-    face[4, 1] = face[4, 6] = (255, 255, 255, 255); face[4, 2] = face[4, 5] = (70, 60, 140, 255)
-    face[6, 3:5] = (120, 70, 60, 255)
-    side = sk.copy(); side[0:3] = hair
-    back = sk.copy(); back[0:6] = hair
-    top = sk.copy(); top[:] = hair
-    full = [0, 0, 8, 8]
+    rng = np.random.default_rng(3)
+    def base(c):
+        a = np.zeros((16, 16, 4), np.uint8)
+        for y in range(16):
+            for x in range(16):
+                k = 1 + rng.choice([-0.05, 0, 0, 0.04])
+                a[y, x] = [min(255, int(v * k)) for v in c] + [255]
+        return a
+    SK, HR, HRD = (214, 166, 128), (74, 48, 34), (52, 33, 24, 255)
+    face = base(SK)
+    face[0:4] = base(HR)[0:4]; face[4, :] = base(HRD[:3])[4]; face[4:6, 0:2] = HRD; face[4:6, 14:16] = HRD
+    face[5, 6:10] = (196, 150, 114, 255)
+    for ex in (3, 10):
+        face[8:10, ex:ex + 3] = (250, 250, 250, 255)
+        face[8:10, ex + (1 if ex == 3 else 0):ex + (3 if ex == 3 else 2)] = (60, 70, 160, 255)
+        face[8, ex + (2 if ex == 3 else 0)] = (110, 125, 220, 255)
+        face[7, ex:ex + 3] = HRD
+    face[10:12, 7:9] = (190, 140, 104, 255)
+    face[12, 5:11] = (150, 84, 70, 255); face[13, 6:10] = (196, 120, 106, 255)
+    face[11, 3:5] = face[11, 11:13] = (226, 150, 130, 255)
+    side = base(SK); side[0:6] = base(HR)[0:6]; side[6, 0:10] = HRD
+    side[9:11, 6:8] = (190, 140, 104, 255)
+    back = base(HR); back[13:16] = base(SK)[13:16]
+    top = base(HR); bot = base((190, 146, 110))
+    full = [0, 0, 16, 16]
     return dict(f=[1.6] * 3, t=[14.4] * 3, rot=None,
                 faces={"north": (face, full), "south": (back, full), "east": (side, full),
-                       "west": (side, full), "up": (top, full), "down": (sk, full)})
+                       "west": (side[:, ::-1], full), "up": (top, full), "down": (bot, full)})
 
-# ---- renderer ---------------------------------------------------------
+# ---- renderer (orthographic z-buffer) ---------------------------------
 FACES = {
     "north": ((0, 0, -1), lambda a, b: ((b[0], b[1], a[2]), (-(b[0]-a[0]), 0, 0), (0, -(b[1]-a[1]), 0))),
     "south": ((0, 0, 1),  lambda a, b: ((a[0], b[1], b[2]), (b[0]-a[0], 0, 0), (0, -(b[1]-a[1]), 0))),
@@ -108,71 +195,95 @@ def rotmat(axis, ang):
             "y": np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]]),
             "z": np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])}[axis]
 
-def render(elements, size=512, yaw=-32, pitch=24, bg=((40, 18, 60), (12, 6, 22)), label=None):
+_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+def render(elements, size=512, yaw=-32, pitch=24, bg=((48, 22, 74), (10, 5, 20)), label=None, ss=3):
     ya, pa = math.radians(yaw), math.radians(pitch)
     cam = np.array([math.sin(ya) * math.cos(pa), math.sin(pa), -math.cos(ya) * math.cos(pa)])
     fwd = -cam
-    right = np.cross(fwd, [0, 1, 0]); right /= np.linalg.norm(right)
-    right = -right  # screen x
-    up = np.cross(right, fwd) * -1
+    right = -np.cross(fwd, [0, 1, 0]); right /= np.linalg.norm(right)
     up = np.array([0, 1, 0]) - fwd * fwd[1]; up /= np.linalg.norm(up)
-    light = lambda n: abs(n[0]) * 0.62 + abs(n[2]) * 0.82 + (n[1] * 1.0 if n[1] > 0 else -n[1] * 0.5)
-    quads = []
+    L = np.array([-0.35, 0.85, -0.55]); L /= np.linalg.norm(L)
+    faces = []
     for el in elements:
         a, b = el['f'], el['t']
-        R, O = (rotmat(el['rot'][0], el['rot'][1]), np.array(el['rot'][2])) if el['rot'] else (None, None)
-        tf = (lambda p: R @ (np.array(p) - O) + O) if R is not None else (lambda p: np.array(p, float))
-        tn = (lambda n: R @ np.array(n, float)) if R is not None else (lambda n: np.array(n, float))
-        flat = [b[i] - a[i] < 1e-6 for i in range(3)]
+        R, O = (rotmat(el['rot'][0], el['rot'][1]), np.array(el['rot'][2], float)) if el['rot'] else (np.eye(3), np.zeros(3))
+        flat = any(b[i] - a[i] < 1e-6 for i in range(3))
         for d, (n, geo) in FACES.items():
             if d not in el['faces']:
                 continue
-            nw = tn(n)
-            twosided = any(flat)
-            if not twosided and np.dot(nw, cam) <= 0:
+            nw = R @ np.array(n, float)
+            if not flat and nw @ cam <= 1e-6:
                 continue
-            o, du, dv = geo(a, b)
-            arr, uv = el['faces'][d]
-            u0, v0, u1, v1 = uv
-            nu, nv = max(1, round(abs(u1 - u0))), max(1, round(abs(v1 - v0)))
-            sh = light(nw if np.dot(nw, cam) > 0 else -nw)
-            o, du, dv = np.array(o, float), np.array(du, float), np.array(dv, float)
-            for j in range(nv):
-                for i in range(nu):
-                    tx = int(u0 + (i + 0.5) * (u1 - u0) / nu)
-                    ty = int(v0 + (j + 0.5) * (v1 - v0) / nv)
-                    px = arr[min(ty, arr.shape[0]-1), min(tx, arr.shape[1]-1)]
-                    if px[3] < 128:
-                        continue
-                    p = [o + du * (i / nu) + dv * (j / nv), o + du * ((i + 1) / nu) + dv * (j / nv),
-                         o + du * ((i + 1) / nu) + dv * ((j + 1) / nv), o + du * (i / nu) + dv * ((j + 1) / nv)]
-                    p = [tf(q) for q in p]
-                    cen = sum(p) / 4
-                    col = tuple(int(min(255, c * sh)) for c in px[:3])
-                    quads.append((np.dot(cen, fwd) - 0.001 * np.dot(nw, cam), p, col))
-    quads.sort(key=lambda q: -q[0])
-    pts = np.array([[np.dot(v, right), np.dot(v, up)] for q in quads for v in q[1]])
+            o, du, dv = (np.array(v, float) for v in geo(a, b))
+            o = R @ (o - O) + O; du = R @ du; dv = R @ dv
+            if nw @ cam < 0:
+                nw = -nw
+            sh = 1.0 if el.get('glow') else 0.55 + 0.5 * max(0, nw @ L) + 0.08 * nw[1]
+            faces.append((o, du, dv, el['faces'][d], min(1.25, sh)))
+    pts = np.array([[p @ right, p @ up] for o, du, dv, *_ in faces for p in (o, o + du, o + dv, o + du + dv)])
     mn, mx = pts.min(0), pts.max(0)
-    ss = 2
     W = size * ss
-    sc = (W * 0.78) / max(mx - mn)
+    sc = W * (0.74 if label else 0.8) / max(mx - mn)
     ctr = (mn + mx) / 2
-    img = Image.new('RGB', (W, W))
-    g = ImageDraw.Draw(img)
-    for y in range(W):
-        t = y / W
-        g.line([(0, y), (W, y)], fill=tuple(int(bg[0][k] * (1 - t) + bg[1][k] * t) for k in range(3)))
-    off = 0.04 * W if label else 0
-    for _, p, col in quads:
-        poly = [((np.dot(v, right) - ctr[0]) * sc + W / 2, -(np.dot(v, up) - ctr[1]) * sc + W / 2 - off) for v in p]
-        g.polygon(poly, fill=col, outline=col)
-    img = img.resize((size, size), Image.LANCZOS)
+    yoff = -0.05 * W if label else 0
+    to2 = lambda p: np.array([(p @ right - ctr[0]) * sc + W / 2, -(p @ up - ctr[1]) * sc + W / 2 + yoff])
+    col = np.zeros((W, W, 3), np.float32); zb = np.full((W, W), np.inf, np.float32)
+    for o, du, dv, (arr, uv), sh in faces:
+        P0, PU, PV = to2(o), to2(o + du) - to2(o), to2(o + dv) - to2(o)
+        M = np.array([[PU[0], PV[0]], [PU[1], PV[1]]])
+        if abs(np.linalg.det(M)) < 1e-6:
+            continue
+        Mi = np.linalg.inv(M)
+        corners = np.array([P0, P0 + PU, P0 + PV, P0 + PU + PV])
+        x0, y0 = np.floor(corners.min(0)).astype(int); x1, y1 = np.ceil(corners.max(0)).astype(int)
+        x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, W), min(y1, W)
+        if x0 >= x1 or y0 >= y1:
+            continue
+        X, Y = np.meshgrid(np.arange(x0, x1) + 0.5, np.arange(y0, y1) + 0.5)
+        dx, dy = X - P0[0], Y - P0[1]
+        s_ = Mi[0, 0] * dx + Mi[0, 1] * dy; t_ = Mi[1, 0] * dx + Mi[1, 1] * dy
+        m = (s_ >= 0) & (s_ < 1) & (t_ >= 0) & (t_ < 1)
+        if not m.any():
+            continue
+        u0, v0, u1, v1 = uv
+        tx = np.clip((u0 + s_ * (u1 - u0)).astype(int), 0, arr.shape[1] - 1)
+        ty = np.clip((v0 + t_ * (v1 - v0)).astype(int), 0, arr.shape[0] - 1)
+        px = arr[ty, tx]
+        m &= px[..., 3] > 127
+        z = o @ fwd + s_ * (du @ fwd) + t_ * (dv @ fwd)
+        sub = zb[y0:y1, x0:x1]
+        m &= z < sub - 1e-4
+        sub[m] = z[m]
+        col[y0:y1, x0:x1][m] = px[..., :3][m] * sh
+    mask = np.isfinite(zb)
+    # silhouette + crease outline from depth jumps
+    zf = np.where(mask, zb, 1e9)
+    edge = np.zeros_like(mask)
+    for sy, sx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+        nz = np.roll(np.roll(zf, sy, 0), sx, 1)
+        edge |= mask & (nz - zf > 0.8)
+    col[edge] *= 0.35
+    # background + soft contact shadow
+    t = np.linspace(0, 1, W)[:, None, None]
+    bgimg = np.array(bg[0], np.float32) * (1 - t) + np.array(bg[1], np.float32) * t
+    bgimg = np.broadcast_to(bgimg, (W, W, 3)).copy()
+    ys, xs = np.nonzero(mask)
+    if len(ys):
+        cy, cx = ys.max() + W * 0.01, (xs.min() + xs.max()) / 2
+        rx, ry = (xs.max() - xs.min()) * 0.55, W * 0.035
+        Y, X = np.mgrid[0:W, 0:W]
+        dd = ((X - cx) / rx) ** 2 + ((Y - cy) / ry) ** 2
+        bgimg *= (1 - 0.55 * np.clip(1 - dd, 0, 1))[..., None]
+        # faint rim glow behind the model
+        glow = np.zeros((W, W), np.float32); glow[mask] = 1
+        g = Image.fromarray((glow * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(W * 0.03))
+        bgimg += (np.array(g, np.float32) / 255)[..., None] * np.array([70, 40, 110], np.float32) * 0.6
+    out = np.where(mask[..., None], col, bgimg)
+    img = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)).resize((size, size), Image.LANCZOS)
     if label:
         d = ImageDraw.Draw(img)
-        try:
-            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size // 18)
-        except OSError:
-            font = ImageFont.load_default()
+        font = ImageFont.truetype(_FONT, size // 17)
         w = d.textlength(label, font=font)
-        d.text(((size - w) / 2, size * 0.9), label, fill=(235, 220, 255), font=font)
+        d.text(((size - w) / 2, size * 0.885), label, fill=(240, 228, 255), font=font)
     return img
