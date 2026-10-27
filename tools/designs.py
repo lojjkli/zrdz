@@ -6377,3 +6377,398 @@ def _(m):
         m.box(*xs(sd, 5.0, 6.4)[:1], 2.4, -0.5, xs(sd, 5.0, 6.4)[1], 3.2, 0.5, ID)
         m.box(*xs(sd, 6.0, 6.6)[:1], 3.2, -0.4, xs(sd, 6.0, 6.6)[1], 5.6, 0.4, ID)
         m.box(*xs(sd, 6.1, 6.5)[:1], 5.6, -0.25, xs(sd, 6.1, 6.5)[1], 6.6, 0.25, P)
+
+# ================= batch 5H: holiday =================
+def arch_band(m, c, x=4.6, t=0.5, w=0.8, z=0.0):
+    """Headband arching over the top from ear to ear."""
+    m.box(-x - t, 4.6, z - w / 2, x + t, 4.6 + t, z + w / 2, c)
+    for sd in (-1, 1):
+        m.box(*xs(sd, x, x + t)[:1], 0.6, z - w / 2, xs(sd, x, x + t)[1], 4.6 + t, z + w / 2, c)
+
+def stripes_up(m, x, z, y1, y2, s, c1, c2, n=None):
+    """Vertical striped post (candy cane style), alternating colours every 0.6."""
+    y, k = y1, 0
+    while y < y2 - 1e-6:
+        m.box(x - s, y, z - s, x + s, min(y + 0.6, y2), z + s, (c1, c2)[k % 2]); y += 0.6; k += 1
+
+@design("reindeer_antlers", "Reindeer Antlers", "holiday")
+def _(m):
+    A, AD, B, R = '#9a6a3a', '#7a4a26', '#c8202e', '#ff2b3a'
+    arch_band(m, B)
+    for sd in (-1, 1):
+        x = sd * 2.6
+        m.box(x - 0.35, 5.0, -0.35, x + 0.35, 8.6, 0.35, A)
+        m.box(*xs(sd, 2.6, 4.6)[:1], 7.0, -0.3, xs(sd, 2.6, 4.6)[1], 7.6, 0.3, A)
+        m.box(sd * 4.3 - 0.3, 7.6, -0.3, sd * 4.3 + 0.3, 9.4, 0.3, AD)
+        m.box(*xs(sd, 2.6, 1.4)[:1], 8.0, -0.3, xs(sd, 2.6, 1.4)[1], 8.5, 0.3, A)
+        m.box(sd * 1.4 - 0.3, 8.5, -0.3, sd * 1.4 + 0.3, 9.6, 0.3, AD)
+        m.box(x - 0.3, 8.6, -0.3, x + 0.3, 10.2, 0.3, AD)
+        rbox(m, sd * 3.6 - 0.6, 5.0, -0.5, sd * 3.6 + 0.6, 5.8, 0.5, '#e8b84a', r=0.25)     # jingle bells
+    rbox(m, -0.8, -1.6, -5.8, 0.8, 0.0, -4.6, R, r=0.4)                                   # red nose
+    m.box(-0.4, -0.6, -5.85, -0.1, -0.3, -5.8, '#ffffff')
+GLOW.add('#ff2b3a')
+
+@design("elf_hat", "Elf Hat", "holiday")
+def _(m):
+    G, GD, R, W, Y = '#2a9a4a', '#1f7a3a', '#c8202e', '#f4f2ee', '#e8b84a'
+    band(m, 3.0, 4.2, R, 4.85)
+    for i, x in enumerate((-4.2, -2.6, -1.0, 0.6, 2.2, 3.8)):                             # zig-zag trim
+        m.box(x, 2.4, -4.95, x + 0.8, 3.0, -4.85, (R, W)[i % 2])
+    dome(m, 4.2, [(4.4, 1.0), (3.6, 1.0), (2.8, 1.0), (2.0, 0.8)], G)
+    for k, (x, y, s) in enumerate(((-0.6, 8.0, 1.4), (-1.6, 8.8, 1.1), (-2.8, 9.2, 0.9), (-3.8, 8.9, 0.7))):
+        m.box(x - s, y, -s, x + s, y + s * 1.2, s, (G, GD)[k % 2])                        # floppy tip
+    rbox(m, -4.8, 7.8, -0.6, -3.6, 9.0, 0.6, Y, r=0.4)                                    # bell
+    m.box(-4.4, 8.3, -0.65, -4.0, 8.5, -0.6, '#a87a2a')
+
+@design("snowman_hat", "Snowman Buddy", "holiday")
+def _(m):
+    W, WS, K, O, R = '#fbfcff', '#dfe8f4', '#1d1b22', '#ff8a1f', '#c8202e'
+    rbox(m, -2.6, 4.6, -2.6, 2.6, 7.4, 2.6, W, r=0.9)                                     # base ball
+    rbox(m, -1.9, 7.2, -1.9, 1.9, 10.0, 1.9, W, r=0.7)                                    # head ball
+    eyes(m, 0.0, 8.8, -1.9, 0.6, w=0.35, h=0.35, c=K, shine=None)
+    m.box(-0.2, 8.2, -3.0, 0.2, 8.6, -1.9, O)                                             # carrot
+    for x in (-0.6, 0.0, 0.6):
+        m.box(x - 0.12, 7.75, -1.95, x + 0.12, 7.95, -1.9, K)
+    m.box(-2.0, 7.0, -2.0, 2.0, 7.6, 2.0, R)                                              # scarf
+    m.box(1.0, 5.6, -2.8, 1.8, 7.4, -2.0, R)
+    for y in (5.4, 6.4):
+        m.box(-0.25, y, -2.66, 0.25, y + 0.5, -2.6, K)                                    # coal buttons
+    m.box(-1.8, 10.0, -1.8, 1.8, 10.3, 1.8, K); m.box(-1.2, 10.3, -1.2, 1.2, 12.0, 1.2, K)   # top hat
+    m.box(-1.25, 10.4, -1.25, 1.25, 10.8, 1.25, R)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 2.6, 4.6)[:1], 6.4, -0.15, xs(sd, 2.6, 4.6)[1], 6.7, 0.15, '#6b4326', rot=('z', 22.5 * sd, (sd * 2.6, 6.5, 0)))
+
+GLOW.update({'#ffe45c', '#ff4f6a', '#5ce1ff'})
+@design("xmas_tree_hat", "Christmas Tree Hat", "holiday")
+def _(m):
+    G, GD, Y, BR = '#2a9a4a', '#1f7a3a', '#ffe45c', '#7a4a26'
+    m.box(-0.8, 4.6, -0.8, 0.8, 5.4, 0.8, BR)
+    y = 5.2
+    for k, hw in enumerate((3.6, 2.8, 2.0, 1.2)):                                          # tiers
+        rbox(m, -hw, y, -hw, hw, y + 1.3, hw, (G, GD)[k % 2], r=0.5)
+        y += 1.1
+    for x, yy, z, c in ((-2.6, 5.6, -3.65, '#ff4f6a'), (1.8, 6.0, -3.65, '#5ce1ff'), (0.0, 7.0, -2.85, Y), (-1.4, 8.0, -2.05, '#5ce1ff'),
+                        (2.0, 7.2, -2.85, '#ff4f6a'), (3.65, 5.8, 1.0, Y), (-3.65, 6.0, 0.4, '#ff4f6a'), (0.8, 9.0, -1.25, '#ff4f6a')):
+        m.box(x - 0.35, yy - 0.35, z - 0.3, x + 0.35, yy + 0.35, z + 0.3, c)               # baubles
+    star(m, 0.0, y + 0.9, 0.0, 0.8, Y)
+    star(m, 0.0, y + 0.9, 0.0, 0.8, Y, axis='x')
+
+@design("gingerbread_buddy", "Gingerbread Buddy", "holiday")
+def _(m):
+    GB, GBD, IC, R, G = '#b8743a', '#8a5426', '#fdf8f0', '#ff4f6a', '#3ad06a'
+    rbox(m, -1.6, 7.0, -0.6, 1.6, 9.4, 0.6, GB, r=0.6)                                    # head
+    m.box(-1.4, 4.6, -0.6, 1.4, 7.2, 0.6, GB)                                             # body
+    for sd in (-1, 1):
+        m.box(*xs(sd, 1.4, 2.8)[:1], 5.8, -0.6, xs(sd, 1.4, 2.8)[1], 6.8, 0.6, GB)        # arms
+    eyes(m, 0.0, 8.2, -0.6, 0.55, w=0.3, h=0.35, c='#2a1a1a', shine=None)
+    m.box(-0.6, 7.7, -0.66, 0.6, 7.85, -0.6, IC)                                          # icing smile
+    for y, c in ((6.4, R), (5.4, G)):
+        m.box(-0.3, y, -0.75, 0.3, y + 0.5, -0.6, c)                                      # gumdrops
+    for sd in (-1, 1):
+        m.box(*xs(sd, 2.2, 2.3)[:1], 5.8, -0.66, xs(sd, 2.2, 2.3)[1], 6.8, -0.6, IC)
+        m.box(*xs(sd, 2.5, 2.6)[:1], 5.8, -0.66, xs(sd, 2.5, 2.6)[1], 6.8, -0.6, IC)
+    m.box(-1.3, 9.0, -0.66, 1.3, 9.15, -0.6, IC)
+
+@design("candy_cane_horns", "Candy Cane Horns", "holiday")
+def _(m):
+    R, W = '#e8202e', '#fbfcff'
+    for sd in (-1, 1):
+        x = sd * 2.8
+        stripes_up(m, x, 0.0, 4.6, 8.8, 0.45, R, W)
+        for k, (dx, dy) in enumerate(((0.6, 8.8), (1.4, 9.0), (2.0, 8.6), (2.2, 7.8))):    # hook curling outward
+            px = x + sd * dx
+            m.box(px - 0.45, dy - 0.45 + 0.2, -0.45, px + 0.45, dy + 0.45 + 0.2, 0.45, (W, R)[k % 2])
+    for sd in (-1, 1):
+        rbox(m, sd * 2.8 - 0.9, 4.4, -0.9, sd * 2.8 + 0.9, 5.0, 0.9, '#2a9a4a', r=0.3)     # green bows at the base
+        m.box(sd * 2.8 - 1.2, 4.6, -0.2, sd * 2.8 + 1.2, 5.2, 0.2, '#3ad06a')
+
+@design("mistletoe_hat", "Mistletoe Hat", "holiday")
+def _(m):
+    S, G, GD, R = '#c9ced8', '#3a9a3a', '#2a7a2a', '#e8202e'
+    arch_band(m, '#c8202e', z=1.0)
+    m.box(-0.15, 5.1, -4.4, 0.15, 9.0, -4.1, S)                                           # wire up and over the front
+    m.box(-0.15, 8.7, -6.8, 0.15, 9.0, -4.1, S)
+    m.box(-0.12, 6.8, -6.8, 0.12, 8.7, -6.55, S)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 0.0, 1.4)[:1], 6.0, -7.1, xs(sd, 0.0, 1.4)[1], 6.6, -6.3, G, rot=('z', -22.5 * sd, (0, 6.6, -6.7)))
+        m.box(*xs(sd, 0.0, 1.2)[:1], 5.4, -7.0, xs(sd, 0.0, 1.2)[1], 6.0, -6.4, GD, rot=('z', 22.5 * sd, (0, 6.0, -6.7)))
+    for x, y in ((-0.3, 5.6), (0.3, 5.4), (0.0, 5.0)):
+        m.box(x - 0.25, y - 0.25, -7.2, x + 0.25, y + 0.25, -6.7, R)
+    rbox(m, -0.8, 6.4, -7.2, 0.8, 7.0, -6.3, R, r=0.2)                                    # ribbon
+
+GLOW.update({'#c8f4ff'})
+@design("snowflake_crown", "Snowflake Crown", "holiday")
+def _(m):
+    I, IL, W = '#7ad8ff', '#c8f4ff', '#ffffff'
+    band(m, 3.6, 4.4, I, 4.8)
+    def flake(x, y, z, s):
+        m.box(x - 0.15, y - s, z - 0.12, x + 0.15, y + s, z, IL)
+        for a in (-45, 45):
+            m.box(x - 0.15, y - s, z - 0.12, x + 0.15, y + s, z, IL, rot=('z', a, (x, y, z)))
+        m.box(x - 0.3, y - 0.3, z - 0.18, x + 0.3, y + 0.3, z, W)
+    for x, y, s in ((0.0, 6.6, 1.6), (-2.8, 5.6, 1.0), (2.8, 5.6, 1.0)):
+        m.box(x - 0.12, 4.4, -4.86, x + 0.12, y, -4.74, I)
+        flake(x, y, -4.8, s)
+    for sd in (-1, 1):
+        for z in (-1.6, 1.6):
+            m.box(*xs(sd, 4.8, 4.92)[:1], 4.4, z - 0.12, xs(sd, 4.8, 4.92)[1], 5.6, z + 0.12, I)
+            m.box(*xs(sd, 4.8, 4.98)[:1], 5.2, z - 0.6, xs(sd, 4.8, 4.98)[1], 6.4, z + 0.6, IL)
+
+@design("new_year_tiara", "New Year Tiara", "holiday")
+def _(m):
+    GD, GDD, SL, P = '#e8b84a', '#a87a2a', '#e6e9f0', '#ff5cb8'
+    m.box(-4.0, 4.0, -3.0, 4.0, 4.6, -2.2, GD)
+    for x, h in ((-3.0, 1.2), (-1.6, 2.0), (0.0, 3.0), (1.6, 2.0), (3.0, 1.2)):
+        m.box(x - 0.2, 4.6, -2.8, x + 0.2, 4.6 + h, -2.4, GD)
+        star(m, x, 4.8 + h, -2.6, 0.45 + h * 0.12, '#ffe45c')
+    for x, y, c in ((-4.4, 7.4, P), (4.0, 8.2, SL), (-2.2, 8.6, '#5ce1ff'), (2.6, 6.8, P), (0.8, 9.0, SL)):  # confetti
+        m.box(x - 0.25, y - 0.1, -2.7, x + 0.25, y + 0.1, -2.5, c, rot=('z', 22.5, (x, y, -2.6)))
+    for sd in (-1, 1):                                                                    # streamers
+        for k in range(4):
+            m.box(*xs(sd, 4.0 + k * 0.2, 4.4 + k * 0.2)[:1], 4.0 - k * 0.8, -2.8, xs(sd, 4.0 + k * 0.2, 4.4 + k * 0.2)[1], 4.8 - k * 0.8, -2.4, (P, '#5ce1ff')[k % 2])
+
+@design("easter_bunny_hat", "Easter Bunny Hat", "holiday")
+def _(m):
+    W, P, Y, B, G = '#fbf8f2', '#ffb3d0', '#ffe45c', '#7ad8ff', '#7ae07a'
+    arch_band(m, '#ffd1e6')
+    for sd, tilt in ((-1, 0), (1, 1)):
+        x = sd * 2.0
+        rot = ('z', -22.5 * sd, (x, 5.0, 0)) if tilt else None
+        rbox(m, x - 0.9, 5.0, -0.5, x + 0.9, 10.4, 0.5, W, r=0.4, rot=rot)                 # ears
+        m.box(x - 0.45, 5.6, -0.55, x + 0.45, 9.8, -0.5, P, rot=rot)
+    for i, (x, c) in enumerate(((-3.6, Y), (3.6, B), (-0.0, G))):                         # little eggs on the band
+        if i < 2:
+            rbox(m, *xs(1 if x > 0 else -1, 4.8, 5.8)[:1], 3.0, -0.6, xs(1 if x > 0 else -1, 4.8, 5.8)[1], 4.4, 0.6, c, r=0.4)
+            m.box(*xs(1 if x > 0 else -1, 4.8, 5.85)[:1], 3.6, -0.6, xs(1 if x > 0 else -1, 4.8, 5.85)[1], 3.8, 0.6, '#ffffff')
+    rbox(m, -0.9, 5.0, -1.4, 0.9, 6.2, -0.4, '#ffd1e6', r=0.3)                             # bow
+    m.box(-1.6, 5.2, -1.2, 1.6, 6.0, -0.6, '#ff9fc8')
+
+@design("egg_basket_hat", "Egg Basket Hat", "holiday")
+def _(m):
+    WK, WKD, GR = '#c8903a', '#9a6a2a', '#7ae07a'
+    rbox(m, -3.4, 4.6, -3.4, 3.4, 6.8, 3.4, WK, r=0.8)                                    # basket
+    for y in (5.2, 6.0):
+        ring(m, y, 3.45, WKD, t=0.2, h=0.3)
+    for x in (-2.0, 0.0, 2.0):
+        m.box(x - 0.2, 4.6, -3.45, x + 0.2, 6.8, -3.4, WKD)
+    m.box(-3.0, 6.8, -3.0, 3.0, 7.0, 3.0, GR)                                             # grass
+    for x, z, c, c2 in ((-1.4, -1.0, '#ffb3d0', '#ff7ab0'), (1.2, -1.2, '#7ad8ff', '#3aa6e3'), (0.0, 1.2, '#ffe45c', '#ffb02e'), (-1.6, 1.4, '#c8a0ff', '#9a6ae0'), (1.8, 1.4, '#7ae07a', '#3ac04a')):
+        rbox(m, x - 0.9, 6.6, z - 0.75, x + 0.9, 8.6, z + 0.75, c, r=0.4)                  # eggs
+        m.box(x - 0.9, 7.4, z - 0.8, x + 0.9, 7.7, z + 0.8, c2)
+    for sd in (-1, 1):                                                                    # handle
+        m.box(*xs(sd, 3.0, 3.4)[:1], 6.8, -0.3, xs(sd, 3.0, 3.4)[1], 9.6, 0.3, WKD)
+    m.box(-3.4, 9.6, -0.3, 3.4, 10.0, 0.3, WKD)
+
+GLOW.update({'#ff7ab0'})
+@design("cupid_halo", "Cupid Halo", "holiday")
+def _(m):
+    P, PL, W, GD = '#ff7ab0', '#ffd1e6', '#ffffff', '#e8b84a'
+    ring(m, 6.6, 3.6, P, t=0.8, h=0.6)
+    for x, z in ((-3.2, -3.2), (3.2, 3.2), (3.2, -3.2), (-3.2, 3.2)):
+        heart(m, x, 7.6, z, 0.18, '#ff4f8a', t=0.12)
+    heart(m, 0.0, 6.9, -3.65, 0.3, '#ff4f8a', t=0.3, hi=PL)
+    for sd in (-1, 1):                                                                    # little wings on the halo
+        wing(m, sd, 6.2, [(1.4, 0.4), (2.2, 0.5), (2.6, 0.5), (2.0, 0.4), (1.0, 0.4)], W, PL, z=-0.15, t=0.3, sweep=-22.5, x0=3.6)
+
+@design("leprechaun_hat", "Leprechaun Hat", "holiday")
+def _(m):
+    G, GD, K, GL, SH = '#2a9a4a', '#1f7a3a', '#1d1b22', '#e8b84a', '#5ec04a'
+    m.box(-5.6, 4.6, -5.6, 5.6, 5.0, 5.6, GD)                                             # brim
+    rbox(m, -3.8, 5.0, -3.8, 3.8, 9.6, 3.8, G, r=0.6)
+    ring(m, 5.0, 3.9, K, t=0.2, h=1.2)
+    frame(m, -1.0, 5.0, 1.0, 6.4, -3.9, 0.35, GL, d=0.25)                                 # buckle
+    for dx, dy in ((0.0, 0.5), (-0.5, 0.0), (0.5, 0.0)):                                  # shamrock
+        m.box(2.2 + dx - 0.4, 7.4 + dy - 0.4, -3.95, 2.2 + dx + 0.4, 7.4 + dy + 0.4, -3.8, SH)
+    m.box(2.15, 6.6, -3.92, 2.3, 7.2, -3.8, GD)
+    for x, z in ((4.6, -4.6), (-4.8, 4.2)):
+        rbox(m, x - 0.5, 5.0, z - 0.5, x + 0.5, 5.4, z + 0.5, GL, r=0.2)                  # gold coins
+
+@design("shamrock_crown", "Shamrock Crown", "holiday")
+def _(m):
+    G, GL, GD = '#3ac04a', '#7ae07a', '#1f7a3a'
+    band(m, 3.6, 4.2, GD, 4.8)
+    for sd, u in ((0, 0.0), (-1, 2.8), (1, 2.8)):
+        x = sd * u
+        s = 1.0 if sd == 0 else 0.8
+        m.box(x - 0.12, 4.2, -4.9, x + 0.12, 5.0 + s, -4.78, GD)
+        for dx, dy in ((0.0, 0.7), (-0.6, 0.0), (0.6, 0.0)):
+            rbox(m, x + dx * s - 0.55 * s, 5.4 + s + dy * s - 0.55 * s, -5.1, x + dx * s + 0.55 * s, 5.4 + s + dy * s + 0.55 * s, -4.75, G, r=0.2)
+        m.box(x - 0.2, 5.4 + s - 0.2, -5.15, x + 0.2, 5.4 + s + 0.2, -5.1, GL)
+    for sd in (-1, 1):
+        for z in (-1.4, 1.6):
+            for dz, dy in ((0.0, 0.5), (-0.45, 0.0), (0.45, 0.0)):
+                m.box(*xs(sd, 4.8, 5.1)[:1], 4.6 + dy - 0.4, z + dz - 0.4, xs(sd, 4.8, 5.1)[1], 4.6 + dy + 0.4, z + dz + 0.4, G)
+
+GLOW.update({'#ffd23a'})
+@design("jack_lantern_hat", "Jack-o'-Lantern Buddy", "holiday")
+def _(m):
+    O, OD, K, Y, ST, V = '#ff8a1f', '#d86a10', '#2a1a10', '#ffd23a', '#5a3a1a', '#3a9a3a'
+    rbox(m, -2.6, 4.6, -2.2, 2.6, 8.0, 2.2, O, r=0.9)
+    for x in (-1.3, 0.0, 1.3):
+        m.box(x - 0.15, 4.8, -2.26, x + 0.15, 7.8, -2.2, OD)                              # ribs
+    relief(m, ["Y.....Y", "YY...YY", ".......", ".YYYYY.", "..Y.Y.."], -2.2, {'Y': (Y, 0.06)}, cell=0.55, top=7.4, cx=0.0)
+    m.box(-0.3, 8.0, -0.3, 0.3, 9.0, 0.3, ST)                                             # stem
+    m.box(0.3, 8.6, -0.25, 1.4, 8.9, 0.25, ST)
+    for x, z, c in ((-3.2, -2.8, V), (3.4, 1.0, V), (-2.0, 3.4, V)):
+        m.box(x - 0.6, 4.6, z - 0.6, x + 0.6, 5.0, z + 0.6, c, rot=('y', 45, (x, 4.8, z)))   # vine leaves
+    m.box(-3.4, 4.6, -0.2, 3.4, 4.8, 0.2, V)
+
+@design("spider_web_hat", "Spider Web Hat", "holiday")
+def _(m):
+    W, K, R = '#e8ecf4', '#1d1b22', '#e8202e'
+    for i, a in enumerate((0, 45, -45, 90)):                                              # web spokes on top
+        L = 4.4 if a in (0, 90) else 4.4
+        m.box(-L, 4.62, -0.08, L, 4.7, 0.08, W, rot=('y', a, (0, 4.66, 0)) if a in (45, -45) else None) if a != 90 else m.box(-0.08, 4.62, -L, 0.08, 4.7, L, W)
+    for r in (1.2, 2.4, 3.6):
+        ring(m, 4.62, r, W, t=0.1, h=0.08)
+    m.box(3.6, -0.6, -4.7, 3.7, 4.6, -4.6, W)                                             # thread down the front
+    rbox(m, 3.0, -2.0, -5.4, 4.3, -0.6, -4.6, K, r=0.4)                                   # spider
+    for y in (-1.8, -1.2):
+        m.box(4.3, y, -5.1, 5.2, y + 0.15, -4.8, K); m.box(2.1, y, -5.1, 3.0, y + 0.15, -4.8, K)
+    m.box(3.2, -1.0, -5.45, 3.5, -0.7, -5.4, R); m.box(3.8, -1.0, -5.45, 4.1, -0.7, -5.4, R)
+
+@design("bat_headband", "Bat Headband", "holiday")
+def _(m):
+    K, KD, P = '#2a2033', '#1a1424', '#b06cff'
+    arch_band(m, K)
+    rbox(m, -1.2, 4.8, -1.0, 1.2, 6.6, 1.0, K, r=0.4)                                     # bat body
+    eyes(m, 0.0, 5.8, -1.0, 0.45, w=0.3, h=0.3, c=P, shine=None)
+    for sd in (-1, 1):
+        m.box(sd * 0.7 - 0.25, 6.6, -0.3, sd * 0.7 + 0.25, 7.3, 0.3, K)                   # ears
+        for k, (a, b, y1, y2) in enumerate(((1.2, 2.4, 5.0, 6.8), (2.4, 3.6, 5.4, 7.4), (3.6, 4.8, 5.0, 7.8), (4.8, 5.6, 6.2, 8.2))):
+            m.box(*xs(sd, a, b)[:1], y1, -0.2, xs(sd, a, b)[1], y2, 0.2, (K, KD)[k % 2])    # scalloped wings
+    m.box(-0.3, 5.0, -1.05, 0.3, 5.2, -1.0, '#ffffff')
+GLOW.add('#b06cff')
+
+@design("mummy_wraps", "Mummy Wraps", "holiday")
+def _(m):
+    W, WD, WL = '#efe6cc', '#d6c8a4', '#fbf6e8'
+    for k, (y1, y2) in enumerate(((-4.6, -3.7), (-3.4, -2.6), (1.2, 2.0), (2.3, 3.2), (3.5, 4.6))):
+        c = (W, WD, WL)[k % 3]
+        m.box(-4.7, y1, -4.7, 4.7, y2, -4.6, c)                                           # strips round the head, eyes left clear
+        m.box(-4.7, y1 + 0.3, 4.6, 4.7, y2 + 0.3, 4.7, c)
+        for sd in (-1, 1):
+            m.box(*xs(sd, 4.6, 4.7)[:1], y1 + 0.15, -4.7, xs(sd, 4.6, 4.7)[1], y2 + 0.15, 4.7, c)
+    for y1, y2 in ((-2.2, -1.4), (-0.8, 0.8)):
+        m.box(-4.7, y1, 4.6, 4.7, y2, 4.7, WD)
+        for sd in (-1, 1):
+            m.box(*xs(sd, 4.6, 4.7)[:1], y1, -2.0, xs(sd, 4.6, 4.7)[1], y2, 4.7, WD)
+    m.box(-4.6, 4.6, -4.6, 4.6, 4.7, 4.6, W)
+    m.box(-4.75, -2.6, -4.75, -0.8, 1.2, -4.6, WD)                                        # one eye wrapped up
+    m.box(-4.0, -2.0, -4.8, -1.2, -1.6, -4.75, W)
+    m.box(2.6, -5.6, -4.85, 3.4, -3.7, -4.7, WL)                                          # loose end hanging
+    for x, y in ((-2.6, -4.2), (1.4, -3.1), (-0.6, 1.6), (2.8, 2.8), (-3.2, 3.9)):
+        m.box(x, y, -4.75, x + 0.6, y + 0.12, -4.7, '#bfb08a')
+
+@design("franken_bolts", "Franken Bolts", "holiday")
+def _(m):
+    S, SD, K, G = '#c9ced8', '#8a92a2', '#1d1b22', '#3ad06a'
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.6, 6.0)[:1], -3.0, -0.5, xs(sd, 4.6, 6.0)[1], -2.0, 0.5, SD)      # neck bolts
+        rbox(m, *xs(sd, 6.0, 6.8)[:1], -3.4, -0.9, xs(sd, 6.0, 6.8)[1], -1.6, 0.9, S, r=0.3)
+    m.box(-3.0, 2.4, -4.72, 3.0, 2.6, -4.6, K)                                            # forehead stitches
+    for x in (-2.4, -1.2, 0.0, 1.2, 2.4):
+        m.box(x - 0.1, 2.0, -4.75, x + 0.1, 3.0, -4.65, K)
+    m.box(-4.6, 3.6, -4.8, 4.6, 4.6, 4.6, '#2a2a33')                                      # flat-top hair
+    m.box(-4.8, 4.6, -4.8, 4.8, 5.6, 4.8, '#2a2a33')
+    m.box(2.0, -1.0, -4.72, 3.0, -0.8, -4.6, K); m.box(2.4, -1.4, -4.75, 2.6, -0.4, -4.65, K)
+
+@design("candy_corn_hat", "Candy Corn Hat", "holiday")
+def _(m):
+    Y, O, W = '#ffd23a', '#ff8a1f', '#fbf8f0'
+    y = 4.6
+    for k, (hw, h, c) in enumerate(((3.0, 1.4, Y), (2.6, 0.8, Y), (2.2, 1.2, O), (1.7, 0.8, O), (1.2, 1.0, W), (0.6, 0.6, W))):
+        rbox(m, -hw, y, -hw * 0.75, hw, y + h, hw * 0.75, c, r=0.4)
+        y += h
+    m.box(-0.4, y - 0.4, -1.2, 0.0, y - 0.1, -0.5, '#ffffff')
+
+@design("turkey_hat", "Turkey Hat", "holiday")
+def _(m):
+    T, TD, TL, W = '#c8803a', '#9a5a26', '#e8a050', '#fbf8f0'
+    rbox(m, -3.0, 4.6, -2.4, 3.0, 7.6, 2.8, T, r=1.0)                                     # roast body
+    rbox(m, -2.4, 7.0, -1.8, 2.4, 7.9, 2.2, TL, r=0.6)
+    for sd in (-1, 1):                                                                    # drumsticks up front
+        m.box(sd * 1.6 - 0.7, 5.6, -4.2, sd * 1.6 + 0.7, 7.0, -2.0, TD, rot=('x', -22.5, (sd * 1.6, 6.2, -2.2)))
+        m.box(sd * 1.6 - 0.35, 6.4, -5.2, sd * 1.6 + 0.35, 7.0, -4.0, W, rot=('x', -22.5, (sd * 1.6, 6.2, -2.2)))
+        m.box(sd * 1.6 - 0.55, 6.3, -5.7, sd * 1.6 + 0.55, 7.1, -5.1, W, rot=('x', -22.5, (sd * 1.6, 6.2, -2.2)))
+        rbox(m, *xs(sd, 2.8, 3.6)[:1], 5.2, -1.0, xs(sd, 2.8, 3.6)[1], 6.6, 1.6, TD, r=0.4)   # wings
+    m.box(-2.2, 4.6, -2.6, 2.2, 4.9, 3.0, '#5ec04a')                                      # lettuce garnish
+    for x in (-1.4, 0.6):
+        m.box(x - 0.15, 7.9, 0.0, x + 0.15, 8.1, 0.8, '#7a4a26')
+
+GLOW.update({'#ff5ce1', '#7af7ff', '#ffe45c'})
+@design("firework_hat", "Firework Hat", "holiday")
+def _(m):
+    R, W, K = '#e8202e', '#fbfcff', '#3a3540'
+    m.box(-1.0, 4.6, -1.0, 1.0, 9.0, 1.0, R)                                              # rocket
+    for y in (5.4, 7.2):
+        m.box(-1.05, y, -1.05, 1.05, y + 0.6, 1.05, W)
+    dome(m, 9.0, [(1.0, 0.6), (0.6, 0.6), (0.25, 0.4)], R)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 1.0, 1.8)[:1], 4.6, -0.15, xs(sd, 1.0, 1.8)[1], 6.0, 0.15, K)
+    m.box(-0.1, 10.6, -0.1, 0.1, 11.0, 0.1, '#ffe45c')
+    import math as _m
+    for i in range(8):                                                                    # burst
+        a = i * _m.pi / 4
+        c = ('#ff5ce1', '#7af7ff', '#ffe45c')[i % 3]
+        for r in (2.4, 3.4):
+            x, y = r * _m.cos(a), 12.6 + r * _m.sin(a)
+            m.box(x - 0.25, y - 0.25, -0.25, x + 0.25, y + 0.25, 0.25, c)
+    star(m, 0.0, 12.6, 0.0, 0.6, '#ffe45c')
+
+@design("birthday_crown", "Birthday Crown", "holiday")
+def _(m):
+    P, B, Y, G, W, F = '#ff7ab0', '#5ab8ff', '#ffd23a', '#3ad06a', '#fbf8f0', '#ff8a1f'
+    band(m, 3.6, 4.8, Y, 4.8)
+    cols = (P, B, G, P, B, G)
+    for i, x in enumerate((-3.6, -2.2, -0.8, 0.8, 2.2, 3.6)):                              # zig-zag paper points
+        prong(m, x, -4.7, True, 4.8, 1.4, 1.6, cols[i], t=0.2, n=4)
+        prong(m, x, 4.7, True, 4.8, 1.4, 1.6, cols[-1 - i], t=0.2, n=4)
+    for x in (-2.8, 0.0, 2.8):
+        m.box(x - 0.3, 4.0, -4.9, x + 0.3, 4.6, -4.8, W)                                  # dots
+    rbox(m, -1.6, 4.6, -1.6, 1.6, 6.0, 1.6, '#f4d0e0', r=0.5)                             # tiny cake
+    m.box(-1.6, 5.6, -1.6, 1.6, 6.0, 1.6, W)
+    m.box(-0.2, 6.0, -0.2, 0.2, 7.2, 0.2, B)                                              # candle
+    m.box(-0.2, 7.2, -0.2, 0.2, 7.7, 0.2, F)
+GLOW.add('#ff8a1f')
+
+@design("lunar_dragon_hat", "Lunar Dragon Hat", "holiday")
+def _(m):
+    R, RD, GD, W, K, G = '#d8202e', '#a01020', '#ffc21f', '#fbf8f0', '#1d1b22', '#3ad06a'
+    dome(m, 3.0, [(5.0, 1.6), (4.6, 0.8)], R)
+    m.box(-5.0, 1.0, 4.0, 5.0, 3.0, 5.0, R)
+    band(m, 3.0, 3.5, GD, 5.05)
+    rbox(m, -3.4, 3.0, -7.4, 3.4, 5.8, -4.6, R, r=0.8)                                    # snout
+    m.box(-3.0, 2.6, -7.2, 3.0, 3.0, -4.6, W)                                             # teeth
+    for sd in (-1, 1):
+        rbox(m, sd * 1.8 - 1.0, 5.6, -6.0, sd * 1.8 + 1.0, 7.4, -4.4, W, r=0.4)           # big eyes
+        m.box(sd * 1.8 - 0.5, 5.9, -6.1, sd * 1.8 + 0.5, 7.0, -6.0, K)
+        m.box(sd * 1.8 - 0.35, 6.6, -6.15, sd * 1.8 - 0.05, 6.9, -6.1, W)
+        m.box(sd * 1.2 - 0.3, 5.0, -7.5, sd * 1.2 + 0.3, 5.4, -7.4, K)                    # nostrils
+        m.box(*xs(sd, 1.4, 2.2)[:1], 7.0, -1.0, xs(sd, 1.4, 2.2)[1], 9.6, -0.2, GD, rot=('z', -22.5 * sd, (sd * 1.8, 7.0, -0.6)))   # horns
+        m.box(*xs(sd, 3.4, 6.4)[:1], 3.6, -7.0, xs(sd, 3.4, 6.4)[1], 3.9, -6.7, GD, rot=('z', 22.5 * sd, (sd * 3.4, 3.75, -6.85)))  # whiskers
+        for k, y in enumerate((1.4, 2.6, 3.8)):
+            m.box(*xs(sd, 5.0, 5.6)[:1], y, -2.0 + k * 0.4, xs(sd, 5.0, 5.6)[1], y + 0.9, 2.0, (GD, G, GD)[k])  # mane frills
+    for z in (-2.0, 0.0, 2.0, 4.0):
+        prong(m, 0.0, z, False, 5.4, 1.2, 1.2, GD, t=0.4, n=3)
+    m.box(-0.5, 6.0, -7.0, 0.5, 6.4, -4.6, GD)
+
+@design("skull_candle_hat", "Sugar Skull Candles", "holiday")
+def _(m):
+    W, K, P, B, Y, O, WX = '#fbf8f0', '#1d1b22', '#ff5cb8', '#5ab8ff', '#ffd23a', '#ff8a1f', '#f4ecd8'
+    rbox(m, -2.4, 4.6, -2.2, 2.4, 8.0, 2.2, W, r=0.8)                                     # sugar skull
+    for sd in (-1, 1):
+        rbox(m, sd * 1.1 - 0.75, 6.2, -2.3, sd * 1.1 + 0.75, 7.4, -2.2, (B, P)[sd > 0], r=0.3)   # eye flowers
+        m.box(sd * 1.1 - 0.35, 6.6, -2.35, sd * 1.1 + 0.35, 7.0, -2.3, K)
+    m.box(-0.3, 5.6, -2.3, 0.3, 6.0, -2.2, K)
+    m.box(-1.4, 5.0, -2.26, 1.4, 5.2, -2.2, K)
+    for x in (-1.0, -0.4, 0.2, 0.8):
+        m.box(x, 4.8, -2.28, x + 0.2, 5.4, -2.2, K)
+    rbox(m, -0.6, 7.6, -2.3, 0.6, 8.0, -1.6, Y, r=0.2)
+    for x, z, h in ((-3.4, -1.4, 2.0), (3.4, 0.6, 1.4), (-2.6, 2.6, 1.0)):                 # candles round it
+        m.box(x - 0.45, 4.6, z - 0.45, x + 0.45, 4.6 + h, z + 0.45, WX)
+        m.box(x - 0.5, 4.6 + h - 0.4, z - 0.5, x + 0.5, 4.6 + h - 0.2, z + 0.5, WX)          # wax drip
+        m.box(x - 0.2, 4.6 + h, z - 0.2, x + 0.2, 5.2 + h, z + 0.2, O)
+        m.box(x - 0.1, 5.0 + h, z - 0.1, x + 0.1, 5.4 + h, z + 0.1, Y)
+    for x, z, c in ((2.6, -2.6, O), (-3.6, 0.8, P), (1.0, 3.2, Y)):
+        rbox(m, x - 0.6, 4.6, z - 0.6, x + 0.6, 5.4, z + 0.6, c, r=0.3)                    # marigolds
