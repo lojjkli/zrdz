@@ -27,16 +27,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.EquippableComponent;
 import org.bukkit.persistence.PersistentDataType;
 
-/**
- * Loads cosmetics.yml (plus any extra models found in the pack) and turns helmets into cosmetics and back.
- * A cosmetic is a look on the worn helmet: the helmet keeps its stats, and the original is stored inside it
- * so it can be given back unchanged when it leaves the head slot.
- */
 public final class Cosmetics {
 
     public static final String NEW_CATEGORY = "New";
 
-    /** Pack models that are part of the flower, not cosmetics. */
     private static final Set<String> FLOWER_MODELS = Set.of(
             "aconite", "wolfsbane", "aconite_stage0", "aconite_stage1", "aconite_stage2",
             "aconite_stage3", "aconite_stage4", "aconite_stage5");
@@ -134,8 +128,6 @@ public final class Cosmetics {
         return anyAnimated;
     }
 
-    // Player selection
-
     public Cosmetic selected(Player player) {
         return get(player.getPersistentDataContainer().get(selectedKey, PersistentDataType.STRING));
     }
@@ -148,14 +140,11 @@ public final class Cosmetics {
         }
     }
 
-    // Cosmetic items
-
     public boolean isCosmetic(ItemStack item) {
         return item != null && item.hasItemMeta()
                 && item.getItemMeta().getPersistentDataContainer().has(idKey, PersistentDataType.STRING);
     }
 
-    /** The cosmetic this item shows, or null. */
     public Cosmetic of(ItemStack item) {
         if (!isCosmetic(item)) {
             return null;
@@ -163,7 +152,6 @@ public final class Cosmetics {
         return byId.get(item.getItemMeta().getPersistentDataContainer().get(idKey, PersistentDataType.STRING));
     }
 
-    /** Puts the cosmetic look on a helmet. With no helmet, makes a look-only item that disappears when taken off. */
     public ItemStack apply(ItemStack head, Cosmetic c) {
         ItemStack base = restore(head);
         ItemStack item = base == null ? new ItemStack(Material.PAPER) : base.clone();
@@ -175,7 +163,6 @@ public final class Cosmetics {
                 meta.lore(List.of(Component.text("Cosmetic: " + c.name(), NamedTextColor.LIGHT_PURPLE)));
             }
             meta.setItemModel(c.model());
-            // No armor texture and no pumpkin overlay, so the cosmetic model is what shows on the head.
             EquippableComponent equippable = meta.getEquippable();
             equippable.setSlot(EquipmentSlot.HEAD);
             equippable.setModel(null);
@@ -186,7 +173,6 @@ public final class Cosmetics {
         return item;
     }
 
-    /** Turns a cosmetic back into the normal helmet (keeping its wear), or null if it had no helmet. */
     public ItemStack restore(ItemStack item) {
         if (item == null || item.isEmpty()) {
             return null;
@@ -207,7 +193,6 @@ public final class Cosmetics {
         return original;
     }
 
-    /** Menu icon. Not a cosmetic item itself. */
     public ItemStack icon(Cosmetic c) {
         ItemStack item = new ItemStack(Material.PAPER);
         item.editMeta(meta -> {
@@ -218,8 +203,6 @@ public final class Cosmetics {
         return item;
     }
 
-    // Flower items
-
     public ItemStack aconite() {
         return flowerItem("aconite:aconite", "Aconite");
     }
@@ -228,7 +211,6 @@ public final class Cosmetics {
         return flowerItem("aconite:wolfsbane", "Wolfsbane");
     }
 
-    /** Pitcher pods that look like aconite. Planted, they grow into aconite (the pack reskins the pitcher crop). */
     public ItemStack seeds() {
         ItemStack item = new ItemStack(Material.PITCHER_POD);
         item.editMeta(meta -> {

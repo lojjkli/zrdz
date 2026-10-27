@@ -72,8 +72,6 @@ public final class AconitePlugin extends JavaPlugin implements Listener {
         return new File(getDataFolder(), PACK);
     }
 
-    // Resource pack
-
     private void setupPack() {
         stopPackServer();
         packRequest = null;
@@ -117,7 +115,6 @@ public final class AconitePlugin extends JavaPlugin implements Listener {
                 getLogger().warning("Set resource-pack.public-address in config.yml so other players can download the pack.");
             }
         }
-        // The hash in the URL makes clients download the pack again after it changes.
         return "http://" + address + ":" + port + "/" + hash + ".zip";
     }
 
@@ -134,8 +131,6 @@ public final class AconitePlugin extends JavaPlugin implements Listener {
             event.getPlayer().sendResourcePacks(packRequest);
         }
     }
-
-    // Commands
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -172,7 +167,6 @@ public final class AconitePlugin extends JavaPlugin implements Listener {
                 try {
                     amount = Math.max(1, Math.min(64, Integer.parseInt(args[3])));
                 } catch (NumberFormatException ignored) {
-                    // keep 1
                 }
             }
             item.setAmount(amount);

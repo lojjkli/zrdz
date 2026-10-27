@@ -13,10 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-/**
- * The aconite flower. The resource pack makes the pitcher crop look like aconite,
- * so aconite seeds are pitcher pods and a fully grown crop drops aconite.
- */
 public final class FlowerListener implements Listener {
 
     private final AconitePlugin plugin;

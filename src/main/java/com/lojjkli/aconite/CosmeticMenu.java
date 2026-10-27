@@ -26,10 +26,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-/**
- * The cosmetics menu. First the topics, then the cosmetics of a topic (45 per page).
- * The search head asks for a word in chat and shows what matches.
- */
 public final class CosmeticMenu implements Listener {
 
     private static final int PER_PAGE = 45;
@@ -47,7 +43,6 @@ public final class CosmeticMenu implements Listener {
     }
 
     private static final class Holder implements InventoryHolder {
-        /** Null for the topics menu. */
         final List<Cosmetic> list;
         final List<String> topics;
         final int page;
@@ -65,7 +60,6 @@ public final class CosmeticMenu implements Listener {
         }
     }
 
-    /** Topics in the order of config.yml, then any others. Each maps to the cosmetic used as its icon. */
     private Map<String, Cosmetic> topics() {
         Map<String, Cosmetic> topics = new LinkedHashMap<>();
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("topics");
@@ -189,8 +183,6 @@ public final class CosmeticMenu implements Listener {
         }
     }
 
-    // Search through chat
-
     private void askSearch(Player player) {
         player.closeInventory();
         searching.add(player.getUniqueId());
@@ -226,9 +218,6 @@ public final class CosmeticMenu implements Listener {
         searching.remove(event.getPlayer().getUniqueId());
     }
 
-    // Wearing
-
-    /** Selects the cosmetic. It shows on whatever helmet the player wears. */
     public void wear(Player player, Cosmetic c) {
         cosmetics.select(player, c);
         player.getInventory().setHelmet(cosmetics.apply(player.getInventory().getHelmet(), c));

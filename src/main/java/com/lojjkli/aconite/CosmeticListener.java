@@ -18,10 +18,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-/**
- * Keeps cosmetics on the head only. The selected cosmetic goes on whatever helmet is worn,
- * and as soon as a helmet leaves the head slot it turns back into the normal helmet.
- */
 public final class CosmeticListener implements Listener {
 
     private final Cosmetics cosmetics;
@@ -31,7 +27,6 @@ public final class CosmeticListener implements Listener {
         this.cosmetics = cosmetics;
     }
 
-    /** Runs every tick. */
     public void tick() {
         tick++;
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -87,7 +82,6 @@ public final class CosmeticListener implements Listener {
         }
     }
 
-    /** Swaps the model of animated cosmetics to the next frame. */
     private void animate(Player player) {
         if (!cosmetics.anyAnimated()) {
             return;
@@ -101,8 +95,6 @@ public final class CosmeticListener implements Listener {
         head.editMeta(meta -> meta.setItemModel(c.frames().get(frame)));
         player.getInventory().setHelmet(head);
     }
-
-    // Anything that leaves the head turns back into the normal helmet
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
@@ -152,8 +144,6 @@ public final class CosmeticListener implements Listener {
             inv.setHelmet(cosmetics.restore(inv.getHelmet()));
         }
     }
-
-    // No renaming, smithing or grinding a cosmetic
 
     @EventHandler
     public void onAnvil(PrepareAnvilEvent event) {
