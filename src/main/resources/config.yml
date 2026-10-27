@@ -1,0 +1,39 @@
+# Resource pack with all cosmetic models and the aconite flower.
+resource-pack:
+  enabled: true
+  # Leave empty to let the plugin host the pack itself (plugins/AconiteCosmetics/aconite_server_pack.zip).
+  # Or upload the pack somewhere and paste a direct download link here.
+  url: ""
+  # Used when the plugin hosts the pack. The port must be open like your server port.
+  host-port: 8164
+  # The IP or domain players use to join. Empty = server-ip from server.properties, or localhost.
+  public-address: ""
+  required: false
+  prompt: "Aconite cosmetics and flowers"
+
+# Models in the pack that are not listed in cosmetics.yml are added automatically.
+auto-add-from-pack: true
+
+flower:
+  # Fully grown aconite (pitcher crop) drops these.
+  flowers-per-harvest: 1
+  max-seeds-per-harvest: 2
+  # Chance (0-1) that breaking grass drops aconite seeds.
+  seed-chance-from-grass: 0.02
+
+# Topics in the cosmetics menu, in this order, with the cosmetic used as the icon.
+# A cosmetic's topic is its "category" in cosmetics.yml. New models from the pack go in "New".
+topics:
+  "Aconite & Froggie": aconite_crown
+  "Hats & Caps": top_hat
+  "Crowns & Halos": gold_crown
+  "Ears & Horns": cat_ears_black
+  "Hair & Headbands": afro_rainbow
+  "Face": sunglasses
+  "Buddies": axolotl_buddy
+  "Food": burger_hat
+  "Fantasy": wizard_hat
+  "Holiday": santa_hat
+  "Blocks & Items": beacon_hat
+  "Memes": six_seven
+  "New": sprout
