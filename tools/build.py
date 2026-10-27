@@ -274,15 +274,46 @@ def sheet(images, cols, ts, path):
     out.save(path)
 
 _NAMES = [d[0] for d in DS.D]
-NEW_BATCH = _NAMES[_NAMES.index('creeper_buddy'):]   # batch 5: the 250 added after the batch-4 crowns/medals
+NEW_BATCH = _NAMES[_NAMES.index('disco_ball_hat'):]   # batch 6: animated + fun
+
+def anim_atlases(m, maxf=24):
+    """Texture frames for a GIF preview, with in-between frames when the pack interpolates."""
+    a = m.anim; N, ft = a['frames'], a['frametime']
+    atl = [m.frame_atlas(f) for f in range(N)]
+    sub = max(1, min(ft, maxf // N)) if a['interpolate'] else 1
+    out = []
+    for f in range(N):
+        A0, B0 = atl[f].astype(np.float32), atl[(f + 1) % N].astype(np.float32)
+        for k in range(sub):
+            out.append(((A0 * (sub - k) + B0 * k) / sub).astype(np.uint8))
+    step = max(1, len(out) // 40)
+    m._gif_ms = ft * 50 / sub * step
+    return out[::step]
+
+def anim_gif(m, head, size=260):
+    frames = []
+    for at in anim_atlases(m):
+        frames.append(render(head + m.render_elements(at), size=size, plain=True, ss=2).convert("P", palette=Image.ADAPTIVE, colors=255))
+    return frames
+
+def gif_durations(m):
+    return max(20, int(round(m._gif_ms / 10) * 10))
 
 def build_heads():
-    thumbs, lines, models, angle_strips = [], [], {}, []
+    thumbs, lines, models, angle_strips, anim_gifs = [], [], {}, [], []
     os.makedirs(f"{PV}/heads", exist_ok=True)
     for i, (name, title, tier, fn) in enumerate(DS.D):
         m = Model(name, title, tier); fn(m)
         tex = m.texture(); models[name] = m
-        w(f"{A}/textures/item/heads/{name}.png", tex)
+        if m.anim:   # animated texture: all frames stacked vertically + .mcmeta
+            w(f"{A}/textures/item/heads/{name}.png", m.anim_strip())
+            w(f"{A}/textures/item/heads/{name}.png.mcmeta", {"animation": {"frametime": m.anim['frametime'], "interpolate": m.anim['interpolate']}})
+            gif = anim_gif(m, skin(SKINS.index(HOME[name] + ".png") if name in HOME else i))
+            os.makedirs(f"{PV}/animated", exist_ok=True)
+            gif[0].save(f"{PV}/animated/{name}.gif", save_all=True, append_images=gif[1:], duration=gif_durations(m), loop=0, disposal=2)
+            anim_gifs.append(gif)
+        else:
+            w(f"{A}/textures/item/heads/{name}.png", tex)
         w(f"{A}/models/item/heads/{name}.json", m.to_json(f"aconite:item/heads/{name}"))
         w(f"{A}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"aconite:item/heads/{name}"}})
         base = SKINS.index(HOME[name] + ".png") if name in HOME else i   # Taggy/Froggie start on their own rider
@@ -311,7 +342,8 @@ def build_heads():
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # trendy batch on its own sheets
     for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy"), ("cute", "cute"), ("cool", "cool"), ("lunar", "headbands"), ("hair", "hair"),
-                        ("mob", "mob"), ("food", "food"), ("hats", "hats"), ("face", "face"), ("fantasy", "fantasy"), ("holiday", "holiday")):
+                        ("mob", "mob"), ("food", "food"), ("hats", "hats"), ("face", "face"), ("fantasy", "fantasy"), ("holiday", "holiday"),
+                        ("animated", "animated"), ("fun", "fun")):
         idx = [i for i, d in enumerate(DS.D) if d[2] == tier]
         if not idx:
             continue
@@ -337,7 +369,19 @@ def build_heads():
     sheet(fit, len(SKINS), 200, f"{PV}/fit_check.png")
     # bare heads, for reference
     sheet([render(skin(j), size=300, plain=True) for j in range(len(SKINS))], len(SKINS), 200, f"{PV}/test_heads.png")
-    print(len(thumbs), "heads")
+    # animated showcase: every animated cosmetic in one looping grid (36 per page)
+    for k in range(0, len(anim_gifs), 36):
+        grp = anim_gifs[k:k + 36]
+        cols, ts = 6, 220
+        n = max(len(g) for g in grp)
+        pages = []
+        for f in range(n):
+            out = Image.new("RGB", (cols * ts, ts * ((len(grp) + cols - 1) // cols)), "white")
+            for j, g in enumerate(grp):
+                out.paste(g[f * len(g) // n].convert("RGB").resize((ts, ts), Image.LANCZOS), ((j % cols) * ts, (j // cols) * ts))
+            pages.append(out.convert("P", palette=Image.ADAPTIVE, colors=255))
+        pages[0].save(f"{PV}/animated_showcase_{k // 36 + 1}.gif", save_all=True, append_images=pages[1:], duration=100, loop=0)
+    print(len(thumbs), "heads,", len(anim_gifs), "animated")
 
 if __name__ == "__main__":
     w(os.path.join(RP, "pack.mcmeta"), {"pack": {"pack_format": 46, "supported_formats": [46, 99],
