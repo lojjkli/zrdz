@@ -7530,3 +7530,7 @@ def _(m):
         m.box(x - 0.15, Y0 + 2.2 * s, z - 0.3, x + 0.15, Y0 + 2.5 * s, z, YL)              # tuft
         for sd in (-1, 1):
             m.box(min(x + sd * 0.9 * s, x + sd * 1.1 * s), Y0 + 0.3 * s, z, max(x + sd * 0.9 * s, x + sd * 1.1 * s), Y0 + 0.8 * s, z + 0.8 * s, YL)   # wings
+
+# ================= removed by request: full mob heads + Taggy Head =================
+REMOVED = {"creeper_mask", "creaking_mask", "taggy_mask"} | {d[0] for d in D if d[2] == "mob"}
+D[:] = [d for d in D if d[0] not in REMOVED]
