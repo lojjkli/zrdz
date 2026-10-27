@@ -273,7 +273,8 @@ def sheet(images, cols, ts, path):
         out.paste(im.resize((ts, ts), Image.LANCZOS), ((i % cols) * ts, (i // cols) * ts))
     out.save(path)
 
-NEW_BATCH = ['headband_red', 'headband_black', 'headband_aconite', 'headband_rainbow', 'headband_flame', 'headband_galaxy', 'headband_camo', 'headband_checker', 'headband_hearts', 'headband_sakura', 'headband_ninja', 'sweatband', 'cat_ear_headband', 'bunny_ear_headband', 'devil_headband', 'heart_boppers', 'bandana_mask_red', 'bandana_mask_black', 'dreads_black', 'dreads_brown', 'dreads_blonde', 'dreads_purple', 'dreads_beaded', 'dreads_updo', 'turtle_buddy', 'turtle_stack', 'turtle_egg_hat', 'baby_sniffer', 'allay_cookie', 'jelly_slime', 'bunny_buddy', 'eye_patch', 'pirate_head', 'pirate_parrot', 'netherite_crown', 'emerald_crown', 'soul_crown', 'imperial_crown', 'void_crown', 'tilted_crown', 'medal_gold', 'medal_silver', 'medal_bronze', 'golden_laurel', 'trophy_hat']
+_NAMES = [d[0] for d in DS.D]
+NEW_BATCH = _NAMES[_NAMES.index('creeper_buddy'):]   # batch 5: the 250 added after the batch-4 crowns/medals
 
 def build_heads():
     thumbs, lines, models, angle_strips = [], [], {}, []
@@ -309,7 +310,8 @@ def build_heads():
             out.paste(st.resize((1000, 250), Image.LANCZOS), (0, 250 * r))
         out.save(f"{PV}/angles_{page // 12 + 1}.png")
     # trendy batch on its own sheets
-    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy"), ("cute", "cute"), ("cool", "cool"), ("lunar", "headbands"), ("hair", "hair")):
+    for tier, label in (("trend", "trendy"), ("meme", "meme"), ("custom", "taggy_froggie"), ("goofy", "goofy"), ("cute", "cute"), ("cool", "cool"), ("lunar", "headbands"), ("hair", "hair"),
+                        ("mob", "mob"), ("food", "food"), ("hats", "hats"), ("face", "face"), ("fantasy", "fantasy"), ("holiday", "holiday")):
         idx = [i for i, d in enumerate(DS.D) if d[2] == tier]
         if not idx:
             continue
@@ -320,7 +322,8 @@ def build_heads():
         out.save(f"{PV}/{label}_photos.png")
     # latest batch (new trends, goofy, Froggie v2 + Taggy updates): hero shots and 4-angle photos
     new = [i for i, d in enumerate(DS.D) if d[0] in NEW_BATCH]
-    sheet([thumbs[i] for i in new], 6, 280, f"{PV}/new_batch_heads.png")
+    for k in range(0, len(new), 36):
+        sheet([thumbs[i] for i in new[k:k + 36]], 6, 280, f"{PV}/new_batch_heads_{k // 36 + 1}.png")
     for k in range(0, len(new), 14):
         grp = new[k:k + 14]
         out = Image.new("RGB", (1000 * 2 + 60, 250 * ((len(grp) + 1) // 2)), "white")
