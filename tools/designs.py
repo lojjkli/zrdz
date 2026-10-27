@@ -5651,3 +5651,342 @@ def _(m):
         rbox(m, sd * 1.9 - 1.3, 2.6, -5.6, sd * 1.9 + 1.3, 4.6, -4.8, BR, r=0.5)
         m.box(sd * 1.9 - 0.9, 3.0, -5.65, sd * 1.9 + 0.9, 4.2, -5.6, GL)
     m.box(-0.4, 3.2, -5.2, 0.4, 3.8, -4.8, BR)
+
+# ================= batch 5F: face accessories =================
+def frame(m, x1, y1, x2, y2, z, t, c, d=0.3):
+    """Rectangle outline on the front plane: outer box x1..x2, y1..y2, bar thickness t, depth d out from z."""
+    m.box(x1, y2 - t, z - d, x2, y2, z, c); m.box(x1, y1, z - d, x2, y1 + t, z, c)
+    m.box(x1, y1 + t, z - d, x1 + t, y2 - t, z, c); m.box(x2 - t, y1 + t, z - d, x2, y2 - t, z, c)
+
+def temples(m, y, c, h=0.4, z2=2.4, r=4.6, w=0.22):
+    """Glasses arms running back along both sides of the head."""
+    for sd in (-1, 1):
+        m.box(min(sd * r, sd * (r + w)), y, -r, max(sd * r, sd * (r + w)), y + h, z2, c)
+
+def strap_back(m, y1, y2, c, r=4.6, t=0.25):
+    """Elastic strap round the sides and back only (front stays clear)."""
+    for sd in (-1, 1):
+        m.box(min(sd * r, sd * (r + t)), y1, -r, max(sd * r, sd * (r + t)), y2, r + t, c)
+    m.box(-r - t, y1, r, r + t, y2, r + t, c)
+
+def round_lens(m, cx, cy, z, rad, c, t=0.35, d=0.3, glass=None):
+    """Octagon-ish round frame (two overlapping outlines) with optional glass."""
+    a = rad * 0.45
+    m.box(cx - a, cy + rad - t, z - d, cx + a, cy + rad, z, c); m.box(cx - a, cy - rad, z - d, cx + a, cy - rad + t, z, c)
+    m.box(cx - rad, cy - a, z - d, cx - rad + t, cy + a, z, c); m.box(cx + rad - t, cy - a, z - d, cx + rad, cy + a, z, c)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            px, py = cx + sx * (a + (rad - a) / 2), cy + sy * (a + (rad - a) / 2)
+            m.box(px - (rad - a) / 2, py - t / 2 - 0.05, z - d, px + (rad - a) / 2, py + t / 2 + 0.05, z, c,
+                  rot=('z', 45 * sx * sy * -1, (px, py, z)))
+    if glass:
+        m.box(cx - rad + t, cy - a, z - d * 0.4, cx + rad - t, cy + a, z - d * 0.3, glass)
+        m.box(cx - a, cy - rad + t, z - d * 0.4, cx + a, cy + rad - t, z - d * 0.3, glass)
+
+@design("monocle", "Monocle", "face")
+def _(m):
+    GD, GDD = '#e8b84a', '#b8862a'
+    round_lens(m, 2.3, -0.3, -4.6, 1.5, GD, glass='#dff4ff55')
+    m.box(2.9, 0.5, -4.98, 3.2, 0.8, -4.94, '#ffffff')                                    # glint
+    m.box(3.6, -4.6, -4.75, 3.8, -1.6, -4.6, GDD, rot=('z', 22.5, (3.7, -1.6, -4.7)))   # chain down to the collar
+
+@design("round_glasses", "Round Glasses", "face")
+def _(m):
+    K = '#2a2420'
+    for sd in (-1, 1):
+        round_lens(m, sd * 2.1, -0.2, -4.6, 1.6, K, t=0.3, glass='#e8f6ff40')
+    m.box(-0.6, 0.3, -4.85, 0.6, 0.6, -4.6, K)                                            # bridge
+    temples(m, 0.2, K, h=0.3)
+    for sd in (-1, 1):
+        m.box(min(sd * 3.5, sd * 4.6), 0.2, -4.85, max(sd * 3.5, sd * 4.6), 0.5, -4.6, K)
+
+@design("nerd_glasses", "Nerd Glasses", "face")
+def _(m):
+    K, TP = '#15131a', '#f4f2ee'
+    for sd in (-1, 1):
+        frame(m, sd * 2.2 - 1.9, -1.6, sd * 2.2 + 1.9, 1.2, -4.6, 0.55, K, d=0.45)
+        m.box(sd * 2.2 - 1.35, -1.05, -4.75, sd * 2.2 + 1.35, 0.65, -4.7, '#e8f6ff38')
+        m.box(sd * 2.2 + 0.5, 0.2, -4.8, sd * 2.2 + 0.9, 0.5, -4.75, '#ffffffaa')
+    m.box(-0.4, -0.2, -5.1, 0.4, 0.6, -4.6, K)
+    m.box(-0.5, -0.35, -5.2, 0.5, 0.75, -5.05, TP)                                        # tape on the bridge
+    m.box(-0.5, 0.05, -5.25, 0.5, 0.15, -5.2, '#d8d4cc')
+    temples(m, 0.4, K, h=0.5, w=0.3)
+
+@design("star_glasses", "Star Glasses", "face")
+def _(m):
+    P, PL, Y = '#ff5cb8', '#ffb3e0', '#ffe45c'
+    for sd in (-1, 1):
+        star(m, sd * 2.3, -0.1, -4.6, 1.6, P)
+        star(m, sd * 2.3, -0.1, -4.95, 1.05, PL)
+        m.box(sd * 2.3 - 0.35, -0.45, -5.25, sd * 2.3 + 0.35, 0.25, -4.95, '#ffffff')
+    m.box(-0.8, 0.2, -4.85, 0.8, 0.5, -4.6, P)
+    temples(m, 0.2, P, h=0.3)
+    for x, y in ((4.4, 1.9), (-4.0, -2.0)):
+        star(m, x, y, -4.9, 0.35, Y)
+
+@design("shutter_shades", "Shutter Shades", "face")
+def _(m):
+    C = '#39e05a'
+    m.box(-4.2, 1.2, -4.9, 4.2, 1.6, -4.6, C); m.box(-4.2, -1.6, -4.9, 4.2, -1.2, -4.6, C)
+    for x in (-4.2, -0.4, 3.8):
+        m.box(x, -1.6, -4.9, x + 0.4 + (0.4 if x == -0.4 else 0), 1.6, -4.6, C)
+    for y in (-0.8, -0.1, 0.6):                                                           # slats
+        m.box(-4.0, y, -5.0, 4.0, y + 0.3, -4.6, C)
+    temples(m, 1.1, C, h=0.4)
+
+@design("cyber_visor", "Cyber Visor", "face")
+def _(m):
+    K, C, CL = '#1d1f2a', '#7af7ff', '#29dfeb'
+    m.box(-4.8, -1.4, -5.2, 4.8, 1.4, -4.9, '#29dfeb80')                                  # glass band
+    m.box(-4.8, 1.4, -5.3, 4.8, 1.8, -4.6, K); m.box(-4.8, -1.8, -5.3, 4.8, -1.4, -4.6, K)
+    m.box(-3.6, -0.1, -5.25, 3.6, 0.1, -5.2, C)                                           # scan line
+    for sd in (-1, 1):
+        rbox(m, min(sd * 4.6, sd * 5.4), -1.8, -5.3, max(sd * 4.6, sd * 5.4), 1.8, -2.4, K, r=0.4)   # side pods
+        m.box(min(sd * 5.4, sd * 5.45), -0.6, -4.6, max(sd * 5.4, sd * 5.45), 0.6, -3.0, C)
+    strap_back(m, -0.4, 0.4, K)
+    for x in (2.6, 3.0, 3.4):
+        m.box(x - 0.1, 0.8, -5.25, x + 0.1, 1.1, -5.2, CL)
+
+@design("ski_goggles", "Ski Goggles", "face")
+def _(m):
+    F, L1, L2, ST = '#f4f2ee', '#ff8a1f', '#ff4fa0', '#2f5fd0'
+    rbox(m, -4.6, -1.8, -5.6, 4.6, 1.8, -4.6, F, r=0.8)
+    m.box(-4.0, -1.3, -5.7, 4.0, 1.3, -5.6, L1)                                           # mirrored lens
+    m.box(-4.0, -1.3, -5.72, 4.0, -0.3, -5.7, L2)
+    m.box(-3.4, 0.5, -5.75, -1.6, 0.9, -5.72, '#ffe45c')
+    m.box(-0.7, -1.85, -5.75, 0.7, -0.9, -5.55, F)                                        # nose notch
+    strap_back(m, -1.0, 1.0, ST, t=0.3)
+    for z in (-2.0, 1.0, 3.6):
+        for sd in (-1, 1):
+            m.box(min(sd * 4.9, sd * 4.95), -0.6, z, max(sd * 4.9, sd * 4.95), 0.6, z + 1.0, '#ffffff')
+
+@design("swim_goggles", "Swim Goggles", "face")
+def _(m):
+    B, L, ST = '#1f8bd0', '#7ad8ff90', '#1d6aa0'
+    for sd in (-1, 1):
+        rbox(m, sd * 2.2 - 1.5, -1.2, -5.3, sd * 2.2 + 1.5, 0.9, -4.6, B, r=0.6)
+        m.box(sd * 2.2 - 1.1, -0.85, -5.4, sd * 2.2 + 1.1, 0.55, -5.3, L)
+        m.box(sd * 2.2 + 0.4, 0.1, -5.45, sd * 2.2 + 0.8, 0.4, -5.4, '#ffffffcc')
+    m.box(-0.7, -0.3, -4.9, 0.7, 0.0, -4.6, B)
+    strap_back(m, -0.4, 0.2, ST)
+
+@design("hypno_glasses", "Hypno Glasses", "face")
+def _(m):
+    K, W, P = '#15131a', '#ffffff', '#b04aff'
+    for sd in (-1, 1):
+        cx = sd * 2.2
+        m.box(cx - 1.9, -1.8, -4.8, cx + 1.9, 1.6, -4.6, K)
+        for i, c in enumerate((W, K, P, K, W)):                                           # spiral rings
+            s = 1.6 - i * 0.32
+            m.box(cx - s, -0.1 - s, -4.8 - 0.06 * (i + 1), cx + s, -0.1 + s, -4.8 - 0.06 * i, c)
+    m.box(-0.4, 0.4, -4.9, 0.4, 0.8, -4.6, K)
+    temples(m, 0.6, K, h=0.4)
+
+@design("pixel_shades", "Pixel Shades", "face")
+def _(m):
+    K, W = '#0b0b0e', '#ffffff'
+    relief(m, ["KKKKKKKKKKKKKKKKK",
+               "..KKKWKKK.KKWKKK.",
+               "..KKWKKKK.KWKKKK.",
+               "...KKKKK...KKKK..",
+               "....KKK.....KK..."], -4.6, {'K': (K, 0.4), 'W': (W, 0.45)}, cell=0.5, top=1.6, cx=0.0)
+    temples(m, 1.1, K, h=0.5)
+
+GLOW.update({'#ff2b2b', '#ff7a7a'})
+@design("laser_eyes", "Laser Eyes", "face")
+def _(m):
+    R, RL = '#ff2b2b', '#ff7a7a'
+    for sd in (-1, 1):
+        x = sd * 2.2
+        m.box(x - 0.9, -0.9, -4.8, x + 0.9, 0.5, -4.6, R)                                 # glowing eyes
+        m.box(x - 0.45, -0.55, -4.85, x + 0.45, 0.15, -4.8, '#ffffff')
+        m.box(x - 0.35, -0.5, -12.0, x + 0.35, 0.1, -4.8, RL)                              # beams
+        m.box(x - 0.15, -0.35, -12.05, x + 0.15, -0.05, -4.85, '#ffffff')
+        m.box(x - 0.8, -1.0, -12.4, x + 0.8, 0.6, -12.0, R)                                # impact flare
+        m.box(x - 0.3, -1.6, -12.3, x + 0.3, 1.2, -12.1, RL); m.box(x - 1.3, -0.5, -12.3, x + 1.3, 0.1, -12.1, RL)
+
+@design("crying_tears", "Crying Tears", "face")
+def _(m):
+    T, TL = '#4fb4ff', '#a6dcffcc'
+    for sd in (-1, 1):
+        x = sd * 2.2
+        m.box(x - 0.6, -1.0, -4.85, x + 0.6, -0.6, -4.6, T)                               # pooled under the eye
+        m.box(x - 0.35, -4.6, -4.8, x + 0.35, -0.6, -4.6, T)                              # stream
+        m.box(x - 0.15, -4.4, -4.85, x + 0.15, -0.8, -4.8, TL)
+        m.box(x - 0.6, -5.6, -5.4, x + 0.6, -4.6, -4.4, T, rot=('x', -22.5, (x, -4.6, -4.6)))   # splash off the chin
+        for dx, dy, s in ((0.9, -6.8, 0.35), (-0.7, -7.4, 0.3), (0.2, -8.2, 0.25)):
+            m.box(x + dx - s, dy - s, -5.6 - s, x + dx + s, dy + s, -5.6 + s, TL)          # drops
+
+@design("curly_mustache", "Curly Mustache", "face")
+def _(m):
+    H, HD = '#3a2418', '#5a3a26'
+    m.box(-2.0, -2.0, -4.95, 2.0, -1.2, -4.6, H)                                          # body
+    m.box(-0.4, -1.4, -5.05, 0.4, -1.0, -4.9, HD)
+    for sd in (-1, 1):
+        m.box(min(sd * 2.0, sd * 3.2), -2.2, -4.9, max(sd * 2.0, sd * 3.2), -1.6, -4.6, H)
+        m.box(min(sd * 3.2, sd * 3.8), -1.9, -4.9, max(sd * 3.2, sd * 3.8), -1.2, -4.6, H)
+        m.box(min(sd * 3.4, sd * 3.9), -1.2, -4.9, max(sd * 3.4, sd * 3.9), -0.5, -4.6, H)   # curl up
+        m.box(min(sd * 2.9, sd * 3.5), -0.6, -4.9, max(sd * 2.9, sd * 3.5), -0.2, -4.6, H)
+        m.box(min(sd * 2.8, sd * 3.1), -0.9, -4.9, max(sd * 2.8, sd * 3.1), -0.5, -4.6, H)
+        m.box(min(sd * 0.8, sd * 1.8), -1.9, -5.0, max(sd * 0.8, sd * 1.8), -1.6, -4.95, HD)
+
+@design("clown_nose", "Clown Nose", "face")
+def _(m):
+    R, RL = '#ff2b3a', '#ff8a92'
+    rbox(m, -1.0, -1.8, -6.0, 1.0, 0.2, -4.6, R, r=0.5)
+    m.box(-0.4, -0.6, -6.05, 0.0, -0.2, -5.95, '#ffffff')
+    cheeks(m, 0.0, -1.6, -4.6, 2.9, '#ff7a9a', w=1.2, h=0.6)
+    for sd in (-1, 1):                                                                    # curly wig puffs
+        for (y, z, c) in ((0.4, -1.6, '#ff6a2a'), (0.0, 1.4, '#ff3d5a'), (2.2, 0.0, '#ff3d5a'), (2.0, 3.2, '#ff6a2a'), (-1.8, 0.2, '#ff8a1f')):
+            rbox(m, min(sd * 4.4, sd * 6.2), y, z - 1.5, max(sd * 4.4, sd * 6.2), y + 2.4, z + 1.5, c, r=0.5)
+
+@design("vampire_fangs", "Vampire Fangs", "face")
+def _(m):
+    W, R, RD = '#fbf8f0', '#b0122a', '#7a0a1c'
+    m.box(-2.2, -2.6, -4.75, 2.2, -2.2, -4.6, RD)                                         # dark lip line
+    for sd in (-1, 1):
+        x = sd * 1.3
+        m.box(x - 0.35, -3.6, -4.85, x + 0.35, -2.4, -4.6, W)                             # fangs
+        m.box(x - 0.2, -4.0, -4.85, x + 0.2, -3.6, -4.6, W)
+    m.box(1.1, -4.6, -4.8, 1.4, -4.0, -4.6, R)                                            # drip
+    m.box(1.05, -5.0, -4.85, 1.45, -4.6, -4.6, R)
+    m.box(-0.8, -2.9, -4.7, 0.8, -2.6, -4.6, W)
+
+@design("blush_stickers", "Blush Stickers", "face")
+def _(m):
+    P, PL, Y = '#ff8ab8', '#ffc4dc', '#ffe45c'
+    for sd in (-1, 1):
+        x = sd * 2.6
+        rbox(m, x - 1.1, -2.2, -4.72, x + 1.1, -1.2, -4.6, P, r=0.35)
+        for dx in (-0.5, 0.0, 0.5):
+            m.box(x + dx - 0.08, -1.95, -4.76, x + dx + 0.08, -1.45, -4.72, '#ff5c98')
+    heart(m, 3.2, 1.6, -4.6, 0.25, '#ff4f8a', t=0.12, hi=PL)
+    star(m, -3.3, 2.2, -4.6, 0.4, Y)
+    star(m, -2.6, 3.2, -4.6, 0.25, PL)
+
+@design("war_paint", "War Paint", "face")
+def _(m):
+    R, K, W = '#d8323a', '#15131a', '#f4f2ee'
+    for sd in (-1, 1):
+        for i, y in enumerate((-1.2, -2.0)):
+            m.box(min(sd * 1.4, sd * 3.8), y, -4.7, max(sd * 1.4, sd * 3.8), y + 0.45, -4.6, (R, K)[i])
+        m.box(min(sd * 1.0, sd * 1.4), -2.0, -4.7, max(sd * 1.0, sd * 1.4), -0.75, -4.6, W)
+    m.box(-0.3, 1.0, -4.7, 0.3, 3.2, -4.6, R)                                             # forehead line
+    for y in (1.4, 2.2):
+        m.box(-0.7, y, -4.72, 0.7, y + 0.3, -4.62, W)
+
+@design("surgical_mask", "Surgical Mask", "face")
+def _(m):
+    B, BL, W = '#8ec8f0', '#b8e0fa', '#f4f2ee'
+    rbox(m, -3.6, -4.2, -5.0, 3.6, -0.6, -4.6, B, r=0.3, top=False)
+    for y in (-3.4, -2.4, -1.4):                                                          # pleats
+        m.box(-3.6, y, -5.08, 3.6, y + 0.18, -5.0, BL)
+    m.box(-1.0, -0.75, -5.05, 1.0, -0.6, -5.0, W)                                         # nose wire
+    for sd in (-1, 1):                                                                    # ear loops
+        m.box(min(sd * 3.6, sd * 4.6), -0.9, -4.75, max(sd * 3.6, sd * 4.6), -0.7, -4.6, W)
+        m.box(min(sd * 3.6, sd * 4.6), -3.9, -4.75, max(sd * 3.6, sd * 4.6), -3.7, -4.6, W)
+        m.box(min(sd * 4.6, sd * 4.75), -0.9, -4.6, max(sd * 4.6, sd * 4.75), -0.7, -1.6, W)
+        m.box(min(sd * 4.6, sd * 4.75), -3.9, -4.6, max(sd * 4.6, sd * 4.75), -3.7, -1.6, W)
+        m.box(min(sd * 4.6, sd * 4.75), -3.9, -1.8, max(sd * 4.6, sd * 4.75), -0.7, -1.4, W)
+
+@design("gas_mask", "Gas Mask", "face")
+def _(m):
+    K, KD, G, L = '#3a3d36', '#25271f', '#6b7055', '#ffd56a90'
+    rbox(m, -4.2, -4.4, -5.0, 4.2, 2.0, -4.6, K, r=0.8)
+    for sd in (-1, 1):
+        round_lens(m, sd * 2.0, 0.3, -5.0, 1.3, KD, t=0.4, d=0.4, glass=L)
+    rbox(m, -1.6, -4.4, -6.2, 1.6, -1.4, -5.0, KD, r=0.5)                                 # snout
+    rbox(m, -1.3, -4.1, -7.6, 1.3, -1.7, -6.2, G, r=0.5)                                  # filter
+    for y in (-3.6, -2.9, -2.2):
+        m.box(-1.0, y, -7.65, 1.0, y + 0.25, -7.6, KD)
+    strap_back(m, 0.0, 0.8, KD, t=0.3)
+    strap_back(m, -3.0, -2.2, KD, t=0.3)
+
+@design("hockey_mask", "Hockey Mask", "face")
+def _(m):
+    W, R, K = '#f2efe6', '#d8323a', '#2a2a30'
+    relief(m, ["..WWWWWW..",
+               ".WWWWWWWW.",
+               "WWWWWWWWWW",
+               "W...WW...W",
+               "W....WW...",
+               "WWWWWWWWWW",
+               "WWWWWWWWWW",
+               ".WWWWWWWW.",
+               "..WWWWWW.."], -4.6, {'W': (W, 0.5)}, cell=0.88, top=4.0, cx=0.0)
+    for x, y in ((0.0, 3.0), (-3.2, 1.8), (3.2, 1.8)):                                    # red chevrons
+        m.box(x - 0.6, y - 0.2, -5.15, x + 0.6, y + 0.2, -5.1, R)
+        m.box(x - 0.2, y - 0.6, -5.15, x + 0.2, y + 0.2, -5.1, R)
+    for x in (-1.8, -0.6, 0.6, 1.8):                                                      # air holes
+        for y in (-1.6, -2.6):
+            m.box(x - 0.18, y - 0.18, -5.15, x + 0.18, y + 0.18, -5.1, K)
+    strap_back(m, 1.6, 2.0, K)
+
+@design("oni_half_mask", "Oni Half Mask", "face")
+def _(m):
+    R, RD, W, GD = '#c8202e', '#8a1420', '#fbf8f0', '#e8b84a'
+    rbox(m, -4.4, -4.6, -5.4, 4.4, -0.6, -4.6, R, r=0.8)
+    m.box(-3.4, -3.2, -5.45, 3.4, -2.0, -5.4, RD)                                         # grin
+    for i, x in enumerate((-2.8, -1.4, 0.0, 1.4, 2.8)):
+        m.box(x - 0.45, -2.6, -5.5, x + 0.45, -2.0, -5.45, W)
+    for sd in (-1, 1):
+        m.box(sd * 2.6 - 0.35, -3.6, -5.55, sd * 2.6 + 0.35, -2.0, -5.45, W)              # tusks
+        m.box(min(sd * 3.0, sd * 4.4), -1.2, -5.5, max(sd * 3.0, sd * 4.4), -0.8, -5.4, GD)
+    m.box(-1.0, -1.4, -5.6, 1.0, -0.6, -5.4, RD)                                          # nose
+    strap_back(m, -1.8, -1.2, '#15131a')
+
+@design("masquerade_mask", "Masquerade Mask", "face")
+def _(m):
+    P, PD, GD, F1, F2 = '#6a2aa8', '#4a1a7a', '#e8b84a', '#c8a0ff', '#ffffff'
+    relief(m, ["PPPP..PPPP",
+               "PG..PP..GP",
+               "PP..PP..PP",
+               ".PPPPPPPP.",
+               "..PP..PP.."], -4.6, {'P': (P, 0.4), 'G': (GD, 0.5)}, cell=0.85, top=1.9, cx=0.0)
+    for sd in (-1, 1):
+        m.box(sd * 2.2 - 1.3, 0.2, -5.05, sd * 2.2 + 1.3, 0.35, -5.0, GD)                 # gold rims
+        m.box(sd * 2.2 - 1.3, -1.5, -5.05, sd * 2.2 + 1.3, -1.35, -5.0, GD)
+    for i, (dx, c) in enumerate(((0.0, F1), (0.7, F2), (-0.6, PD))):                      # feathers on one side
+        m.box(3.4 + dx - 0.3, 1.6, -5.0, 3.4 + dx + 0.3, 5.6 - i * 0.6, -4.7, c, rot=('z', -22.5 + i * 22.5, (3.4 + dx, 1.6, -4.85)))
+    rbox(m, 2.8, 1.0, -5.3, 4.0, 2.2, -4.8, GD, r=0.3)
+    temples(m, 0.6, PD, h=0.4)
+
+@design("hero_mask", "Hero Mask", "face")
+def _(m):
+    K, W = '#1d1b22', '#ffffff'
+    relief(m, ["..KKKKKKKKKKKK..",
+               ".KKKKKKKKKKKKKKK",
+               "KKKWWWKKKKWWWKKK",
+               "KKKWWWKKKKWWWKKK",
+               ".KKKKKKKKKKKKKK.",
+               "..KKKK....KKKK.."], -4.6, {'K': (K, 0.3), 'W': (W, 0.34)}, cell=0.5, top=1.4, cx=0.0)
+    strap_back(m, 0.0, 0.9, K)
+    for sd in (-1, 1):                                                                    # knot tails
+        m.box(sd * 1.0 - 0.4, -2.8, 4.85, sd * 1.0 + 0.4, 0.4, 5.2, K, rot=('z', 22.5 * sd, (sd * 1.0, 0.4, 5.0)))
+    rbox(m, -0.7, -0.2, 4.8, 0.7, 1.1, 5.4, K, r=0.3)
+
+@design("sleep_mask", "Sleep Mask", "face")
+def _(m):
+    P, PL, K, W = '#ff9fd2', '#ffd1ea', '#3a2a3a', '#ffffff'
+    rbox(m, -4.4, -1.6, -5.0, 4.4, 1.6, -4.6, P, r=0.8)
+    m.box(-4.6, -1.8, -4.9, 4.6, -1.5, -4.6, PL); m.box(-4.6, 1.5, -4.9, 4.6, 1.8, -4.6, PL)   # frilly trim
+    for sd in (-1, 1):                                                                    # closed eyes + lashes
+        x = sd * 2.2
+        m.box(x - 1.0, -0.3, -5.05, x + 1.0, 0.0, -5.0, K)
+        m.box(x - 1.2, 0.0, -5.05, x - 0.9, 0.3, -5.0, K); m.box(x + 0.9, 0.0, -5.05, x + 1.2, 0.3, -5.0, K)
+        for dx in (-0.6, 0.0, 0.6):
+            m.box(x + dx - 0.08, -0.7, -5.05, x + dx + 0.08, -0.3, -5.0, K)
+    strap_back(m, -0.4, 0.4, P)
+    heart(m, 0.0, 0.6, -5.0, 0.18, '#ff4f8a', t=0.08)
+
+@design("nose_ring", "Nose Ring", "face")
+def _(m):
+    S, SD = '#e6e9f0', '#a8adb8'
+    m.box(-0.6, -1.3, -4.9, 0.6, -1.1, -4.6, S)                                           # septum hoop
+    for sd in (-1, 1):
+        m.box(min(sd * 0.4, sd * 0.6), -1.7, -4.9, max(sd * 0.4, sd * 0.6), -1.2, -4.6, S)
+    m.box(-0.4, -1.9, -4.9, 0.4, -1.7, -4.6, SD)
+    m.box(1.4, -1.0, -4.75, 1.7, -0.7, -4.6, '#7af7ff')                                   # nose stud
+    for sd in (-1, 1):                                                                    # ear hoops
+        for z, h in ((-1.2, 1.0), (0.2, 0.7)):
+            m.box(min(sd * 4.6, sd * 4.8), -1.4 - h, z - 0.15, max(sd * 4.6, sd * 4.8), -1.4, z + 0.15, S)
