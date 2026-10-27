@@ -6772,3 +6772,372 @@ def _(m):
         m.box(x - 0.1, 5.0 + h, z - 0.1, x + 0.1, 5.4 + h, z + 0.1, Y)
     for x, z, c in ((2.6, -2.6, O), (-3.6, 0.8, P), (1.0, 3.2, Y)):
         rbox(m, x - 0.6, 4.6, z - 0.6, x + 0.6, 5.4, z + 0.6, c, r=0.3)                    # marigolds
+
+# ================= batch 5I: hair =================
+def hair_cap(m, c, r=5.0, top=5.4, fringe=2.6, side=-0.6, back=-3.0, side_z=None):
+    """Hair that covers top, sides and back but leaves the face open below the fringe."""
+    rbox(m, -r, 4.0, -r, r, top, r, c, r=1.0)
+    m.box(-r, back, 4.0, r, top - 0.6, r, c)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.0, r)[:1], side, side_z if side_z is not None else -r, xs(sd, 4.0, r)[1], top - 0.6, r, c)
+    m.box(-r + 0.01, fringe, -r, r - 0.01, top - 0.6, -4.0, c)
+
+def streaks(m, c, r=5.0, y1=-3.0, y2=5.0, seed=1, n=16, t=0.05, front=None):
+    """Thin darker strands painted on the outside of a hair cap (sides and back; front if front=(y1, y2))."""
+    import random as _r
+    rnd = _r.Random(seed)
+    for k in range(n):
+        face = k % 3
+        u = rnd.uniform(-r + 0.4, r - 0.6)
+        a = rnd.uniform(y1, y2 - 1.2); b = min(y2, a + rnd.uniform(1.2, 3.0))
+        w = rnd.choice((0.2, 0.3, 0.4))
+        if face == 0:
+            m.box(u, a, r, u + w, b, r + t, c)
+        else:
+            sd = -1 if face == 1 else 1
+            m.box(*xs(sd, r, r + t)[:1], a, u, xs(sd, r, r + t)[1], b, u + w, c)
+    if front:
+        for k in range(6):
+            u = rnd.uniform(-r + 0.4, r - 0.6)
+            m.box(u, front[0], -r - t, u + 0.25, front[1], -r, c)
+
+def fringe_teeth(m, c, xs_list, y, r=5.0, d=0.8):
+    """Pointy fringe locks hanging off the front edge."""
+    for x, ln in xs_list:
+        m.box(x - 0.45, y - ln, -r, x + 0.45, y, -r + d, c)
+        m.box(x - 0.2, y - ln - 0.5, -r, x + 0.2, y - ln, -r + d * 0.6, c)
+
+def bumps(m, cols, r, y1, y2, seed, n=40, s=0.7, top=None):
+    """Curly bumps scattered over the outside of a hair mass of half-width r."""
+    import random as _r
+    rnd = _r.Random(seed)
+    for k in range(n):
+        c = cols[k % len(cols)]
+        face = rnd.randrange(4 if top else 3)
+        q = s * rnd.uniform(0.7, 1.2)
+        if face == 3:
+            x, z = rnd.uniform(-r + 1, r - 1), rnd.uniform(-r + 1, r - 1)
+            m.box(x - q, top - 0.2, z - q, x + q, top + q * 0.8, z + q, c)
+            continue
+        y = rnd.uniform(y1, y2)
+        u = rnd.uniform(-r + 0.6, r - 0.6)
+        if face == 0:
+            m.box(u - q, y - q, r - 0.2, u + q, y + q, r + q * 0.8, c)
+        else:
+            sd = -1 if face == 1 else 1
+            m.box(*xs(sd, r - 0.2, r + q * 0.8)[:1], y - q, u - q, xs(sd, r - 0.2, r + q * 0.8)[1], y + q, u + q, c)
+
+def afro(m, cols, seed, lumpy=True):
+    c = cols[0]
+    rbox(m, -6.4, 2.6, -6.0, 6.4, 9.6, 6.4, c, r=1.8)                                     # big crown mass
+    for sd in (-1, 1):
+        rbox(m, *xs(sd, 4.6, 6.4)[:1], -2.2, -3.8, xs(sd, 4.6, 6.4)[1], 3.2, 6.4, c, r=0.8)
+    m.box(-6.0, -2.2, 4.6, 6.0, 3.2, 6.4, c)
+    if lumpy:
+        bumps(m, cols, 6.4, -1.8, 9.0, seed, n=46, s=0.7, top=9.6)
+    for k, x in enumerate((-4.6, -2.6, -0.6, 1.4, 3.4, 5.0)):                              # bumpy front hairline
+        m.box(x - 0.8, 2.0 + (k % 2) * 0.4, -6.2, x + 0.8, 3.4, -5.6, cols[k % len(cols)])
+
+@design("afro_black", "Black Afro", "hair")
+def _(m): afro(m, ('#1d1714', '#2a221c', '#140f0c'), 11)
+
+@design("afro_rainbow", "Rainbow Afro", "hair")
+def _(m):
+    R = ('#ff3d5a', '#ff8a1f', '#ffd23a', '#3ad06a', '#3aa6e3', '#9a5ae0')
+    afro(m, ('#9a5ae0',) + R, 12, lumpy=False)
+    for k, c in enumerate(R):                                                             # stacked colour bands
+        y = 9.6 - (k + 1) * 7.0 / 6
+        rbox(m, -6.5, y, -6.1, 6.5, y + 7.0 / 6, 6.5, c, r=1.8, top=(k == 0))
+
+@design("mohawk_green", "Green Mohawk", "hair")
+def _(m):
+    G, GD, SH = '#3ad06a', '#1f9a4a', '#3a3530'
+    hair_cap(m, SH, r=4.7, top=4.9, fringe=3.6, side=1.0, back=-1.0)                      # buzzed sides
+    for i, (z, h) in enumerate(((-4.6, 2.4), (-3.0, 3.6), (-1.2, 4.2), (0.6, 4.2), (2.4, 3.6), (4.0, 2.8))):
+        prong(m, 0.0, z, False, 4.8, 1.8, h, (G, GD)[i % 2], t=1.4, n=4)                    # spikes front to back
+    m.box(-0.8, 4.6, -5.0, 0.8, 5.6, 5.0, G)
+
+@design("spiky_anime_hair", "Spiky Anime Hair", "hair")
+def _(m):
+    Y, YD, YL = '#ffd23a', '#e8a81a', '#fff4a0'
+    hair_cap(m, Y, r=5.0, top=5.6, fringe=1.6)
+    for x, z, a, h, c in ((-3.0, -2.0, ('z', 22.5, None), 4.0, Y), (3.0, -2.0, ('z', -22.5, None), 4.0, YD), (0.0, -1.0, None, 5.0, Y),
+                          (-1.6, 2.0, ('x', 22.5, None), 4.4, YD), (1.8, 2.4, ('x', 22.5, None), 4.0, Y), (-4.2, 2.6, ('z', 45, None), 3.4, Y),
+                          (4.2, 2.6, ('z', -45, None), 3.4, YD), (0.0, 4.0, ('x', 45, None), 3.6, Y)):
+        rot = (a[0], a[1], (x, 5.2, z)) if a else None
+        for k in range(4):                                                                # tapered spike
+            w = 1.9 * (1 - k / 4)
+            m.box(x - w / 2, 5.2 + k * h / 4, z - w / 2, x + w / 2, 5.2 + (k + 1) * h / 4, z + w / 2, c, rot=rot)
+    fringe_teeth(m, Y, ((-3.4, 1.2), (-1.6, 2.0), (0.2, 1.4), (2.0, 2.2), (3.6, 1.0)), 1.8)
+    m.box(-2.6, 4.6, -5.1, -1.2, 5.0, -5.0, YL)
+
+def tail(m, x, z, y_top, segs, c, c2=None, tie=None, w=1.6):
+    """Hanging tail of hair: segs = [(dx, dz, h, w_scale), ...] from the top down."""
+    y = y_top
+    for k, (dx, dz, h, sc) in enumerate(segs):
+        ww = w * sc
+        m.box(x + dx - ww / 2, y - h, z + dz - ww / 2, x + dx + ww / 2, y, z + dz + ww / 2, (c, c2 or c)[k % 2])
+        y -= h
+    if tie:
+        m.box(x + segs[0][0] - w * 0.6, y_top - 0.6, z + segs[0][1] - w * 0.6, x + segs[0][0] + w * 0.6, y_top - 0.1, z + segs[0][1] + w * 0.6, tie)
+
+@design("twin_tails", "Twin Tails", "hair")
+def _(m):
+    B, BD, R = '#3aa6e3', '#2a86c3', '#ff5cb8'
+    hair_cap(m, B, top=5.6, fringe=2.0)
+    fringe_teeth(m, B, ((-3.4, 0.8), (-1.4, 1.4), (0.6, 1.0), (2.6, 1.4), (3.8, 0.8)), 2.2)
+    for sd in (-1, 1):
+        rbox(m, *xs(sd, 4.6, 6.6)[:1], 3.0, 0.6, xs(sd, 4.6, 6.6)[1], 5.6, 3.0, R, r=0.5)   # ties
+        tail(m, sd * 6.4, 1.8, 4.4, [(0, 0, 2.0, 1.2), (sd * 0.4, 0.2, 2.4, 1.3), (sd * 0.6, 0.4, 2.6, 1.2), (sd * 0.4, 0.6, 2.4, 1.0), (0, 0.6, 1.6, 0.7)], B, BD, w=2.0)
+    streaks(m, BD, r=5.0, y1=-0.6, y2=5.0, seed=21, n=12)
+
+@design("space_buns", "Space Buns", "hair")
+def _(m):
+    P, PD, PL = '#ff8ac8', '#e86aa8', '#ffc4e4'
+    hair_cap(m, P, top=5.4, fringe=2.6)
+    for sd in (-1, 1):
+        x = sd * 2.8
+        rbox(m, x - 1.9, 5.0, -1.4, x + 1.9, 8.4, 2.2, P, r=0.9)                          # buns
+        m.box(x - 1.4, 6.0, -1.5, x - 0.8, 7.8, -1.4, PD) if sd > 0 else m.box(x + 0.8, 6.0, -1.5, x + 1.4, 7.8, -1.4, PD)
+        m.box(x - 2.0, 5.0, -1.5, x + 2.0, 5.6, 2.3, PL)                                  # scrunchie
+    fringe_teeth(m, P, ((-2.6, 1.0), (0.0, 1.4), (2.6, 1.0)), 2.8)
+    streaks(m, PD, y1=-0.6, seed=22, n=10)
+
+@design("long_hair_brown", "Long Brown Hair", "hair")
+def _(m):
+    B, BD, BL = '#6b4326', '#4a2e1a', '#8a5a36'
+    hair_cap(m, B, top=5.6, fringe=2.4, side=-8.0, back=-9.0, side_z=-3.6)
+    m.box(-5.0, -9.0, 4.0, 5.0, -8.4, 5.0, BD)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.0, 5.0)[:1], -8.0, -5.0, xs(sd, 4.0, 5.0)[1], 2.4, -3.6, B)          # front locks
+    streaks(m, BD, y1=-8.6, y2=5.0, seed=23, n=20)
+    streaks(m, BL, y1=-7.0, y2=4.0, seed=24, n=8)
+    fringe_teeth(m, B, ((-3.6, 0.6), (-1.6, 1.0), (0.6, 0.8), (2.8, 1.0)), 2.6)
+
+@design("pompadour", "Pompadour", "hair")
+def _(m):
+    K, KD, KL = '#2a2018', '#1a140e', '#4a3a2a'
+    hair_cap(m, K, r=4.8, top=5.2, fringe=3.4, side=0.0, back=-1.4)
+    rbox(m, -3.8, 4.4, -5.6, 3.8, 6.6, 2.0, K, r=1.2)                                     # big quiff rolling forward
+    rbox(m, -3.4, 6.2, -6.6, 3.4, 7.8, 0.6, K, r=1.0)
+    rbox(m, -2.8, 7.4, -7.2, 2.8, 8.4, -1.6, K, r=0.8)
+    m.box(-1.8, 7.6, -7.25, -1.2, 8.2, -7.2, KL)                                          # shine
+    m.box(-1.6, 8.4, -6.0, -1.0, 8.45, -2.4, KL)
+
+@design("mullet", "Mullet", "hair")
+def _(m):
+    B, BD = '#c8903a', '#9a6a2a'
+    hair_cap(m, B, r=4.9, top=5.2, fringe=3.2, side=0.6, back=-8.2)                        # business up front...
+    m.box(-4.9, -8.2, 4.9, 4.9, -2.0, 5.5, B)                                             # ...party in the back
+    for x in (-3.6, -1.6, 0.4, 2.4):
+        m.box(x, -9.0, 4.0, x + 1.4, -8.2, 5.4, B)
+    streaks(m, BD, r=4.9, y1=-8.0, y2=4.6, seed=25, n=16)
+    fringe_teeth(m, B, ((-2.4, 0.6), (0.0, 0.9), (2.4, 0.6)), 3.4, r=4.9)
+
+@design("ponytail_blonde", "Blonde Ponytail", "hair")
+def _(m):
+    Y, YD, R = '#f4d27a', '#d8b050', '#ff5c7a'
+    hair_cap(m, Y, top=5.4, fringe=2.6)
+    tail(m, 0.0, 5.8, 5.4, [(0, 0, 1.0, 1.0), (0, 0.6, 2.0, 1.3), (0, 0.9, 2.4, 1.3), (0, 1.0, 2.4, 1.1), (0, 0.9, 2.0, 0.8), (0, 0.7, 1.2, 0.5)], Y, YD, tie=R, w=2.0)
+    streaks(m, YD, y1=-2.6, seed=26, n=12)
+    fringe_teeth(m, Y, ((-3.4, 0.8), (-1.2, 1.2), (1.2, 1.0), (3.4, 0.8)), 2.8)
+
+@design("braids_red", "Red Braids", "hair")
+def _(m):
+    R, RD, W = '#c8402a', '#9a2a1a', '#f4f2ee'
+    hair_cap(m, R, top=5.4, fringe=2.6)
+    for sd in (-1, 1):
+        x = sd * 4.2
+        for k in range(7):                                                                # plaited braid hanging over the shoulder
+            y = 0.0 - k * 1.2
+            off = 0.25 * (1 if k % 2 else -1)
+            rbox(m, x - 0.8 + off, y - 1.2, -4.6, x + 0.8 + off, y, -3.2, (R, RD)[k % 2], r=0.3)
+        m.box(x - 0.6, -8.8, -4.5, x + 0.6, -8.4, -3.3, W)
+        for k, (dx, h) in enumerate(((-0.4, 1.0), (0.0, 1.4), (0.4, 1.0))):
+            m.box(x + dx - 0.25, -8.8 - h, -4.3, x + dx + 0.25, -8.8, -3.5, R)
+    m.box(-0.2, 4.6, -5.05, 0.2, 5.4, 5.0, RD)                                            # centre part
+    streaks(m, RD, y1=-0.6, seed=27, n=10)
+
+@design("curly_hair", "Curly Hair", "hair")
+def _(m):
+    C = ('#5a3420', '#6b4326', '#4a2a18')
+    hair_cap(m, C[0], r=5.0, top=5.6, fringe=2.4, side=-2.0, back=-3.6)
+    bumps(m, C, 5.0, -3.0, 5.0, 31, n=44, s=0.6, top=5.6)
+    for k, x in enumerate((-4.0, -2.4, -0.8, 0.8, 2.4, 4.0)):
+        rbox(m, x - 0.8, 1.6 + (k % 2) * 0.4, -5.6, x + 0.8, 3.0, -4.6, C[k % 3], r=0.3)  # curly fringe
+
+@design("bob_cut", "Bob Cut", "hair")
+def _(m):
+    K, KD, KL = '#1d1714', '#120e0c', '#3a2e28'
+    hair_cap(m, K, r=5.2, top=5.6, fringe=1.8, side=-3.4, back=-3.4, side_z=-5.2)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.0, 5.4)[:1], -3.8, -5.4, xs(sd, 4.0, 5.4)[1], -3.2, 5.4, K)          # curled-under ends
+    m.box(-5.4, -3.8, 4.6, 5.4, -3.2, 5.4, K)
+    m.box(-5.2, 1.6, -5.4, 5.2, 2.2, -5.2, K)                                             # blunt fringe edge
+    m.box(-3.0, 4.6, -5.25, -1.6, 5.0, -5.2, KL)
+    streaks(m, KD, r=5.2, y1=-3.0, seed=32, n=12)
+
+@design("emo_fringe", "Emo Fringe", "hair")
+def _(m):
+    K, KD, P = '#14121a', '#0a090e', '#7a3aff'
+    hair_cap(m, K, r=5.0, top=5.6, fringe=2.2, side=-2.0, back=-2.6)
+    rbox(m, -5.0, -1.8, -5.6, 1.6, 2.6, -4.6, K, r=0.4)                                   # swoop over one eye
+    for k, (x, ln) in enumerate(((-4.4, 1.4), (-3.2, 1.0), (-2.0, 0.8))):
+        m.box(x - 0.5, -1.8 - ln, -5.5, x + 0.5, -1.8, -4.7, K)
+    m.box(-1.0, 0.0, -5.6, 1.6, 2.6, -4.8, K, rot=('z', 22.5, (1.6, 2.6, -5.2)))
+    for x in (-3.6, -1.0, 0.8):
+        m.box(x, -0.8, -5.65, x + 0.3, 2.4, -5.6, P)                                      # purple streaks
+    streaks(m, KD, y1=-1.6, seed=33, n=10)
+
+@design("man_bun", "Man Bun", "hair")
+def _(m):
+    B, BD, K = '#5a3a22', '#3e2616', '#1d1b22'
+    hair_cap(m, B, r=4.8, top=5.2, fringe=3.6, side=0.4, back=-1.6)
+    m.box(-4.8, 4.0, -4.9, 4.8, 4.8, 4.8, B)
+    for x in (-3.0, -1.0, 1.0, 3.0):                                                      # slicked-back lines
+        m.box(x, 5.2, -3.8, x + 0.2, 5.25, 3.6, BD)
+    rbox(m, -1.8, 4.4, 3.0, 1.8, 7.4, 6.4, B, r=0.9)                                      # bun
+    m.box(-1.9, 5.2, 2.8, 1.9, 5.8, 6.5, K)                                               # hair tie
+    m.box(-1.0, 6.8, 6.4, 0.2, 7.0, 6.45, BD)
+
+@design("bowl_cut", "Bowl Cut", "hair")
+def _(m):
+    B, BD = '#8a5a2b', '#6a4220'
+    dome(m, 1.8, [(5.2, 3.2), (4.8, 0.8), (4.0, 0.5)], B)                                  # bowl
+    m.box(-5.2, 1.8, -5.2, 5.2, 2.2, 5.2, BD)                                             # straight-cut rim
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.6, 5.2)[:1], -0.6, -3.0, xs(sd, 4.6, 5.2)[1], 1.8, 5.2, B)
+    m.box(-5.2, -0.6, 4.6, 5.2, 1.8, 5.2, B)
+
+@design("rainbow_hair", "Rainbow Hair", "hair")
+def _(m):
+    R = ('#ff3d5a', '#ff8a1f', '#ffd23a', '#3ad06a', '#3aa6e3', '#9a5ae0')
+    hair_cap(m, R[0], r=5.0, top=5.6, fringe=2.6, side=-6.0, back=-7.0, side_z=-3.0)
+    for k, c in enumerate(R):                                                             # vertical colour panels down the back
+        x = -5.0 + k * 10 / 6
+        m.box(x, -7.0, 4.95, x + 10 / 6, 5.0, 5.1, c)
+    for sd in (-1, 1):
+        for k, c in enumerate(R):
+            z = -5.0 + k * 10 / 6
+            m.box(*xs(sd, 5.0, 5.1)[:1], -6.0 if z > -3.0 else 2.6, z, xs(sd, 5.0, 5.1)[1], 5.0, z + 10 / 6, c)
+    for k, c in enumerate(R):
+        x = -5.0 + k * 10 / 6
+        m.box(x, 2.6, -5.1, x + 10 / 6, 5.0, -5.0, c)
+        m.box(x + 0.2, 4.9, -4.8, x + 10 / 6 - 0.2, 5.65, 4.8, c)
+
+@design("wolf_cut", "Wolf Cut", "hair")
+def _(m):
+    G, GD, GL = '#5a5a62', '#3a3a42', '#7a7a84'
+    hair_cap(m, G, r=5.0, top=5.8, fringe=2.2, side=-4.4, back=-4.4)
+    import random as _r
+    rnd = _r.Random(41)
+    for k in range(18):                                                                   # choppy shaggy layers
+        face = k % 3
+        y = rnd.uniform(-2.6, 4.0); u = rnd.uniform(-4.4, 4.0); ln = rnd.uniform(0.8, 1.6)
+        c = (G, GD, GL)[k % 3]
+        if face == 0:
+            m.box(u, y - ln, 4.8, u + 0.9, y, 5.5, c)
+        else:
+            sd = -1 if face == 1 else 1
+            m.box(*xs(sd, 4.8, 5.5)[:1], y - ln, u, xs(sd, 4.8, 5.5)[1], y, u + 0.9, c)
+    fringe_teeth(m, G, ((-3.6, 1.4), (-2.0, 2.0), (-0.4, 1.4), (1.2, 2.2), (2.8, 1.4), (4.0, 1.0)), 2.4)
+    for x, z in ((-2.0, -1.0), (1.6, 1.4), (0.0, 3.0)):
+        m.box(x - 0.6, 5.6, z - 0.6, x + 0.6, 6.6, z + 0.6, GL)
+
+@design("pigtail_bows", "Pigtail Bows", "hair")
+def _(m):
+    B, BD, P, PL = '#8a5a36', '#6b4326', '#ff5cb8', '#ffb3e0'
+    hair_cap(m, B, top=5.4, fringe=2.6)
+    for sd in (-1, 1):
+        tail(m, sd * 5.6, 1.6, -0.6, [(0, 0, 1.4, 1.0), (sd * 0.3, 0.1, 2.0, 1.2), (sd * 0.4, 0.2, 2.2, 1.1), (sd * 0.2, 0.2, 1.4, 0.7)], B, BD, w=1.8)
+        x = sd * 5.6
+        rbox(m, x - 0.6, -1.2, 0.8, x + 0.6, 0.0, 2.4, P, r=0.3)                          # bows
+        for dz in (-1, 1):
+            m.box(x - 0.4, -1.4, 1.6 + dz * 0.6 - 0.7, x + 0.4, 0.2, 1.6 + dz * 0.6 + 0.7, PL if dz < 0 else P,
+                  rot=('x', 22.5 * dz, (x, -0.6, 1.6)))
+        m.box(x - 0.2, -2.4, 1.0, x + 0.2, -1.2, 1.4, P)
+    fringe_teeth(m, B, ((-2.6, 1.0), (0.0, 1.4), (2.6, 1.0)), 2.8)
+    streaks(m, BD, y1=-0.6, seed=42, n=10)
+
+@design("side_ponytail", "Side Ponytail", "hair")
+def _(m):
+    P, PD, Y = '#b06cff', '#8a4ae0', '#ffd23a'
+    hair_cap(m, P, top=5.4, fringe=2.4)
+    rbox(m, 4.6, 3.0, 0.0, 6.2, 5.0, 2.4, P, r=0.5)
+    tail(m, 6.6, 1.2, 4.0, [(0, 0, 1.4, 1.1), (0.4, 0.2, 2.4, 1.3), (0.6, 0.4, 2.6, 1.2), (0.4, 0.4, 2.2, 0.9), (0.2, 0.3, 1.2, 0.6)], P, PD, tie=Y, w=2.0)
+    m.box(-5.0, 1.2, -5.6, -0.4, 2.8, -4.6, P)                                            # side-swept fringe
+    fringe_teeth(m, P, ((-4.0, 1.6), (-2.6, 1.2), (-1.2, 0.8)), 1.4)
+    streaks(m, PD, y1=-0.6, seed=43, n=10)
+
+@design("viking_beard", "Viking Beard", "hair")
+def _(m):
+    O, OD, OL, S = '#d8642a', '#a84a1a', '#f08a4a', '#c9ced8'
+    rbox(m, -4.6, -7.0, -6.0, 4.6, -1.6, -4.6, O, r=0.8)                                  # beard
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.6, 5.1)[:1], -4.6, -4.6, xs(sd, 4.6, 5.1)[1], 1.0, -0.6, O)        # sideburns
+        m.box(*xs(sd, 0.3, 3.4)[:1], -2.0, -6.2, xs(sd, 0.3, 3.4)[1], -1.2, -5.0, OD)       # moustache
+        x = sd * 1.8
+        for k in range(4):                                                                # two braids
+            rbox(m, x - 0.6 + 0.2 * (k % 2), -7.0 - (k + 1) * 1.0, -5.8, x + 0.6 + 0.2 * (k % 2), -7.0 - k * 1.0, -4.8, (O, OD)[k % 2], r=0.2)
+        rbox(m, x - 0.7, -10.2, -5.9, x + 0.7, -9.4, -4.7, S, r=0.2)                      # metal beads
+    m.box(-1.6, -3.2, -6.05, 1.6, -2.6, -6.0, '#5a2010')                                  # mouth
+    streaks(m, OD, r=4.6, y1=-6.6, y2=-1.6, seed=44, n=0, front=(-6.6, -3.4))
+    for x in (-3.4, -1.0, 1.4, 3.2):
+        m.box(x, -6.6, -6.05, x + 0.3, -3.4, -6.0, OL)
+
+@design("wizard_beard", "Wizard Beard", "hair")
+def _(m):
+    W, WD, WL = '#eceff4', '#c8ccd6', '#ffffff'
+    rbox(m, -4.4, -6.0, -5.8, 4.4, -1.6, -4.6, W, r=0.8)
+    y = -6.0
+    for k, hw in enumerate((3.8, 3.2, 2.6, 2.0, 1.4, 0.8)):                                 # long tapering beard
+        rbox(m, -hw, y - 1.4, -5.6 + k * 0.1, hw, y + 0.2, -4.6 + k * 0.1, (W, WD)[k % 2], r=0.4)
+        y -= 1.3
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.4, 4.9)[:1], -3.6, -4.6, xs(sd, 4.4, 4.9)[1], 1.2, -0.8, W)
+        m.box(*xs(sd, 0.2, 3.6)[:1], -2.0, -6.1, xs(sd, 0.2, 3.6)[1], -1.0, -5.6, WL)     # moustache
+        m.box(*xs(sd, 3.0, 4.0)[:1], -3.0, -6.1, xs(sd, 3.0, 4.0)[1], -1.6, -5.6, WL)
+    for x in (-2.6, -0.8, 1.0, 2.6):
+        m.box(x, -9.0, -5.85, x + 0.2, -2.6, -5.8, WD)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 0.6, 3.4)[:1], 1.4, -4.85, xs(sd, 0.6, 3.4)[1], 2.0, -4.6, W)       # bushy brows
+
+@design("pink_waves", "Pink Waves", "hair")
+def _(m):
+    P, PD, PL = '#ff8ac8', '#e86aa8', '#ffc4e4'
+    hair_cap(m, P, r=5.0, top=5.6, fringe=2.6, side=-6.0, back=-7.0, side_z=-3.0)
+    for k in range(7):                                                                    # wavy edges
+        y = -7.0 + k * 1.6
+        off = 0.5 if k % 2 else 0.0
+        if y < 4:
+            o = 0.1 + off * 0.3
+            m.box(-5.0 - o, y, -3.0, -5.0, y + 0.8, 5.0, (PD, PL)[k % 2])
+            m.box(5.0, y, -3.0, 5.0 + o, y + 0.8, 5.0, (PD, PL)[k % 2])
+            m.box(-5.0, y, 5.0, 5.0, y + 0.8, 5.0 + o, (PD, PL)[k % 2])
+    for x in (-3.6, -1.2, 1.2, 3.6):
+        for k in range(3):
+            m.box(x + (0.4 if k % 2 else 0), -7.0 - (k + 1) * 0.8, 4.0, x + 1.2 + (0.4 if k % 2 else 0), -7.0 - k * 0.8, 5.0, P)
+    fringe_teeth(m, P, ((-3.6, 0.8), (-1.6, 1.2), (0.6, 0.8), (2.8, 1.2)), 2.8)
+
+@design("silver_hair", "Silver Hair", "hair")
+def _(m):
+    S, SD, SL = '#c9ced8', '#9aa4b8', '#ffffff'
+    hair_cap(m, S, r=5.0, top=5.6, fringe=2.0, side=-7.0, back=-8.0, side_z=-3.4)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.0, 5.0)[:1], -6.0, -5.0, xs(sd, 4.0, 5.0)[1], 2.0, -3.4, S)
+    m.box(-4.0, 3.8, -5.05, 3.6, 4.2, -5.0, SL)                                           # shine streak
+    m.box(-5.05, 3.8, -4.0, -5.0, 4.2, 4.0, SL); m.box(-4.0, 3.8, 5.0, 4.0, 4.2, 5.05, SL)
+    streaks(m, SD, y1=-7.6, y2=3.4, seed=45, n=18)
+    m.box(-5.0, 0.4, -5.6, 1.0, 2.6, -4.6, S, rot=('z', -22.5, (1.0, 2.6, -5.1)))         # swept fringe
+
+@design("ginger_curls", "Ginger Curls", "hair")
+def _(m):
+    C = ('#d8642a', '#e87a3a', '#b84a1a')
+    hair_cap(m, C[0], r=5.2, top=5.8, fringe=2.4, side=-3.0, back=-4.0)
+    bumps(m, C, 5.2, -3.6, 5.2, 46, n=40, s=0.65, top=5.8)
+    for sd in (-1, 1):                                                                    # ringlets hanging by the face
+        for k, z in enumerate((-4.2, -2.4)):
+            for j in range(4):
+                rbox(m, *xs(sd, 4.6, 5.8)[:1], -1.0 - j * 1.1 - k * 0.6, z - 0.6, xs(sd, 4.6, 5.8)[1], -1.0 - (j - 1) * 1.1 - k * 0.6, z + 0.6, C[(j + k) % 3], r=0.3)
+    for k, x in enumerate((-4.0, -2.4, -0.8, 0.8, 2.4, 4.0)):
+        rbox(m, x - 0.8, 1.6 + (k % 2) * 0.4, -5.8, x + 0.8, 3.0, -4.8, C[k % 3], r=0.3)
