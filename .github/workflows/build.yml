@@ -1,0 +1,43 @@
+name: Build plugin
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Pick Paper API version
+        id: paper
+        run: |
+          meta=$(curl -fsSL https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/maven-metadata.xml)
+          versions=$(echo "$meta" | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g')
+          echo "Newest Paper API versions:"; echo "$versions" | tail -10
+          v=$(echo "$versions" | grep '^26\.3' | tail -1)
+          [ -z "$v" ] && v=$(echo "$versions" | tail -1)
+          echo "Using $v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: mvn -B package -Dpaper.version='${{ steps.paper.outputs.version }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AconiteCosmetics
+          path: target/AconiteCosmetics-*.jar
+      - name: Publish dev build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete dev-build --yes --cleanup-tag || true
+          gh release create dev-build target/AconiteCosmetics-*.jar resourcepack/aconite_server_pack.zip \
+            --prerelease --target "$GITHUB_SHA" --title "Dev build" \
+            --notes "Built against Paper API ${{ steps.paper.outputs.version }} from ${GITHUB_REF_NAME}."

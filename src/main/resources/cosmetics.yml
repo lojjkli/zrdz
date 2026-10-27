@@ -1,0 +1,1565 @@
+# Every cosmetic on the server. To add one: add its model to the resource pack,
+# then add an entry here (or just update the pack, new models are picked up
+# automatically) and run /aconite reload.
+#
+# id:
+#   name: Shown name
+#   category: Hats & Caps        (topic in the menu, see config.yml)
+#   model: aconite:id          (optional, defaults to aconite:<id>)
+#   frames: [aconite:a, aconite:b]   (optional, makes it animated)
+#   frame-ticks: 4             (optional, ticks per frame, 20 ticks = 1 second)
+
+cat_ears_black:
+  name: "Cat Ears (Black)"
+  category: "Ears & Horns"
+cat_ears_white:
+  name: "Cat Ears (White)"
+  category: "Ears & Horns"
+cat_ears_ginger:
+  name: "Cat Ears (Ginger)"
+  category: "Ears & Horns"
+cat_ears_aconite:
+  name: "Cat Ears (Aconite)"
+  category: "Aconite & Froggie"
+cat_ears_bell:
+  name: "Kitty Ears + Bell"
+  category: "Ears & Horns"
+fox_ears:
+  name: "Fox Ears"
+  category: "Ears & Horns"
+wolf_ears:
+  name: "Wolf Ears"
+  category: "Ears & Horns"
+bunny_ears:
+  name: "Bunny Ears"
+  category: "Ears & Horns"
+bear_ears:
+  name: "Bear Ears"
+  category: "Ears & Horns"
+panda_ears:
+  name: "Panda Ears"
+  category: "Ears & Horns"
+mouse_ears:
+  name: "Mouse Ears"
+  category: "Ears & Horns"
+deer_antlers:
+  name: "Deer Antlers"
+  category: "Ears & Horns"
+axolotl_gills:
+  name: "Axolotl Gills"
+  category: "Ears & Horns"
+bee_antennae:
+  name: "Bee Antennae"
+  category: "Ears & Horns"
+alien_antennae:
+  name: "Alien Antennae"
+  category: "Ears & Horns"
+devil_horns:
+  name: "Devil Horns"
+  category: "Ears & Horns"
+demon_horns:
+  name: "Demon Horns"
+  category: "Ears & Horns"
+ram_horns:
+  name: "Ram Horns"
+  category: "Ears & Horns"
+oni_horns:
+  name: "Oni Horns"
+  category: "Ears & Horns"
+dragon_horns:
+  name: "Dragon Horns"
+  category: "Ears & Horns"
+unicorn_horn:
+  name: "Unicorn Horn"
+  category: "Ears & Horns"
+crystal_horns:
+  name: "Amethyst Horns"
+  category: "Ears & Horns"
+bone_crown:
+  name: "Bone Crown"
+  category: "Crowns & Halos"
+halo:
+  name: "Halo"
+  category: "Animated"
+angel_set:
+  name: "Angel Halo + Wings"
+  category: "Crowns & Halos"
+ender_halo:
+  name: "Ender Halo"
+  category: "Animated"
+gold_crown:
+  name: "Royal Crown"
+  category: "Crowns & Halos"
+diamond_crown:
+  name: "Diamond Crown"
+  category: "Crowns & Halos"
+ice_crown:
+  name: "Frost Crown"
+  category: "Crowns & Halos"
+fire_crown:
+  name: "Blaze Crown"
+  category: "Animated"
+tiara:
+  name: "Tiara"
+  category: "Crowns & Halos"
+laurel_wreath:
+  name: "Laurel Wreath"
+  category: "Crowns & Halos"
+aconite_crown:
+  name: "Aconite Crown"
+  category: "Aconite & Froggie"
+aconite_hairpin:
+  name: "Aconite Hairpin"
+  category: "Aconite & Froggie"
+aconite_bloom_hat:
+  name: "Aconite Bloom Hat"
+  category: "Aconite & Froggie"
+flower_crown:
+  name: "Flower Crown"
+  category: "Crowns & Halos"
+sprout:
+  name: "Little Sprout"
+  category: "Blocks & Items"
+mushroom_red:
+  name: "Red Mushroom Cap"
+  category: "Food"
+mushroom_brown:
+  name: "Brown Mushroom"
+  category: "Food"
+grass_block_hat:
+  name: "Grass Block Hat"
+  category: "Blocks & Items"
+pumpkin_hat:
+  name: "Mini Pumpkin"
+  category: "Holiday"
+cloud_hat:
+  name: "Rain Cloud"
+  category: "Fantasy"
+rainbow_arc:
+  name: "Rainbow"
+  category: "Fantasy"
+top_hat:
+  name: "Top Hat"
+  category: "Hats & Caps"
+gentleman:
+  name: "Gentleman (Hat + Monocle)"
+  category: "Hats & Caps"
+wizard_hat:
+  name: "Wizard Hat"
+  category: "Fantasy"
+witch_hat:
+  name: "Witch Hat"
+  category: "Fantasy"
+cowboy_hat:
+  name: "Cowboy Hat"
+  category: "Hats & Caps"
+beanie:
+  name: "Beanie"
+  category: "Hats & Caps"
+propeller_cap:
+  name: "Propeller Cap"
+  category: "Hats & Caps"
+baseball_cap:
+  name: "Baseball Cap"
+  category: "Hats & Caps"
+backwards_cap:
+  name: "Backwards Cap"
+  category: "Hats & Caps"
+chef_hat:
+  name: "Chef Hat"
+  category: "Hats & Caps"
+pirate_tricorn:
+  name: "Pirate Captain"
+  category: "Fantasy"
+viking_helmet:
+  name: "Viking Helmet"
+  category: "Fantasy"
+santa_hat:
+  name: "Santa Hat"
+  category: "Holiday"
+party_hat:
+  name: "Party Hat"
+  category: "Holiday"
+fez:
+  name: "Fez"
+  category: "Hats & Caps"
+beret:
+  name: "Beret"
+  category: "Hats & Caps"
+grad_cap:
+  name: "Graduation Cap"
+  category: "Hats & Caps"
+knight_helmet:
+  name: "Knight Helmet"
+  category: "Fantasy"
+bucket_hat:
+  name: "Bucket Hat"
+  category: "Hats & Caps"
+sailor_cap:
+  name: "Sailor Cap"
+  category: "Hats & Caps"
+straw_hat:
+  name: "Straw Hat"
+  category: "Hats & Caps"
+jester_hat:
+  name: "Jester Hat"
+  category: "Hats & Caps"
+deerstalker:
+  name: "Detective Cap"
+  category: "Hats & Caps"
+miner_helmet:
+  name: "Miner Helmet"
+  category: "Hats & Caps"
+astronaut:
+  name: "Astronaut Helmet"
+  category: "Fantasy"
+traffic_cone:
+  name: "Traffic Cone"
+  category: "Memes"
+ufo_hat:
+  name: "UFO"
+  category: "Fantasy"
+cake_hat:
+  name: "Birthday Cake"
+  category: "Food"
+tnt_hat:
+  name: "TNT Hat"
+  category: "Blocks & Items"
+slime_buddy:
+  name: "Slime Buddy"
+  category: "Buddies"
+chick_buddy:
+  name: "Chick Buddy"
+  category: "Buddies"
+frog_buddy:
+  name: "Frog Buddy"
+  category: "Buddies"
+pumpkin_head:
+  name: "Jack o' Lantern Head"
+  category: "Holiday"
+sunglasses:
+  name: "Shades"
+  category: "Face"
+3d_glasses:
+  name: "3D Glasses"
+  category: "Face"
+aviator_goggles:
+  name: "Aviator Goggles"
+  category: "Face"
+vr_visor:
+  name: "Cyber Visor"
+  category: "Animated"
+ninja_headband:
+  name: "Ninja Headband"
+  category: "Hair & Headbands"
+pirate_bandana:
+  name: "Bandana"
+  category: "Hair & Headbands"
+headphones:
+  name: "Headphones"
+  category: "Hats & Caps"
+cat_headphones:
+  name: "Cat Headphones"
+  category: "Hats & Caps"
+samurai_kabuto:
+  name: "Samurai Kabuto"
+  category: "Fantasy"
+phoenix_crest:
+  name: "Phoenix Crest"
+  category: "Crowns & Halos"
+knight_plume:
+  name: "Plumed Circlet"
+  category: "Crowns & Halos"
+snail_shell:
+  name: "Snail Shell"
+  category: "Buddies"
+star_antenna:
+  name: "Shooting Star"
+  category: "Ears & Horns"
+bubble_halo:
+  name: "Bubble Orbit"
+  category: "Animated"
+sky_island:
+  name: "Floating Island"
+  category: "Fantasy"
+aconite_halo:
+  name: "Aconite Halo"
+  category: "Animated"
+aconite_witch:
+  name: "Aconite Witch Hat"
+  category: "Aconite & Froggie"
+plague_mask:
+  name: "Plague Doctor Mask"
+  category: "Face"
+ghost_sheet:
+  name: "Spooky Ghost"
+  category: "Holiday"
+coquette_bow:
+  name: "Coquette Bow"
+  category: "Hair & Headbands"
+heart_shades:
+  name: "Heart Shades"
+  category: "Face"
+kitsune_mask:
+  name: "Kitsune Mask"
+  category: "Face"
+happy_ghast:
+  name: "Happy Ghast"
+  category: "Buddies"
+copper_golem:
+  name: "Copper Golem Buddy"
+  category: "Buddies"
+capybara:
+  name: "Capybara Buddy"
+  category: "Buddies"
+shark_hood:
+  name: "Shark Hood"
+  category: "Buddies"
+frog_bucket:
+  name: "Froggy Bucket Hat"
+  category: "Buddies"
+strawberry_hat:
+  name: "Strawberry Hat"
+  category: "Food"
+boba_buddy:
+  name: "Boba Tea Buddy"
+  category: "Food"
+gaming_headset:
+  name: "RGB Gaming Headset"
+  category: "Hats & Caps"
+butterfly_clips:
+  name: "Butterfly Clips"
+  category: "Hair & Headbands"
+star_clips:
+  name: "Star Clips"
+  category: "Hair & Headbands"
+cherry_blossom_crown:
+  name: "Cherry Blossom Crown"
+  category: "Crowns & Halos"
+heart_halo:
+  name: "Heart Halo"
+  category: "Animated"
+allay_buddy:
+  name: "Allay Buddy"
+  category: "Buddies"
+sniffer_buddy:
+  name: "Sniffer Buddy"
+  category: "Buddies"
+duck_buddy:
+  name: "Duck Buddy (Shades)"
+  category: "Buddies"
+neon_horns:
+  name: "Neon Cyber Horns"
+  category: "Animated"
+bear_beanie:
+  name: "Bear Beanie"
+  category: "Hats & Caps"
+deal_with_it:
+  name: "Deal With It Shades"
+  category: "Memes"
+chicken_jockey:
+  name: "Chicken Jockey"
+  category: "Memes"
+lava_chicken:
+  name: "Lava Chicken"
+  category: "Memes"
+banana_cat:
+  name: "Banana Cat"
+  category: "Memes"
+bread_face:
+  name: "Bread Face"
+  category: "Memes"
+tinfoil_hat:
+  name: "Tinfoil Hat"
+  category: "Memes"
+bucket_head:
+  name: "Bucket Head"
+  category: "Memes"
+shiba_buddy:
+  name: "Shiba Buddy"
+  category: "Buddies"
+fish_slap:
+  name: "Fish On Head"
+  category: "Memes"
+groucho_disguise:
+  name: "Disguise Glasses"
+  category: "Memes"
+clown_wig:
+  name: "Clown Wig"
+  category: "Memes"
+herobrine_eyes:
+  name: "Herobrine Eyes"
+  category: "Face"
+watermelon_helmet:
+  name: "Watermelon Helmet"
+  category: "Food"
+taggy_buddy:
+  name: "Taggy Buddy"
+  category: "Aconite & Froggie"
+taggy_wave:
+  name: "Taggy Waving"
+  category: "Aconite & Froggie"
+froggie_buddy:
+  name: "Froggie Buddy"
+  category: "Aconite & Froggie"
+froglight_crown:
+  name: "Froglight Crown"
+  category: "Aconite & Froggie"
+taggy_froggie_duo:
+  name: "Taggy & Froggie Duo"
+  category: "Aconite & Froggie"
+froggie_hat:
+  name: "Froggie Hat"
+  category: "Aconite & Froggie"
+taggy_rides_froggie:
+  name: "Taggy Rides Froggie"
+  category: "Aconite & Froggie"
+taggy_peek:
+  name: "Taggy Peekaboo"
+  category: "Aconite & Froggie"
+taggy_headphones:
+  name: "Taggy Headphones"
+  category: "Aconite & Froggie"
+six_seven:
+  name: "6-7"
+  category: "Memes"
+six_seven_hands:
+  name: "6-7 Hands"
+  category: "Memes"
+tralalero:
+  name: "Tralalero Shark"
+  category: "Memes"
+tung_tung:
+  name: "Tung Tung Buddy"
+  category: "Memes"
+ballerina_cappuccina:
+  name: "Ballerina Cappuccina"
+  category: "Memes"
+bombardiro:
+  name: "Bombardiro Croc"
+  category: "Memes"
+matcha_latte:
+  name: "Matcha Latte"
+  category: "Memes"
+clanker_helmet:
+  name: "Clanker Helmet"
+  category: "Memes"
+dubai_chocolate:
+  name: "Dubai Chocolate"
+  category: "Memes"
+aura_farmer:
+  name: "Aura Farmer"
+  category: "Memes"
+googly_eyes:
+  name: "Googly Eyes"
+  category: "Memes"
+plunger:
+  name: "Plunger"
+  category: "Memes"
+arrow_head:
+  name: "Arrow Through Head"
+  category: "Memes"
+banana_peel:
+  name: "Banana Peel"
+  category: "Memes"
+dizzy_stars:
+  name: "Dizzy Stars"
+  category: "Memes"
+cheese_hat:
+  name: "Cheese Wedge Hat"
+  category: "Food"
+frying_pan:
+  name: "Frying Pan + Egg"
+  category: "Memes"
+toaster_hat:
+  name: "Toaster Hat"
+  category: "Memes"
+big_brain:
+  name: "Big Brain"
+  category: "Memes"
+duck_floatie:
+  name: "Duck Floatie"
+  category: "Memes"
+engineer_goggles:
+  name: "Engineer's Goggles"
+  category: "Face"
+froggie_strawberry:
+  name: "Froggie Strawberry Hat"
+  category: "Aconite & Froggie"
+froggie_mushroom:
+  name: "Froggie Mushroom Cap"
+  category: "Aconite & Froggie"
+froggie_princess:
+  name: "Froggie Princess"
+  category: "Aconite & Froggie"
+froggie_flower_crown:
+  name: "Froggie Flower Crown"
+  category: "Aconite & Froggie"
+axolotl_buddy:
+  name: "Axolotl Buddy"
+  category: "Buddies"
+bee_buddy:
+  name: "Bee Buddy"
+  category: "Buddies"
+sleepy_fox:
+  name: "Sleepy Fox"
+  category: "Buddies"
+cat_loaf:
+  name: "Cat Loaf"
+  category: "Buddies"
+penguin_buddy:
+  name: "Penguin Buddy"
+  category: "Buddies"
+baby_hippo:
+  name: "Baby Hippo"
+  category: "Buddies"
+hamster_buddy:
+  name: "Hamster Buddy"
+  category: "Buddies"
+raccoon_buddy:
+  name: "Raccoon Buddy"
+  category: "Buddies"
+warden_tendrils:
+  name: "Warden Tendrils"
+  category: "Ears & Horns"
+totem_halo:
+  name: "Totem Halo"
+  category: "Animated"
+end_crystal_hat:
+  name: "End Crystal Hat"
+  category: "Fantasy"
+wither_crown:
+  name: "Wither Crown"
+  category: "Crowns & Halos"
+blaze_halo:
+  name: "Blaze Halo"
+  category: "Animated"
+baby_dragon:
+  name: "Baby Ender Dragon"
+  category: "Buddies"
+turtle_helmet:
+  name: "Turtle Shell Helmet"
+  category: "Blocks & Items"
+armadillo_buddy:
+  name: "Armadillo Buddy"
+  category: "Buddies"
+breeze_buddy:
+  name: "Breeze Buddy"
+  category: "Buddies"
+planet_orbit:
+  name: "Planet Orbit"
+  category: "Fantasy"
+chimpanzini_bananini:
+  name: "Chimpanzini Bananini"
+  category: "Memes"
+lirili_larila:
+  name: "Lirili Larila"
+  category: "Memes"
+brr_patapim:
+  name: "Brr Brr Patapim"
+  category: "Memes"
+cappuccino_assassino:
+  name: "Cappuccino Assassino"
+  category: "Memes"
+lightbulb_idea:
+  name: "Lightbulb Idea"
+  category: "Memes"
+fishbowl_helmet:
+  name: "Fishbowl Helmet"
+  category: "Memes"
+ice_cream_splat:
+  name: "Ice Cream Splat"
+  category: "Memes"
+spaghetti_hair:
+  name: "Spaghetti Hair"
+  category: "Memes"
+lampshade:
+  name: "Lampshade"
+  category: "Memes"
+rubber_chicken:
+  name: "Rubber Chicken"
+  category: "Memes"
+cone_of_shame:
+  name: "Cone of Shame"
+  category: "Memes"
+pancake_stack:
+  name: "Pancake Stack"
+  category: "Food"
+bird_nest:
+  name: "Bird Nest"
+  category: "Buddies"
+hot_dog_hat:
+  name: "Hot Dog Hat"
+  category: "Food"
+pizza_slice:
+  name: "Pizza Slice"
+  category: "Food"
+snorkel_mask:
+  name: "Snorkel Mask"
+  category: "Face"
+angler_light:
+  name: "Angler Light"
+  category: "Hats & Caps"
+silly_goose:
+  name: "Silly Goose"
+  category: "Memes"
+headband_red:
+  name: "Red Headband"
+  category: "Hair & Headbands"
+headband_black:
+  name: "Black Headband"
+  category: "Hair & Headbands"
+headband_aconite:
+  name: "Aconite Headband"
+  category: "Aconite & Froggie"
+headband_rainbow:
+  name: "Rainbow Headband"
+  category: "Animated"
+headband_flame:
+  name: "Flame Headband"
+  category: "Animated"
+headband_galaxy:
+  name: "Galaxy Headband"
+  category: "Animated"
+headband_camo:
+  name: "Camo Headband"
+  category: "Hair & Headbands"
+headband_checker:
+  name: "Checker Headband"
+  category: "Hair & Headbands"
+headband_hearts:
+  name: "Heart Headband"
+  category: "Hair & Headbands"
+headband_sakura:
+  name: "Sakura Headband"
+  category: "Hair & Headbands"
+headband_ninja:
+  name: "Ninja Plate Headband"
+  category: "Hair & Headbands"
+sweatband:
+  name: "Retro Sweatband"
+  category: "Hair & Headbands"
+cat_ear_headband:
+  name: "Cat Ear Headband"
+  category: "Hair & Headbands"
+bunny_ear_headband:
+  name: "Bunny Ear Headband"
+  category: "Hair & Headbands"
+devil_headband:
+  name: "Devil Horn Headband"
+  category: "Hair & Headbands"
+heart_boppers:
+  name: "Heart Boppers"
+  category: "Hair & Headbands"
+bandana_mask_red:
+  name: "Red Bandana Mask"
+  category: "Hair & Headbands"
+bandana_mask_black:
+  name: "Black Bandana Mask"
+  category: "Hair & Headbands"
+dreads_black:
+  name: "Black Dreads"
+  category: "Hair & Headbands"
+dreads_brown:
+  name: "Brown Dreads"
+  category: "Hair & Headbands"
+dreads_blonde:
+  name: "Blonde Tip Dreads"
+  category: "Hair & Headbands"
+dreads_purple:
+  name: "Purple Ombre Dreads"
+  category: "Hair & Headbands"
+dreads_beaded:
+  name: "Beaded Dreads"
+  category: "Hair & Headbands"
+dreads_updo:
+  name: "Dread Updo"
+  category: "Hair & Headbands"
+turtle_buddy:
+  name: "Turtle Buddy"
+  category: "Buddies"
+turtle_stack:
+  name: "Turtle Stack"
+  category: "Buddies"
+turtle_egg_hat:
+  name: "Turtle Egg Nest"
+  category: "Blocks & Items"
+baby_sniffer:
+  name: "Baby Sniffer"
+  category: "Buddies"
+allay_cookie:
+  name: "Allay with Cookie"
+  category: "Buddies"
+jelly_slime:
+  name: "Jelly Slime"
+  category: "Buddies"
+bunny_buddy:
+  name: "Bunny Buddy"
+  category: "Buddies"
+eye_patch:
+  name: "Eye Patch"
+  category: "Face"
+pirate_head:
+  name: "Pirate Head"
+  category: "Fantasy"
+pirate_parrot:
+  name: "Pirate Parrot"
+  category: "Buddies"
+netherite_crown:
+  name: "Netherite Crown"
+  category: "Crowns & Halos"
+emerald_crown:
+  name: "Emerald Crown"
+  category: "Crowns & Halos"
+soul_crown:
+  name: "Soul Fire Crown"
+  category: "Crowns & Halos"
+imperial_crown:
+  name: "Imperial Crown"
+  category: "Crowns & Halos"
+void_crown:
+  name: "Void Crown"
+  category: "Crowns & Halos"
+tilted_crown:
+  name: "Tilted Crown"
+  category: "Crowns & Halos"
+medal_gold:
+  name: "Gold Medal"
+  category: "Crowns & Halos"
+medal_silver:
+  name: "Silver Medal"
+  category: "Crowns & Halos"
+medal_bronze:
+  name: "Bronze Medal"
+  category: "Crowns & Halos"
+golden_laurel:
+  name: "Golden Laurel"
+  category: "Crowns & Halos"
+trophy_hat:
+  name: "Trophy Hat"
+  category: "Crowns & Halos"
+creeper_buddy:
+  name: "Creeper Buddy"
+  category: "Buddies"
+enderman_buddy:
+  name: "Enderman Buddy"
+  category: "Buddies"
+pig_buddy:
+  name: "Pig Buddy"
+  category: "Buddies"
+cow_buddy:
+  name: "Cow Buddy"
+  category: "Buddies"
+mooshroom_buddy:
+  name: "Mooshroom Buddy"
+  category: "Buddies"
+sheep_buddy:
+  name: "Sheep Buddy"
+  category: "Buddies"
+hen_buddy:
+  name: "Hen Buddy"
+  category: "Buddies"
+wolf_pup:
+  name: "Wolf Pup"
+  category: "Buddies"
+parrot_buddy:
+  name: "Parrot Buddy"
+  category: "Buddies"
+bat_buddy:
+  name: "Bat Buddy"
+  category: "Buddies"
+strider_buddy:
+  name: "Strider Buddy"
+  category: "Buddies"
+goat_buddy:
+  name: "Goat Buddy"
+  category: "Buddies"
+camel_buddy:
+  name: "Camel Buddy"
+  category: "Buddies"
+panda_buddy:
+  name: "Panda Buddy"
+  category: "Animated"
+polar_bear_cub:
+  name: "Polar Bear Cub"
+  category: "Buddies"
+glow_squid_buddy:
+  name: "Glow Squid Buddy"
+  category: "Animated"
+dolphin_buddy:
+  name: "Dolphin Buddy"
+  category: "Buddies"
+snow_golem_buddy:
+  name: "Snow Golem Buddy"
+  category: "Buddies"
+iron_golem_buddy:
+  name: "Iron Golem Buddy"
+  category: "Buddies"
+villager_buddy:
+  name: "Villager Buddy"
+  category: "Buddies"
+llama_buddy:
+  name: "Llama Buddy"
+  category: "Buddies"
+piglin_buddy:
+  name: "Piglin Buddy"
+  category: "Buddies"
+shulker_buddy:
+  name: "Shulker Buddy"
+  category: "Buddies"
+phantom_buddy:
+  name: "Phantom Buddy"
+  category: "Buddies"
+ocelot_buddy:
+  name: "Ocelot Buddy"
+  category: "Buddies"
+diamond_ore_hat:
+  name: "Diamond Ore Hat"
+  category: "Blocks & Items"
+beacon_hat:
+  name: "Beacon Hat"
+  category: "Animated"
+jukebox_hat:
+  name: "Jukebox Hat"
+  category: "Blocks & Items"
+enchant_table_hat:
+  name: "Enchanting Table Hat"
+  category: "Animated"
+anvil_hat:
+  name: "Anvil Hat"
+  category: "Blocks & Items"
+bell_hat:
+  name: "Village Bell Hat"
+  category: "Blocks & Items"
+lantern_hat:
+  name: "Lantern Hat"
+  category: "Animated"
+soul_lantern_hat:
+  name: "Soul Lantern Rod"
+  category: "Animated"
+campfire_hat:
+  name: "Campfire Hat"
+  category: "Animated"
+honey_drip_hat:
+  name: "Honey Block Hat"
+  category: "Food"
+sponge_hat:
+  name: "Wet Sponge Hat"
+  category: "Blocks & Items"
+note_block_hat:
+  name: "Note Block Hat"
+  category: "Blocks & Items"
+hopper_hat:
+  name: "Hopper Funnel Hat"
+  category: "Blocks & Items"
+cauldron_hat:
+  name: "Bubbling Cauldron"
+  category: "Blocks & Items"
+brewing_hat:
+  name: "Brewing Stand Hat"
+  category: "Blocks & Items"
+portal_halo:
+  name: "Nether Portal Halo"
+  category: "Animated"
+end_portal_hat:
+  name: "End Portal Crown"
+  category: "Animated"
+conduit_hat:
+  name: "Conduit Hat"
+  category: "Animated"
+spyglass_monocle:
+  name: "Spyglass"
+  category: "Face"
+golden_apple_hat:
+  name: "Enchanted Golden Apple"
+  category: "Food"
+enchanted_book_hat:
+  name: "Enchanted Book Hat"
+  category: "Animated"
+sword_through_head:
+  name: "Sword Through Head"
+  category: "Memes"
+trident_crown:
+  name: "Trident Crown"
+  category: "Crowns & Halos"
+mini_elytra:
+  name: "Mini Elytra"
+  category: "Blocks & Items"
+banner_flag:
+  name: "Banner Flag Hat"
+  category: "Blocks & Items"
+sushi_hat:
+  name: "Sushi Hat"
+  category: "Food"
+taco_hat:
+  name: "Taco Hat"
+  category: "Food"
+burger_hat:
+  name: "Burger Hat"
+  category: "Food"
+donut_hat:
+  name: "Donut Hat"
+  category: "Food"
+cupcake_hat:
+  name: "Cupcake Hat"
+  category: "Food"
+popcorn_bucket:
+  name: "Popcorn Bucket"
+  category: "Food"
+ramen_bowl:
+  name: "Ramen Bowl"
+  category: "Food"
+fries_hat:
+  name: "Fries Hat"
+  category: "Food"
+pineapple_hat:
+  name: "Pineapple Hat"
+  category: "Food"
+avocado_hat:
+  name: "Avocado Buddy"
+  category: "Food"
+egg_yolk_hat:
+  name: "Eggshell Helmet"
+  category: "Food"
+croissant_hat:
+  name: "Croissant Hat"
+  category: "Food"
+milk_carton_hat:
+  name: "Milk Carton Hat"
+  category: "Food"
+sundae_hat:
+  name: "Sundae Hat"
+  category: "Food"
+cotton_candy_hair:
+  name: "Cotton Candy Hair"
+  category: "Food"
+corn_hat:
+  name: "Corn Cob Hat"
+  category: "Food"
+broccoli_hair:
+  name: "Broccoli Hair"
+  category: "Food"
+carrot_hat:
+  name: "Carrot Hat"
+  category: "Food"
+baguette_hat:
+  name: "Baguette Hat"
+  category: "Food"
+pretzel_hat:
+  name: "Pretzel Hat"
+  category: "Food"
+lemon_hat:
+  name: "Lemon Buddy"
+  category: "Food"
+cherry_clips:
+  name: "Cherry Hair Clips"
+  category: "Food"
+dumpling_hat:
+  name: "Dumpling Steamer"
+  category: "Food"
+onigiri_hat:
+  name: "Onigiri Buddy"
+  category: "Food"
+coffee_cup_hat:
+  name: "Coffee To Go"
+  category: "Food"
+fedora:
+  name: "Fedora"
+  category: "Hats & Caps"
+bowler_hat:
+  name: "Bowler Hat"
+  category: "Hats & Caps"
+pompom_beanie:
+  name: "Pompom Beanie"
+  category: "Hats & Caps"
+trapper_hat:
+  name: "Trapper Hat"
+  category: "Hats & Caps"
+sombrero:
+  name: "Sombrero"
+  category: "Hats & Caps"
+pharaoh_headdress:
+  name: "Pharaoh Headdress"
+  category: "Fantasy"
+sun_visor:
+  name: "Sun Visor"
+  category: "Face"
+newsboy_cap:
+  name: "Newsboy Cap"
+  category: "Hats & Caps"
+captain_hat:
+  name: "Captain Hat"
+  category: "Hats & Caps"
+police_cap:
+  name: "Officer Cap"
+  category: "Hats & Caps"
+firefighter_helmet:
+  name: "Firefighter Helmet"
+  category: "Hats & Caps"
+hard_hat:
+  name: "Hard Hat"
+  category: "Hats & Caps"
+football_helmet:
+  name: "Football Helmet"
+  category: "Hats & Caps"
+bike_helmet:
+  name: "Bike Helmet"
+  category: "Hats & Caps"
+flat_cap:
+  name: "Flat Cap"
+  category: "Hats & Caps"
+nurse_cap:
+  name: "Nurse Cap"
+  category: "Hats & Caps"
+bunny_hood:
+  name: "Bunny Hood"
+  category: "Hats & Caps"
+frog_hood:
+  name: "Frog Hood"
+  category: "Hats & Caps"
+dino_hood:
+  name: "Dino Hood"
+  category: "Hats & Caps"
+bear_hood:
+  name: "Bear Hood"
+  category: "Hats & Caps"
+bonnet:
+  name: "Flower Bonnet"
+  category: "Hats & Caps"
+boater_hat:
+  name: "Straw Boater"
+  category: "Hats & Caps"
+jockey_cap:
+  name: "Jockey Silks Cap"
+  category: "Hats & Caps"
+diving_helmet:
+  name: "Diving Helmet"
+  category: "Hats & Caps"
+aviator_cap:
+  name: "Aviator Cap"
+  category: "Hats & Caps"
+monocle:
+  name: "Monocle"
+  category: "Face"
+round_glasses:
+  name: "Round Glasses"
+  category: "Face"
+nerd_glasses:
+  name: "Nerd Glasses"
+  category: "Face"
+star_glasses:
+  name: "Star Glasses"
+  category: "Animated"
+shutter_shades:
+  name: "Shutter Shades"
+  category: "Animated"
+cyber_visor:
+  name: "Cyber Visor"
+  category: "Animated"
+ski_goggles:
+  name: "Ski Goggles"
+  category: "Face"
+swim_goggles:
+  name: "Swim Goggles"
+  category: "Face"
+hypno_glasses:
+  name: "Hypno Glasses"
+  category: "Animated"
+pixel_shades:
+  name: "Pixel Shades"
+  category: "Face"
+laser_eyes:
+  name: "Laser Eyes"
+  category: "Animated"
+crying_tears:
+  name: "Crying Tears"
+  category: "Memes"
+curly_mustache:
+  name: "Curly Mustache"
+  category: "Face"
+clown_nose:
+  name: "Clown Nose"
+  category: "Memes"
+vampire_fangs:
+  name: "Vampire Fangs"
+  category: "Face"
+blush_stickers:
+  name: "Blush Stickers"
+  category: "Face"
+war_paint:
+  name: "War Paint"
+  category: "Face"
+surgical_mask:
+  name: "Surgical Mask"
+  category: "Face"
+gas_mask:
+  name: "Gas Mask"
+  category: "Face"
+hockey_mask:
+  name: "Hockey Mask"
+  category: "Face"
+oni_half_mask:
+  name: "Oni Half Mask"
+  category: "Face"
+masquerade_mask:
+  name: "Masquerade Mask"
+  category: "Face"
+hero_mask:
+  name: "Hero Mask"
+  category: "Face"
+sleep_mask:
+  name: "Sleep Mask"
+  category: "Memes"
+nose_ring:
+  name: "Nose Ring"
+  category: "Face"
+elf_ears:
+  name: "Elf Ears"
+  category: "Ears & Horns"
+fairy_wings_head:
+  name: "Fairy Wings"
+  category: "Ears & Horns"
+mage_circlet:
+  name: "Mage Circlet"
+  category: "Crowns & Halos"
+crystal_ball_hat:
+  name: "Crystal Ball"
+  category: "Animated"
+floating_runes:
+  name: "Floating Runes"
+  category: "Animated"
+dragon_skull_helm:
+  name: "Dragon Skull Helm"
+  category: "Fantasy"
+valkyrie_helm:
+  name: "Valkyrie Helm"
+  category: "Fantasy"
+crusader_helm:
+  name: "Crusader Helm"
+  category: "Fantasy"
+spartan_helm:
+  name: "Spartan Helm"
+  category: "Fantasy"
+mermaid_tiara:
+  name: "Mermaid Tiara"
+  category: "Crowns & Halos"
+necromancer_hood:
+  name: "Necromancer Hood"
+  category: "Fantasy"
+mushroom_spirit:
+  name: "Mushroom Spirit"
+  category: "Fantasy"
+wisp_lantern:
+  name: "Wisp Lantern"
+  category: "Animated"
+star_crown:
+  name: "Star Crown"
+  category: "Animated"
+moon_crown:
+  name: "Moon Crown"
+  category: "Crowns & Halos"
+sun_crown:
+  name: "Sun Crown"
+  category: "Animated"
+eclipse_halo:
+  name: "Eclipse Halo"
+  category: "Animated"
+potion_hat:
+  name: "Potion Hat"
+  category: "Fantasy"
+spellbook_hat:
+  name: "Spellbook Hat"
+  category: "Fantasy"
+dragon_egg_hat:
+  name: "Dragon Egg"
+  category: "Fantasy"
+griffin_feather_hat:
+  name: "Griffin Feather Hat"
+  category: "Fantasy"
+ice_queen_crown:
+  name: "Ice Queen Crown"
+  category: "Crowns & Halos"
+forest_antlers:
+  name: "Forest Antlers"
+  category: "Ears & Horns"
+jinn_lamp_hat:
+  name: "Jinn Lamp"
+  category: "Fantasy"
+cursed_helm:
+  name: "Cursed Helm"
+  category: "Fantasy"
+reindeer_antlers:
+  name: "Reindeer Antlers"
+  category: "Animated"
+elf_hat:
+  name: "Elf Hat"
+  category: "Holiday"
+snowman_hat:
+  name: "Snowman Buddy"
+  category: "Holiday"
+xmas_tree_hat:
+  name: "Christmas Tree Hat"
+  category: "Animated"
+gingerbread_buddy:
+  name: "Gingerbread Buddy"
+  category: "Holiday"
+candy_cane_horns:
+  name: "Candy Cane Horns"
+  category: "Holiday"
+mistletoe_hat:
+  name: "Mistletoe Hat"
+  category: "Holiday"
+snowflake_crown:
+  name: "Snowflake Crown"
+  category: "Animated"
+new_year_tiara:
+  name: "New Year Tiara"
+  category: "Holiday"
+easter_bunny_hat:
+  name: "Easter Bunny Hat"
+  category: "Holiday"
+egg_basket_hat:
+  name: "Egg Basket Hat"
+  category: "Holiday"
+cupid_halo:
+  name: "Cupid Halo"
+  category: "Holiday"
+leprechaun_hat:
+  name: "Leprechaun Hat"
+  category: "Holiday"
+shamrock_crown:
+  name: "Shamrock Crown"
+  category: "Holiday"
+jack_lantern_hat:
+  name: "Jack-o'-Lantern Buddy"
+  category: "Animated"
+spider_web_hat:
+  name: "Spider Web Hat"
+  category: "Holiday"
+bat_headband:
+  name: "Bat Headband"
+  category: "Holiday"
+mummy_wraps:
+  name: "Mummy Wraps"
+  category: "Holiday"
+franken_bolts:
+  name: "Franken Bolts"
+  category: "Holiday"
+candy_corn_hat:
+  name: "Candy Corn Hat"
+  category: "Holiday"
+turkey_hat:
+  name: "Turkey Hat"
+  category: "Holiday"
+firework_hat:
+  name: "Firework Hat"
+  category: "Animated"
+birthday_crown:
+  name: "Birthday Crown"
+  category: "Animated"
+lunar_dragon_hat:
+  name: "Lunar Dragon Hat"
+  category: "Holiday"
+skull_candle_hat:
+  name: "Sugar Skull Candles"
+  category: "Holiday"
+afro_black:
+  name: "Black Afro"
+  category: "Hair & Headbands"
+afro_rainbow:
+  name: "Rainbow Afro"
+  category: "Animated"
+mohawk_green:
+  name: "Green Mohawk"
+  category: "Hair & Headbands"
+spiky_anime_hair:
+  name: "Spiky Anime Hair"
+  category: "Hair & Headbands"
+twin_tails:
+  name: "Twin Tails"
+  category: "Hair & Headbands"
+space_buns:
+  name: "Space Buns"
+  category: "Hair & Headbands"
+long_hair_brown:
+  name: "Long Brown Hair"
+  category: "Hair & Headbands"
+pompadour:
+  name: "Pompadour"
+  category: "Hair & Headbands"
+mullet:
+  name: "Mullet"
+  category: "Hair & Headbands"
+ponytail_blonde:
+  name: "Blonde Ponytail"
+  category: "Hair & Headbands"
+braids_red:
+  name: "Red Braids"
+  category: "Hair & Headbands"
+curly_hair:
+  name: "Curly Hair"
+  category: "Hair & Headbands"
+bob_cut:
+  name: "Bob Cut"
+  category: "Hair & Headbands"
+emo_fringe:
+  name: "Emo Fringe"
+  category: "Hair & Headbands"
+man_bun:
+  name: "Man Bun"
+  category: "Hair & Headbands"
+bowl_cut:
+  name: "Bowl Cut"
+  category: "Hair & Headbands"
+rainbow_hair:
+  name: "Rainbow Hair"
+  category: "Animated"
+wolf_cut:
+  name: "Wolf Cut"
+  category: "Hair & Headbands"
+pigtail_bows:
+  name: "Pigtail Bows"
+  category: "Hair & Headbands"
+side_ponytail:
+  name: "Side Ponytail"
+  category: "Hair & Headbands"
+viking_beard:
+  name: "Viking Beard"
+  category: "Hair & Headbands"
+wizard_beard:
+  name: "Wizard Beard"
+  category: "Hair & Headbands"
+pink_waves:
+  name: "Pink Waves"
+  category: "Hair & Headbands"
+silver_hair:
+  name: "Silver Hair"
+  category: "Hair & Headbands"
+ginger_curls:
+  name: "Ginger Curls"
+  category: "Hair & Headbands"
+ladybug_buddy:
+  name: "Ladybug Buddy"
+  category: "Buddies"
+butterfly_buddy:
+  name: "Butterfly Buddy"
+  category: "Buddies"
+caterpillar_buddy:
+  name: "Caterpillar Buddy"
+  category: "Buddies"
+octopus_buddy:
+  name: "Octopus Buddy"
+  category: "Buddies"
+jellyfish_hat:
+  name: "Jellyfish Hat"
+  category: "Animated"
+crab_buddy:
+  name: "Crab Buddy"
+  category: "Buddies"
+starfish_clip:
+  name: "Starfish Clip"
+  category: "Hair & Headbands"
+seal_buddy:
+  name: "Seal Buddy"
+  category: "Buddies"
+otter_buddy:
+  name: "Otter Buddy"
+  category: "Buddies"
+sloth_buddy:
+  name: "Sloth Buddy"
+  category: "Buddies"
+koala_buddy:
+  name: "Koala Buddy"
+  category: "Buddies"
+red_panda_buddy:
+  name: "Red Panda Buddy"
+  category: "Buddies"
+owl_buddy:
+  name: "Owl Buddy"
+  category: "Animated"
+hedgehog_buddy:
+  name: "Hedgehog Buddy"
+  category: "Buddies"
+mouse_buddy:
+  name: "Mouse Buddy"
+  category: "Buddies"
+trex_buddy:
+  name: "T-Rex Buddy"
+  category: "Buddies"
+corgi_buddy:
+  name: "Corgi Buddy"
+  category: "Animated"
+kitten_cup:
+  name: "Kitten in a Cup"
+  category: "Animated"
+puppy_pile:
+  name: "Puppy Pile"
+  category: "Buddies"
+snail_racer:
+  name: "Snail Racer"
+  category: "Buddies"
+worm_buddy:
+  name: "Worm Buddy"
+  category: "Buddies"
+ghost_buddy:
+  name: "Ghost Buddy"
+  category: "Buddies"
+mini_whale:
+  name: "Mini Whale"
+  category: "Buddies"
+chameleon_buddy:
+  name: "Chameleon Buddy"
+  category: "Buddies"
+duckling_trio:
+  name: "Duckling Trio"
+  category: "Buddies"
+disco_ball_hat:
+  name: "Disco Ball"
+  category: "Animated"
+police_siren_hat:
+  name: "Police Siren"
+  category: "Animated"
+rgb_headset:
+  name: "RGB Gamer Headset"
+  category: "Animated"
+loading_halo:
+  name: "Loading Halo"
+  category: "Animated"
+marquee_crown:
+  name: "Marquee Crown"
+  category: "Animated"
+heartbeat_visor:
+  name: "Heartbeat Visor"
+  category: "Animated"
+lava_lamp_hat:
+  name: "Lava Lamp"
+  category: "Animated"
+traffic_light_hat:
+  name: "Traffic Light"
+  category: "Animated"
+fire_hair:
+  name: "Fire Hair"
+  category: "Animated"
+lightning_cloud:
+  name: "Lightning Cloud"
+  category: "Animated"
+aurora_halo:
+  name: "Aurora Halo"
+  category: "Animated"
+neon_cat_ears:
+  name: "Neon Cat Ears"
+  category: "Animated"
+pulsing_heart_hat:
+  name: "Pulsing Heart"
+  category: "Animated"
+glitch_crown:
+  name: "Glitch Crown"
+  category: "Animated"
+firefly_jar_hat:
+  name: "Firefly Jar"
+  category: "Animated"
+snow_globe_hat:
+  name: "Snow Globe"
+  category: "Animated"
+candle_crown:
+  name: "Candle Crown"
+  category: "Animated"
+sparkler_headband:
+  name: "Sparkler Headband"
+  category: "Animated"
+alarm_clock_hat:
+  name: "Alarm Clock"
+  category: "Animated"
+pixel_pet_screen:
+  name: "Pixel Pet"
+  category: "Animated"
+music_note_halo:
+  name: "Music Note Halo"
+  category: "Animated"
+cauldron_bubbles_hat:
+  name: "Bubbling Cauldron"
+  category: "Animated"
+ufo_lights_hat:
+  name: "Flashing UFO"
+  category: "Animated"
+dj_deck_hat:
+  name: "DJ Deck"
+  category: "Animated"
+rainbow_cloud_hat:
+  name: "Rainbow Cloud"
+  category: "Animated"
+basketball_hat:
+  name: "Basketball"
+  category: "Hats & Caps"
+soccer_ball_hat:
+  name: "Soccer Ball"
+  category: "Hats & Caps"
+bowling_pin_hat:
+  name: "Bowling Pin"
+  category: "Hats & Caps"
+drum_hat:
+  name: "Snare Drum"
+  category: "Hats & Caps"
+vinyl_halo:
+  name: "Vinyl Halo"
+  category: "Crowns & Halos"
+lighthouse_hat:
+  name: "Lighthouse"
+  category: "Animated"
+pufferfish_buddy:
+  name: "Pufferfish Buddy"
+  category: "Buddies"
+shark_fin_hat:
+  name: "Shark Fin"
+  category: "Buddies"
+coral_crown:
+  name: "Coral Crown"
+  category: "Crowns & Halos"
+rocket_hat:
+  name: "Rocket"
+  category: "Animated"
+satellite_dish_hat:
+  name: "Satellite Dish"
+  category: "Animated"
+paper_boat_hat:
+  name: "Paper Boat"
+  category: "Hats & Caps"
+book_stack_hat:
+  name: "Book Stack"
+  category: "Blocks & Items"
+sandcastle_hat:
+  name: "Sandcastle"
+  category: "Hats & Caps"
+ice_cream_cone_hat:
+  name: "Ice Cream Cone"
+  category: "Hats & Caps"
+cactus_hat:
+  name: "Cactus Pot"
+  category: "Hats & Caps"
+umbrella_hat:
+  name: "Umbrella Hat"
+  category: "Hats & Caps"
+pencil_ear:
+  name: "Pencil Behind Ear"
+  category: "Hats & Caps"
+paint_bucket_hat:
+  name: "Paint Bucket"
+  category: "Face"
+tiny_tent_hat:
+  name: "Camping Tent"
+  category: "Animated"
+piano_keys_headband:
+  name: "Piano Headband"
+  category: "Hair & Headbands"
+handheld_console_hat:
+  name: "Handheld Console"
+  category: "Animated"
+kite_hat:
+  name: "Kite"
+  category: "Hats & Caps"
+hot_air_balloon_hat:
+  name: "Hot Air Balloon"
+  category: "Hats & Caps"
+tiny_island_hat:
+  name: "Tiny Island"
+  category: "Hats & Caps"
