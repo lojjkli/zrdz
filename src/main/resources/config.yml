@@ -24,6 +24,7 @@ flower:
 # Topics in the cosmetics menu, in this order, with the cosmetic used as the icon.
 # A cosmetic's topic is its "category" in cosmetics.yml. New models from the pack go in "New".
 topics:
+  "Animated": disco_ball_hat
   "Aconite & Froggie": aconite_crown
   "Hats & Caps": top_hat
   "Crowns & Halos": gold_crown
