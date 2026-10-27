@@ -5990,3 +5990,390 @@ def _(m):
     for sd in (-1, 1):                                                                    # ear hoops
         for z, h in ((-1.2, 1.0), (0.2, 0.7)):
             m.box(min(sd * 4.6, sd * 4.8), -1.4 - h, z - 0.15, max(sd * 4.6, sd * 4.8), -1.4, z + 0.15, S)
+
+# ================= batch 5G: fantasy =================
+def xs(sd, a, b):
+    """Sorted x pair for a mirrored side: xs(sd, 4.6, 5.4) -> (min, max) of sd*a, sd*b."""
+    return min(sd * a, sd * b), max(sd * a, sd * b)
+
+def wing(m, sd, y0, rows, c, edge=None, z=4.7, t=0.25, sweep=-22.5, x0=0.6):
+    """Flat wing behind the head made of horizontal rows [(length, height), ...] from y0 upward."""
+    rot = ('y', sweep * sd, (sd * x0, y0, z))
+    y = y0
+    for ln, h in rows:
+        x1, x2 = xs(sd, x0, x0 + ln)
+        m.box(x1, y, z, x2, y + h, z + t, c, rot=rot)
+        if edge:
+            e1, e2 = xs(sd, x0 + ln - 0.35, x0 + ln)
+            m.box(e1, y, z - 0.03, e2, y + h, z + t + 0.03, edge, rot=rot)
+        y += h
+
+@design("elf_ears", "Elf Ears", "fantasy")
+def _(m):
+    S, SP, GD = '#f2c9a4', '#e89a8c', '#e8b84a'
+    for sd in (-1, 1):
+        for i, (a, b, y1, y2) in enumerate(((4.6, 5.4, -1.4, 1.0), (5.4, 6.2, -0.8, 1.8), (6.2, 7.0, 0.0, 2.5), (7.0, 7.7, 0.9, 3.0), (7.7, 8.2, 1.9, 3.3))):
+            x1, x2 = xs(sd, a, b)
+            m.box(x1, y1, -0.4, x2, y2, 0.5, S)
+            if i < 4:
+                m.box(x1, y1 + 0.3, -0.45, x2, y2 - 0.3, 0.0, SP)                         # inner ear
+        x1, x2 = xs(sd, 5.3, 5.8)
+        m.box(x1, -0.9, -0.55, x2, 1.5, 0.65, GD)                                         # gold cuff
+        m.box(*xs(sd, 5.8, 5.9)[:1], 0.1, -0.2, xs(sd, 5.8, 5.9)[1], 0.5, 0.3, '#7af7ff')
+
+@design("fairy_wings_head", "Fairy Wings", "fantasy")
+def _(m):
+    W1, W2, E = '#ffb3e0a0', '#a6ffefa0', '#ff5cb8'
+    for sd in (-1, 1):
+        wing(m, sd, 0.6, [(3.2, 0.8), (4.4, 1.0), (5.0, 1.2), (4.6, 1.0), (3.4, 0.8), (1.8, 0.6)], W1, E)
+        wing(m, sd, -3.4, [(2.0, 0.6), (3.2, 0.9), (3.4, 0.9), (2.4, 0.8)], W2, '#29dfeb', z=4.75)
+    for x, y in ((-3.4, 5.6), (3.0, 6.4), (5.8, 2.0), (-6.0, 3.4)):
+        star(m, x, y, 5.6, 0.3, '#ffe45c')
+
+@design("mage_circlet", "Mage Circlet", "fantasy")
+def _(m):
+    S, SD, GM = '#d8e0ec', '#9aa4b8', '#5ce1ff'
+    band(m, 2.2, 2.6, S, 4.65)
+    for sd in (-1, 1):                                                                    # swoops down to the gem
+        m.box(*xs(sd, 0.6, 2.4)[:1], 1.6, -4.85, xs(sd, 0.6, 2.4)[1], 2.0, -4.65, S, rot=('z', 22.5 * sd, (sd * 2.4, 2.2, -4.75)))
+    rbox(m, -0.7, 0.8, -5.1, 0.7, 2.2, -4.65, SD, r=0.3)
+    m.box(-0.45, 1.0, -5.25, 0.45, 2.0, -5.1, GM)
+    m.box(-0.25, 0.4, -5.2, 0.25, 0.8, -4.9, GM)                                          # teardrop tip
+    m.box(-0.2, 1.7, -5.3, 0.0, 1.9, -5.25, '#ffffff')
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.65, 4.85)[:1], 2.0, -1.0, xs(sd, 4.65, 4.85)[1], 2.8, 0.0, SD)
+
+GLOW.update({'#c88aff', '#5ce1ff'})
+@design("crystal_ball_hat", "Crystal Ball", "fantasy")
+def _(m):
+    GD, GDD, GL, IN = '#e8b84a', '#a87a2a', '#d8c8ff70', '#c88aff'
+    rbox(m, -2.4, 4.6, -2.4, 2.4, 5.4, 2.4, GDD, r=0.6)                                   # stand
+    for x, z in ((-1.8, -1.8), (1.8, -1.8), (-1.8, 1.8), (1.8, 1.8)):
+        m.box(x - 0.3, 5.4, z - 0.3, x + 0.3, 6.4, z + 0.3, GD)
+    dome(m, 5.8, [(1.8, 0.8), (2.6, 2.4), (1.8, 0.8)], GL)                                # glass ball
+    rbox(m, -1.1, 6.8, -1.1, 1.1, 8.6, 1.1, IN, r=0.4)                                     # swirling core
+    m.box(-1.6, 7.4, -0.3, 1.6, 7.8, 0.3, '#ff9fd2', rot=('y', 45, (0, 7.6, 0)))
+    m.box(-1.0, 8.0, -1.0, -0.4, 8.6, -0.4, '#ffffff')
+
+GLOW.update({'#b06cff'})
+@design("floating_runes", "Floating Runes", "fantasy")
+def _(m):
+    R = '#b06cff'
+    glyphs = [["##.", "#..", "##."], [".#.", "###", ".#."], ["#.#", ".#.", "#.#"], ["###", "..#", ".##"],
+              ["#..", "###", "..#"], ["##.", ".##", "..#"]]
+    import math as _m
+    for i, g in enumerate(glyphs):
+        a = i / len(glyphs) * 2 * _m.pi
+        x, z, y = 5.8 * _m.sin(a), -5.8 * _m.cos(a), 6.0 + (0.8 if i % 2 else 0)
+        for r, row in enumerate(g):
+            for c, ch in enumerate(row):
+                if ch == '#':
+                    px, py = x + (1 - c) * 0.5, y + (1 - r) * 0.5
+                    m.box(px - 0.25, py - 0.25, z - 0.12, px + 0.25, py + 0.25, z + 0.12, R)
+    ring(m, 4.7, 5.2, '#b06cff60', t=0.25, h=0.15)
+
+@design("dragon_skull_helm", "Dragon Skull Helm", "fantasy")
+def _(m):
+    B, BD, K, H = '#ece2c8', '#c8b894', '#1d1b22', '#3a3540'
+    dome(m, 3.0, [(5.0, 1.6), (4.6, 0.8), (3.6, 0.5)], B)                                  # skull cap
+    m.box(-4.6, 3.0, -4.6, 4.6, 3.6, 4.6, B)
+    rbox(m, -2.4, 3.0, -8.4, 2.4, 5.2, -4.6, B, r=0.6)                                    # snout over the brow
+    m.box(-2.0, 2.4, -8.0, 2.0, 3.0, -4.6, BD)                                            # upper teeth line
+    for x in (-1.6, -0.6, 0.6, 1.6):
+        m.box(x - 0.2, 1.8, -7.8, x + 0.2, 2.4, -7.4, '#ffffff')
+    for sd in (-1, 1):
+        m.box(sd * 0.9 - 0.3, 4.6, -8.45, sd * 0.9 + 0.3, 5.0, -8.0, K)                     # nostrils
+        m.box(*xs(sd, 2.0, 3.8)[:1], 4.4, -4.85, xs(sd, 2.0, 3.8)[1], 5.6, -4.4, K)        # eye sockets
+        m.box(*xs(sd, 2.6, 3.2)[:1], 4.8, -4.9, xs(sd, 2.6, 3.2)[1], 5.2, -4.85, '#ff5c3a')
+        for k, (a, b, y1, y2, z1, z2) in enumerate(((3.4, 4.4, 6.0, 7.2, 1.0, 2.6), (3.8, 4.6, 7.0, 8.4, 2.2, 3.6),
+                                                     (4.2, 4.8, 8.2, 9.4, 3.4, 4.6), (4.4, 4.9, 9.2, 10.0, 4.4, 5.6))):
+            m.box(*xs(sd, a, b)[:1], y1, z1, xs(sd, a, b)[1], y2, z2, H if k == 3 else B)  # swept horns
+
+@design("valkyrie_helm", "Valkyrie Helm", "fantasy")
+def _(m):
+    S, SD, W, WD, GD = '#c9ced8', '#8a92a2', '#ffffff', '#dce4ee', '#e8b84a'
+    dome(m, 2.6, [(4.9, 1.6), (4.5, 0.8), (3.6, 0.5)], S)
+    band(m, 2.6, 3.2, GD, 4.95)
+    m.box(-0.5, 0.0, -5.2, 0.5, 3.2, -4.6, SD)                                            # nose guard
+    for sd in (-1, 1):
+        rot = ('z', -22.5 * sd, (sd * 5.0, 3.0, 0))
+        for k, (h, z1) in enumerate(((3.4, -1.8), (4.4, -0.6), (5.2, 0.6), (5.6, 1.8), (5.0, 3.0), (3.8, 4.0))):
+            x1, x2 = xs(sd, 5.0, 5.4)
+            m.box(x1, 3.0, z1, x2, 3.0 + h, z1 + 1.2, W if k % 2 else WD, rot=rot)          # feathered wing
+        m.box(*xs(sd, 4.9, 5.5)[:1], 2.6, -2.2, xs(sd, 4.9, 5.5)[1], 3.6, 5.0, GD)
+
+@design("crusader_helm", "Crusader Helm", "fantasy")
+def _(m):
+    S, SD, K, R, GD = '#c9ced8', '#8a92a2', '#15131a', '#c8202e', '#e8b84a'
+    rbox(m, -5.0, -5.0, -5.0, 5.0, 4.4, 5.0, S, r=0.8)
+    rbox(m, -4.6, 4.4, -4.6, 4.6, 5.2, 4.6, SD, r=0.8)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 0.6, 4.2)[:1], 0.4, -5.1, xs(sd, 0.6, 4.2)[1], 1.0, -5.0, K)        # eye slits
+    m.box(-0.6, -4.4, -5.3, 0.6, 3.8, -5.0, GD)                                           # cross
+    for x in (-2.4, -1.4, 1.4, 2.4):
+        for y in (-2.4, -3.4):
+            m.box(x - 0.2, y - 0.2, -5.1, x + 0.2, y + 0.2, -5.0, K)                       # breaths
+    m.box(-0.4, 5.2, -3.8, 0.4, 5.8, 3.8, R)
+
+@design("spartan_helm", "Spartan Helm", "fantasy")
+def _(m):
+    BZ, BZD, R, RD = '#c8903a', '#9a6a2a', '#d8202e', '#a01020'
+    dome(m, 2.4, [(4.9, 1.8), (4.4, 0.8)], BZ)
+    m.box(-4.9, -4.0, 4.0, 4.9, 2.4, 4.9, BZ)                                             # neck guard
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.0, 4.9)[:1], -4.0, -4.9, xs(sd, 4.0, 4.9)[1], 2.4, 4.0, BZ)
+        m.box(*xs(sd, 1.2, 4.0)[:1], -4.2, -4.9, xs(sd, 1.2, 4.0)[1], -1.0, -4.6, BZ)    # cheek plates
+        m.box(*xs(sd, 2.4, 4.0)[:1], 1.4, -4.9, xs(sd, 2.4, 4.0)[1], 2.4, -4.6, BZ)
+    m.box(-0.5, -1.2, -5.1, 0.5, 2.4, -4.6, BZD)                                          # nose guard
+    m.box(-4.9, 2.4, -4.9, 4.9, 2.8, -4.6, BZD)
+    for i, (z, h) in enumerate(((-4.6, 1.6), (-3.0, 2.6), (-1.0, 3.0), (1.0, 3.0), (3.0, 2.6), (4.6, 2.0), (6.0, 1.2))):
+        m.box(-0.5, 5.4, z - 0.9, 0.5, 5.4 + h, z + 0.9, R if i % 2 else RD)               # horsehair crest
+    m.box(-0.6, 4.8, -4.4, 0.6, 5.6, 4.4, BZD)
+
+@design("mermaid_tiara", "Mermaid Tiara", "fantasy")
+def _(m):
+    T, TL, P, PR = '#3ad0c8', '#a6ffef', '#ff9fc8', '#fdf8f0'
+    m.box(-4.0, 4.0, -3.0, 4.0, 4.6, -2.2, T)
+    rbox(m, -1.6, 4.6, -3.0, 1.6, 7.4, -2.4, P, r=0.6)                                    # big shell
+    for x in (-1.0, 0.0, 1.0):
+        m.box(x - 0.15, 4.8, -3.05, x + 0.15, 7.2, -3.0, '#ff6fa8')
+    m.box(-0.5, 4.4, -3.2, 0.5, 5.0, -2.9, TL)
+    for sd in (-1, 1):
+        rbox(m, *xs(sd, 2.0, 3.4)[:1], 4.6, -2.9, xs(sd, 2.0, 3.4)[1], 6.0, -2.4, TL, r=0.4)
+        for k, x in enumerate((1.9, 3.6)):
+            m.box(sd * x - 0.3, 4.6, -3.1, sd * x + 0.3, 5.2, -2.6, PR)                    # pearls
+        star(m, sd * 4.0, 5.4, -2.8, 0.4, '#ffb070')
+
+@design("necromancer_hood", "Necromancer Hood", "fantasy")
+def _(m):
+    C, CD, B, G = '#2a1a3a', '#1a1024', '#ece2c8', '#5cff8a'
+    hood(m, C, frame=CD)
+    rbox(m, -1.0, 4.2, 4.6, 1.0, 6.0, 6.6, C, r=0.5)                                       # pointed tip
+    m.box(-0.5, 5.6, 6.2, 0.5, 6.4, 7.6, C)
+    for sd in (-1, 1):                                                                    # bone trim
+        for y in (-3.4, -1.0, 1.4, 3.6):
+            m.box(*xs(sd, 3.4, 4.0)[:1], y, -5.1, xs(sd, 3.4, 4.0)[1], y + 0.6, -5.0, B)
+    rbox(m, -0.9, 4.4, -5.6, 0.9, 5.8, -5.0, B, r=0.3)                                    # skull pin
+    for sd in (-1, 1):
+        m.box(sd * 0.4 - 0.2, 4.9, -5.65, sd * 0.4 + 0.2, 5.3, -5.6, G)
+    m.box(-0.5, 4.4, -5.7, 0.5, 4.6, -5.6, '#15131a')
+GLOW.add('#5cff8a')
+
+@design("mushroom_spirit", "Mushroom Spirit", "fantasy")
+def _(m):
+    R, W, ST, K = '#d8323a', '#fdf8f0', '#efe4cc', '#2a1a1a'
+    rbox(m, -1.8, 4.6, -1.8, 1.8, 7.2, 1.8, ST, r=0.6)                                    # stem body
+    eyes(m, 0.0, 5.8, -1.8, 0.7, w=0.4, h=0.55, c=K)
+    cheeks(m, 0.0, 5.5, -1.8, 1.2, w=0.4, h=0.2)
+    dome(m, 7.0, [(3.6, 0.8), (3.2, 0.8), (2.2, 0.6)], R)                                  # cap
+    for x, y in ((-2.0, 7.3), (1.6, 7.5)):                                                # spots
+        m.box(x - 0.5, y - 0.3, -3.66, x + 0.5, y + 0.4, -3.6, W)
+        m.box(-x - 0.5, y - 0.3, 3.6, -x + 0.5, y + 0.4, 3.66, W)
+    for x, y in ((-1.0, 8.0), (1.2, 8.1)):
+        m.box(x - 0.45, y - 0.3, -3.26, x + 0.45, y + 0.3, -3.2, W)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 3.6, 3.66)[:1], 7.2, -0.6, xs(sd, 3.6, 3.66)[1], 7.8, 0.6, W)
+    m.box(-0.7, 9.2, -0.7, 0.7, 9.26, 0.7, W)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 1.8, 2.6)[:1], 5.2, -0.3, xs(sd, 1.8, 2.6)[1], 5.6, 0.3, ST)        # little arms
+    for x, z in ((-3.0, -3.0), (3.2, 2.6), (2.8, -3.2)):
+        m.box(x - 0.4, 4.6, z - 0.4, x + 0.4, 5.2, z + 0.4, '#7ac04a')                    # moss tufts
+
+GLOW.update({'#7ad8ff', '#c8f4ff'})
+@design("wisp_lantern", "Wisp Lantern", "fantasy")
+def _(m):
+    I, IL, W, WL = '#3a3540', '#5a5560', '#7ad8ff', '#c8f4ff'
+    m.box(3.6, 4.6, -0.3, 4.2, 9.0, 0.3, I)                                               # hook post
+    m.box(4.2, 8.4, -0.3, 7.0, 9.0, 0.3, I)
+    m.box(6.7, 7.4, -0.15, 6.9, 8.4, 0.15, IL)
+    m.box(5.6, 4.6, -1.1, 8.0, 5.0, 1.1, I); m.box(5.6, 7.0, -1.1, 8.0, 7.4, 1.1, I)        # lantern
+    for x in (5.6, 7.6):
+        for z in (-1.1, 0.7):
+            m.box(x, 5.0, z, x + 0.4, 7.0, z + 0.4, IL)                                   # open cage posts
+    rbox(m, 6.0, 5.0, -0.8, 7.6, 6.6, 0.8, W, r=0.4)                                      # wisp inside
+    m.box(6.5, 6.6, -0.3, 7.1, 7.3, 0.3, WL)
+    for x, y, z in ((5.0, 9.6, -1.0), (8.4, 8.0, 1.2), (4.6, 7.6, 1.6)):
+        m.box(x - 0.2, y - 0.2, z - 0.2, x + 0.2, y + 0.2, z + 0.2, WL)
+    rbox(m, 2.8, 4.6, -1.0, 4.6, 5.2, 1.0, I, r=0.4)                                      # clip on the head
+
+GLOW.update({'#ffe45c', '#fff4a0'})
+@design("star_crown", "Star Crown", "fantasy")
+def _(m):
+    GD, GDD, Y, YL = '#e8b84a', '#a87a2a', '#ffe45c', '#fff4a0'
+    band(m, 3.6, 4.8, GD, 4.8); band(m, 3.6, 3.9, GDD, 4.88)
+    for k, (x, z, s) in enumerate(((0.0, -4.85, 1.0), (-3.2, -4.85, 0.6), (3.2, -4.85, 0.6))):
+        m.box(x - 0.15, 4.8, z - 0.1, x + 0.15, 5.6 + s, z + 0.1, GD)
+        star(m, x, 6.0 + s * 1.2, z, 1.1 * s, Y)
+        star(m, x, 6.0 + s * 1.2, z - 0.25, 0.5 * s, YL)
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.8, 4.9)[:1], 4.8, -0.15, xs(sd, 4.8, 4.9)[1], 6.0, 0.15, GD)
+        star(m, sd * 4.95, 6.6, 0.0, 0.7, Y, axis='x') if sd == 1 else star(m, -5.2, 6.6, 0.0, 0.7, Y, axis='x')
+    star(m, 0.0, 6.4, 4.85, 0.8, Y)
+
+@design("moon_crown", "Moon Crown", "fantasy")
+def _(m):
+    S, SD, MN, ML = '#d8e0ec', '#9aa4b8', '#fff4a0', '#ffffff'
+    band(m, 3.6, 4.6, S, 4.8); band(m, 3.6, 3.85, SD, 4.88)
+    relief(m, ["..MMM.",                                                                   # crescent
+               ".MM...",
+               "MM....",
+               "MM....",
+               "MM....",
+               ".MM...",
+               "..MMM."], -4.8, {'M': (MN, 0.4)}, cell=0.5, top=8.2, cx=0.4)
+    m.box(-0.2, 4.6, -5.0, 0.2, 4.7 + 0.3, -4.8, S)
+    for sd in (-1, 1):
+        for k, x in enumerate((1.8, 3.4)):
+            m.box(sd * x - 0.15, 4.6, -5.0, sd * x + 0.15, 5.4 + (1 - k) * 0.6, -4.8, S)
+            m.box(sd * x - 0.3, 5.4 + (1 - k) * 0.6, -5.05, sd * x + 0.3, 6.0 + (1 - k) * 0.6, -4.75, ML)
+    star(m, 1.6, 7.4, -5.0, 0.3, MN)
+GLOW.add('#fff4a0')
+
+GLOW.update({'#ff8a1f'})
+@design("sun_crown", "Sun Crown", "fantasy")
+def _(m):
+    GD, GDD, O, Y = '#e8b84a', '#a87a2a', '#ff8a1f', '#ffe45c'
+    band(m, 3.6, 4.8, GD, 4.8); band(m, 3.6, 3.9, GDD, 4.88)
+    import math as _m
+    for i, a in enumerate((-45, -22.5, 0, 22.5, 45)):                                     # rays fanning up behind the disc
+        h = 3.4 if i % 2 == 0 else 2.6
+        m.box(-0.3, 6.4, -5.0, 0.3, 6.4 + h, -4.7, O if i % 2 else Y, rot=('z', a, (0, 6.4, -4.85)))
+        m.box(-0.25, 6.4, -5.0, 0.25, 6.4 + h, -4.7, Y if i % 2 else O, rot=('z', a, (0, 6.4, -4.85)) if a in (-45, -22.5, 0, 22.5, 45) else None) if abs(a) <= 45 else None
+    rbox(m, -1.8, 4.8, -5.4, 1.8, 8.0, -4.8, O, r=0.7)                                    # sun disc
+    rbox(m, -1.1, 5.5, -5.6, 1.1, 7.3, -5.4, Y, r=0.4)
+    for sd in (-1, 1):
+        for x in (2.4, 3.8):
+            m.box(sd * x - 0.2, 4.8, -5.0, sd * x + 0.2, 5.4 + (3.8 - x), -4.7, Y)
+            m.box(sd * x - 0.3, 5.4 + (3.8 - x), -5.05, sd * x + 0.3, 6.0 + (3.8 - x), -4.65, O)
+
+@design("eclipse_halo", "Eclipse Halo", "fantasy")
+def _(m):
+    K, O, Y = '#15131a', '#ff8a1f', '#ffe45c'
+    ring(m, 7.0, 3.8, O, t=0.5, h=0.4)                                                    # corona
+    ring(m, 6.9, 3.4, K, t=0.9, h=0.6)                                                    # dark moon ring
+    for x, z in ((-4.2, 0), (4.2, 0), (0, -4.2), (0, 4.2)):
+        m.box(x - 0.3, 7.0, z - 0.3, x + 0.3, 7.4, z + 0.3, Y)
+    for x, z in ((-3.1, -3.1), (3.1, 3.1), (3.1, -3.1), (-3.1, 3.1)):
+        m.box(x - 0.2, 7.05, z - 0.2, x + 0.2, 7.35, z + 0.2, O)
+
+@design("potion_hat", "Potion Hat", "fantasy")
+def _(m):
+    GL, LQ, LQL, CK = '#e8f6ffa0', '#ff4fa0', '#ff9fd2', '#b07a40'
+    rbox(m, -2.8, 4.6, -2.8, 2.8, 8.4, 2.8, GL, r=1.0)                                    # bottle
+    rbox(m, -2.4, 4.7, -2.4, 2.4, 7.4, 2.4, LQ, r=0.8)                                    # liquid
+    m.box(-2.0, 7.4, -2.0, 2.0, 7.5, 2.0, LQL)
+    m.box(-1.0, 8.4, -1.0, 1.0, 9.8, 1.0, GL)                                             # neck
+    m.box(-1.2, 9.6, -1.2, 1.2, 10.6, 1.2, CK)                                            # cork
+    for x, y, z in ((1.2, 5.4, -2.45), (-0.8, 6.4, -2.45), (0.4, 8.6, -0.5)):
+        m.box(x - 0.25, y - 0.25, z - 0.1, x + 0.25, y + 0.25, z, '#ffffff')              # bubbles
+    m.box(-1.6, 5.4, -2.9, 1.6, 6.8, -2.85, '#f4ecd8')                                    # label (blank)
+    heart(m, 0.0, 5.8, -2.9, 0.2, LQ, t=0.06)
+GLOW.add('#ff4fa0')
+
+@design("spellbook_hat", "Spellbook Hat", "fantasy")
+def _(m):
+    CV, CVD, PG, GL, GD = '#5a2a8a', '#3a1a5a', '#f4ecd8', '#c88aff', '#e8b84a'
+    for sd in (-1, 1):                                                                    # open covers in a shallow V
+        rot = ('z', 22.5 * sd * -1, (0, 4.6, 0))
+        m.box(*xs(sd, 0.0, 4.4)[:1], 4.6, -3.0, xs(sd, 0.0, 4.4)[1], 5.0, 3.0, CV, rot=rot)
+        m.box(*xs(sd, 0.2, 4.1)[:1], 5.0, -2.7, xs(sd, 0.2, 4.1)[1], 5.6, 2.7, PG, rot=rot)
+        for z in (-1.6, -0.6, 0.4, 1.4):
+            m.box(*xs(sd, 0.8, 3.4)[:1], 5.6, z, xs(sd, 0.8, 3.4)[1], 5.65, z + 0.25, '#8a7a9a', rot=rot)
+    m.box(-0.3, 4.4, -3.0, 0.3, 5.0, 3.0, CVD)                                            # spine
+    m.box(-0.3, 4.6, -3.3, 0.3, 5.0, -3.0, GD)
+    for x, y, z in ((0.0, 7.0, 0.0), (-1.2, 8.0, 0.8), (1.0, 8.6, -0.6), (0.2, 9.6, 0.4)):  # rising magic
+        m.box(x - 0.3, y - 0.3, z - 0.3, x + 0.3, y + 0.3, z + 0.3, GL)
+    star(m, 0.0, 10.6, 0.0, 0.5, GL)
+
+@design("dragon_egg_hat", "Dragon Egg", "fantasy")
+def _(m):
+    E, ED, SP, TW, TWD = '#4a1a6a', '#2a0a3a', '#c88aff', '#8a5a2b', '#5a3a1a'
+    ring(m, 4.6, 3.4, TW, t=1.0, h=0.8); ring(m, 5.2, 3.0, TWD, t=0.8, h=0.6)              # twig nest
+    for x, z in ((-3.4, 1.0), (3.2, -1.2), (1.0, 3.6), (-1.4, -3.4)):
+        m.box(x - 0.2, 5.0, z - 1.0, x + 0.2, 5.4, z + 1.0, TWD, rot=('y', 45, (x, 5.2, z)))
+    dome(m, 5.0, [(2.2, 0.8), (2.6, 1.6), (2.2, 1.2), (1.6, 0.8), (0.9, 0.5)], E)          # egg
+    for x, y, z in ((-2.65, 6.2, 0.4), (2.65, 7.0, -0.6), (0.4, 6.0, -2.65), (-0.8, 7.6, 2.25), (1.0, 8.6, -1.65), (-1.2, 8.2, -1.65)):
+        if abs(x) >= 2.6:
+            m.box(min(x, x * 1.03), y, z - 0.35, max(x, x * 1.03), y + 0.6, z + 0.35, SP)
+        else:
+            m.box(x - 0.35, y, min(z, z * 1.03), x + 0.35, y + 0.6, max(z, z * 1.03), SP)
+    m.box(-0.2, 6.6, -2.66, 0.2, 7.6, -2.6, '#ff8a1f')                                    # glowing crack
+    m.box(0.2, 7.4, -2.66, 0.6, 8.0, -2.6, '#ff8a1f')
+
+@design("griffin_feather_hat", "Griffin Feather Hat", "fantasy")
+def _(m):
+    L, LD, F1, F2, FT = '#6b4326', '#4a2e1a', '#e8b84a', '#c8903a', '#fdf8f0'
+    dome(m, 3.4, [(5.0, 1.2), (4.4, 0.6)], L)
+    m.box(-5.6, 3.4, -5.6, 5.6, 3.8, 5.6, LD)                                             # brim
+    band(m, 3.8, 4.3, '#2a6a4a', 5.02)
+    for k, (y, z1, z2) in enumerate(((4.4, 0.2, 1.6), (5.2, 0.4, 2.4), (6.0, 0.8, 3.2), (6.8, 1.4, 3.8), (7.6, 2.0, 4.4),
+                                     (8.4, 2.8, 4.8), (9.2, 3.6, 5.2), (10.0, 4.4, 5.4), (10.8, 5.0, 5.6))):
+        rot = ('z', -22.5, (3.4, 4.4, 0))
+        m.box(2.9, y, z1, 3.9, y + 0.8, z2, (F1, F2)[k % 2] if k < 8 else FT, rot=rot)  # big plume sweeping back
+        if k < 8:
+            m.box(2.85, y, (z1 + z2) / 2 - 0.1, 3.95, y + 0.8, (z1 + z2) / 2 + 0.1, LD, rot=rot)
+
+@design("ice_queen_crown", "Ice Queen Crown", "fantasy")
+def _(m):
+    I, IL, ID, W = '#a6e8ffb0', '#e0f8ff', '#5ab8e8', '#ffffff'
+    band(m, 3.6, 4.4, IL, 4.8)
+    for i, (x, h) in enumerate(((-3.6, 2.0), (-2.4, 3.4), (-1.2, 4.6), (0.0, 6.0), (1.2, 4.6), (2.4, 3.4), (3.6, 2.0))):
+        prong(m, x, -4.6, True, 4.4, 1.2, h, I, t=0.6, n=4)                               # front spikes
+        m.box(x - 0.1, 4.4, -4.95, x + 0.1, 4.4 + h * 0.7, -4.9, W)
+    for sd in (-1, 1):
+        for z, h in ((-2.0, 2.6), (0.6, 2.0), (3.0, 1.4)):
+            prong(m, sd * 4.6, z, False, 4.4, 1.2, h, I, t=0.6, n=3)
+    rbox(m, -0.6, 4.6, -5.2, 0.6, 5.8, -4.8, ID, r=0.3)
+    for x, y in ((-4.4, 7.6), (3.8, 8.4), (0.0, 11.2)):
+        star(m, x, y, -4.8, 0.3, W)
+
+@design("forest_antlers", "Forest Antlers", "fantasy")
+def _(m):
+    W, WD, LF, LF2, FL = '#7a5a3a', '#5a3e26', '#5ec04a', '#3a9a3a', '#ff9fc8'
+    for sd in (-1, 1):
+        x = sd * 2.4
+        m.box(x - 0.4, 4.0, -0.4, x + 0.4, 7.6, 0.4, W)
+        m.box(*xs(sd, 2.4, 5.4)[:1], 6.4, -0.35, xs(sd, 2.4, 5.4)[1], 7.0, 0.35, W)
+        m.box(sd * 5.0 - 0.35, 6.4, -0.35, sd * 5.0 + 0.35, 9.4, 0.35, WD)
+        m.box(sd * 3.6 - 0.3, 7.0, -0.3, sd * 3.6 + 0.3, 8.8, 0.3, W)
+        m.box(x - 0.35, 7.6, -0.35, x + 0.35, 10.2, 0.35, WD)
+        m.box(*xs(sd, 2.4, 1.2)[:1], 9.0, -0.3, xs(sd, 2.4, 1.2)[1], 9.5, 0.3, W)
+        for (lx, ly, c) in ((x, 10.2, LF), (sd * 5.0, 9.4, LF2), (sd * 3.6, 8.8, LF), (sd * 1.1, 9.4, LF2), (sd * 5.6, 7.0, LF)):
+            m.box(lx - 0.6, ly - 0.2, -0.6, lx + 0.6, ly + 0.6, 0.6, c, rot=('y', 45, (lx, ly, 0)))
+        m.box(sd * 2.4 - 0.4, 5.6, -0.7, sd * 2.4 + 0.4, 6.4, -0.4, FL)                   # tiny blossom
+        m.box(sd * 2.4 - 0.15, 5.85, -0.8, sd * 2.4 + 0.15, 6.15, -0.7, '#ffe45c')
+    m.box(-4.0, 4.0, -0.5, 4.0, 4.6, 0.5, LF2)                                            # mossy band
+    for x in (-3.0, -1.0, 1.0, 3.0):
+        m.box(x - 0.4, 4.6, -0.5, x + 0.4, 5.0, 0.5, LF)
+
+@design("jinn_lamp_hat", "Jinn Lamp", "fantasy")
+def _(m):
+    GD, GDD, SM, SML = '#e8b84a', '#a87a2a', '#3ad0c8a0', '#a6ffefc0'
+    dome(m, 4.6, [(1.6, 0.4), (2.6, 1.2), (2.0, 0.6)], GD)                                 # lamp body
+    m.box(-0.8, 6.8, -0.8, 0.8, 7.4, 0.8, GDD)
+    m.box(-0.4, 7.4, -0.4, 0.4, 7.8, 0.4, GD)
+    m.box(-5.0, 5.6, -0.4, -2.6, 6.2, 0.4, GD)                                            # spout
+    m.box(-5.6, 6.0, -0.5, -4.8, 6.6, 0.5, GD)
+    m.box(2.6, 5.4, -0.25, 3.8, 5.8, 0.25, GDD); m.box(3.4, 5.4, -0.25, 3.8, 7.0, 0.25, GDD)   # handle
+    m.box(2.6, 6.6, -0.25, 3.8, 7.0, 0.25, GDD)
+    for k, (x, y, s) in enumerate(((-5.6, 7.2, 0.8), (-5.0, 8.4, 1.0), (-3.8, 9.4, 1.2), (-2.4, 10.0, 1.1), (-1.4, 11.0, 0.9), (-2.0, 12.0, 0.6))):
+        m.box(x - s / 2, y - s / 2, -s / 2, x + s / 2, y + s / 2, s / 2, SM if k % 2 else SML)   # magic smoke
+    m.box(-0.3, 5.6, -2.65, 0.3, 6.2, -2.55, '#ff4f6a')
+
+@design("cursed_helm", "Cursed Helm", "fantasy")
+def _(m):
+    I, ID, P, K = '#3a3540', '#25222b', '#b06cff', '#0b0b0e'
+    rbox(m, -5.0, -5.0, -5.0, 5.0, 4.6, 5.0, I, r=0.8)
+    rbox(m, -4.4, 4.6, -4.4, 4.4, 5.4, 4.4, ID, r=0.8)
+    m.box(-4.0, -0.2, -5.15, 4.0, 1.4, -5.0, K)                                           # visor slit
+    for sd in (-1, 1):
+        m.box(*xs(sd, 1.2, 3.2)[:1], 0.3, -5.2, xs(sd, 1.2, 3.2)[1], 0.9, -5.15, P)       # glowing eyes
+    m.box(-0.5, -4.6, -5.3, 0.5, 1.4, -5.0, ID)
+    for x in (-3.4, -2.2, 2.2, 3.4):
+        m.box(x - 0.15, -4.2, -5.15, x + 0.15, -1.2, -5.0, K)
+    for x, z in ((0.0, -2.6), (0.0, 0.0), (0.0, 2.6)):
+        prong(m, x, z, True, 5.4, 1.2, 2.4, ID, t=1.0, n=4)                               # spikes
+    for sd in (-1, 1):
+        m.box(*xs(sd, 5.0, 6.4)[:1], 2.4, -0.5, xs(sd, 5.0, 6.4)[1], 3.2, 0.5, ID)
+        m.box(*xs(sd, 6.0, 6.6)[:1], 3.2, -0.4, xs(sd, 6.0, 6.6)[1], 5.6, 0.4, ID)
+        m.box(*xs(sd, 6.1, 6.5)[:1], 5.6, -0.25, xs(sd, 6.1, 6.5)[1], 6.6, 0.25, P)
