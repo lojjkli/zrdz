@@ -3835,3 +3835,490 @@ def _(m):
         m.box(x1, 9.4, -0.25, x2, 9.7, 0.25, GOLD); m.box(x1, 8.0, -0.25, x2, 8.3, 0.25, GOLD)
         m.box(min(sd * 2.5, sd * 2.8), 8.0, -0.25, max(sd * 2.5, sd * 2.8), 9.7, 0.25, GOLD)
     star(m, 0, 9.6, -1.8, 0.4, '#fff4a0')
+
+
+# ======================================================================
+# BATCH 5+: 250 more. Shared helpers for chibi critters.
+# ======================================================================
+def eyes(m, cx, y, z, sep, w=0.5, h=0.6, c='#1a1418', shine='#ffffff', t=0.06):
+    """Two cute eyes on a front face at z, with a sparkle in the upper-left of each."""
+    for sd in (-1, 1):
+        x = cx + sd * sep
+        m.box(x - w / 2, y, z - t, x + w / 2, y + h, z, c)
+        if shine:
+            m.box(x + w / 2 - 0.26, y + h - 0.26, z - t - 0.02, x + w / 2 - 0.06, y + h - 0.06, z - t, shine)
+
+def cheeks(m, cx, y, z, sep, c='#ff9fb8', w=0.45, h=0.22):
+    for sd in (-1, 1):
+        m.box(cx + sd * sep - w / 2, y, z - 0.05, cx + sd * sep + w / 2, y + h, z, c)
+
+def legs4(m, c, x, z1, z2, y0, h, w=0.6, foot=None):
+    for sx in (-1, 1):
+        for z in (z1, z2):
+            m.box(sx * x - w / 2, y0, z - w / 2, sx * x + w / 2, y0 + h, z + w / 2, c)
+            if foot:
+                m.box(sx * x - w / 2 - 0.02, y0, z - w / 2 - 0.02, sx * x + w / 2 + 0.02, y0 + 0.2, z + w / 2 + 0.02, foot)
+
+def patches(m, axis, plane, out, a1, a2, y1, y2, n, cols, seed, s=0.45):
+    """Random pixel patches on one flat face (axis 'z' = front/back face, 'x' = side face, 'y' = top face)."""
+    import random as _r
+    rnd = _r.Random(seed)
+    for _ in range(n):
+        a = rnd.uniform(a1, a2 - s); b = rnd.uniform(y1, y2 - s); c = rnd.choice(cols)
+        p1, p2 = sorted((plane, plane + out * 0.04))
+        if axis == 'z':
+            m.box(a, b, p1, a + s, b + s, p2, c)
+        elif axis == 'x':
+            m.box(p1, b, a, p2, b + s, a + s, c)
+        else:
+            m.box(a, p1, b, a + s, p2, b + s, c)
+
+def tail_curl(m, x, y, z, c, s=0.3):
+    for dx, dy, dz in ((0, 0, 0), (0, s, s), (0, 2 * s, 0), (0, s, -s * 0.2)):
+        m.box(x - s / 2 + dx, y + dy, z + dz, x + s / 2 + dx, y + dy + s, z + dz + s, c)
+
+# ---------- A: mob buddies ----------
+@design("creeper_buddy", "Creeper Buddy", "cute")
+def _(m):
+    G, GD, GL, K = '#5fae46', '#3f8a32', '#8fd06a', '#1d2a1a'
+    y0 = 4.6
+    for sx in (-1, 1):
+        for z in (-1.0, 1.4):
+            m.box(sx * 0.75 - 0.5, y0, z - 0.5, sx * 0.75 + 0.5, y0 + 0.8, z + 0.5, G)
+            m.box(sx * 0.75 - 0.52, y0, z - 0.52, sx * 0.75 + 0.52, y0 + 0.2, z + 0.52, GD)
+    m.box(-1.0, y0 + 0.7, -0.6, 1.0, y0 + 2.5, 1.0, G)                                  # body
+    patches(m, 'z', -0.6, -1, -1.0, 1.0, y0 + 0.8, y0 + 2.4, 5, [GD, GL], 1, s=0.4)
+    rbox(m, -1.7, y0 + 2.3, -1.9, 1.7, y0 + 5.7, 1.5, G, r=0.25)                         # big head
+    for ax, pl, out, a1, a2 in (('x', 1.7, 1, -1.9, 1.5), ('x', -1.7, -1, -1.9, 1.5), ('z', 1.5, 1, -1.7, 1.7)):
+        patches(m, ax, pl, out, a1, a2, y0 + 2.4, y0 + 5.6, 10, [GD, GL, GD], 2 + int(pl * 3), s=0.42)
+    patches(m, 'y', y0 + 5.7, 1, -1.5, 1.5, -1.7, 1.3, 8, [GD, GL], 9, s=0.42)
+    relief(m, ["........", "........", ".EE..EE.", ".EE..EE.", "...MM...", "..MMMM..", "..MMMM..", "..M..M.."],
+           -1.9, {'E': (K, 0.06), 'M': (K, 0.06)}, cell=0.425, top=y0 + 5.7)
+    for sd in (-1, 1):
+        x = sd * 0.85
+        m.box(x + (0.425 if sd < 0 else 0) - 0.3, y0 + 4.6, -1.98, x + (0.425 if sd < 0 else 0) - 0.12, y0 + 4.78, -1.96, '#ffffff')
+    cheeks(m, 0, y0 + 3.85, -1.9, 1.35, w=0.4, h=0.3)
+
+@design("enderman_buddy", "Enderman Buddy", "cute")
+def _(m):
+    K, K2, P, PL = '#141218', '#22202a', '#d77bff', '#f4c8ff'
+    GLOW.update({P})
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.5 - 0.2, y0, -0.2, sd * 0.5 + 0.2, y0 + 2.6, 0.2, K)                # long legs
+    m.box(-0.8, y0 + 2.5, -0.4, 0.8, y0 + 3.9, 0.4, K2)                                 # body
+    for sd in (-1, 1):
+        m.box(sd * 0.8 - (0.4 if sd > 0 else 0), y0 + 1.6, -0.2, sd * 0.8 + (0.4 if sd < 0 else 0), y0 + 3.9, 0.2, K)   # long arms
+    rbox(m, -0.9, y0 + 1.4, -1.6, 0.9, y0 + 2.6, -0.4, '#5fae46', r=0.1)                 # holding a grass block
+    m.box(-0.92, y0 + 1.4, -1.62, 0.92, y0 + 2.2, -0.38, '#7a4a26')
+    patches(m, 'z', -1.62, -1, -0.9, 0.9, y0 + 1.45, y0 + 2.15, 3, ['#5e3a20', '#8a5a34'], 4, s=0.25)
+    rbox(m, -1.4, y0 + 3.8, -1.4, 1.4, y0 + 6.4, 1.4, K, r=0.2)                          # head
+    eyes(m, 0, y0 + 4.8, -1.4, 0.7, w=0.8, h=0.5, c=P)
+    for sd in (-1, 1):
+        m.box(sd * 0.7 - 0.15, y0 + 4.85, -1.47, sd * 0.7 + 0.15, y0 + 5.2, -1.46, '#7a2aa8')
+    cheeks(m, 0, y0 + 4.35, -1.4, 1.0, c='#5a2a6a')
+    for x, y in ((-2.2, 8.4), (2.0, 9.6), (-1.6, 11.0)):
+        m.box(x - 0.15, y, -0.15, x + 0.15, y + 0.3, 0.15, PL)                            # ender particles
+
+@design("pig_buddy", "Pig Buddy", "cute")
+def _(m):
+    P, PD, PL, K = '#f2a6b4', '#e08a9c', '#f9c8d2', '#1a1418'
+    y0 = 4.6
+    legs4(m, PD, 1.0, -0.9, 1.6, y0, 0.7, w=0.65)
+    rbox(m, -1.5, y0 + 0.6, -1.3, 1.5, y0 + 2.6, 2.2, P, r=0.5)                          # body
+    rbox(m, -1.4, y0 + 1.0, -3.3, 1.4, y0 + 3.6, -0.9, P, r=0.45)                        # head
+    rbox(m, -0.75, y0 + 1.4, -3.75, 0.75, y0 + 2.3, -3.3, PL, r=0.15)                    # snout
+    for sd in (-1, 1):
+        m.box(sd * 0.32 - 0.15, y0 + 1.7, -3.8, sd * 0.32 + 0.15, y0 + 2.0, -3.75, '#c06a7c')
+        m.box(sd * 0.95 - 0.45, y0 + 3.4, -2.6, sd * 0.95 + 0.45, y0 + 3.9, -1.9, PD,
+              rot=('x', -22.5, (sd * 0.95, y0 + 3.4, -2.25)))                             # flop ears
+    eyes(m, 0, y0 + 2.5, -3.3, 0.8, w=0.42, h=0.5)
+    cheeks(m, 0, y0 + 2.0, -3.3, 1.1)
+    tail_curl(m, 0, y0 + 1.8, 2.2, PD)
+
+@design("cow_buddy", "Cow Buddy", "cute")
+def _(m):
+    W, K, PK, HN = '#f4f2ee', '#2a2226', '#f2b0b8', '#e8e0c8'
+    y0 = 4.6
+    legs4(m, W, 1.0, -0.9, 1.7, y0, 0.8, w=0.6, foot=K)
+    rbox(m, -1.6, y0 + 0.7, -1.3, 1.6, y0 + 2.8, 2.4, W, r=0.45)                         # body
+    for (x, z, w, d) in ((-1.62, 0.2, 0.0, 1.4), (1.62, -0.6, 0.0, 1.2)):
+        x1, x2 = sorted((x, x + (0.05 if x > 0 else -0.05)))
+        m.box(x1, y0 + 1.3, z, x2, y0 + 2.4, z + d, K)                                   # side spots
+    m.box(-0.6, y0 + 2.8, 0.4, 0.8, y0 + 2.85, 1.6, K)
+    rbox(m, -1.4, y0 + 1.1, -3.4, 1.4, y0 + 3.8, -1.0, W, r=0.4)                         # head
+    m.box(0.3, y0 + 2.8, -3.46, 1.4, y0 + 3.8, -3.4, K)                                  # face patch
+    rbox(m, -1.0, y0 + 1.1, -3.85, 1.0, y0 + 2.1, -3.3, PK, r=0.2)                       # muzzle
+    for sd in (-1, 1):
+        m.box(sd * 0.4 - 0.12, y0 + 1.5, -3.9, sd * 0.4 + 0.12, y0 + 1.75, -3.85, '#b86a78')
+        m.box(min(sd * 1.4, sd * 2.0), y0 + 3.0, -2.4, max(sd * 1.4, sd * 2.0), y0 + 3.4, -1.9, W)   # ears
+        m.box(sd * 0.9 - 0.18, y0 + 3.8, -2.2, sd * 0.9 + 0.18, y0 + 4.5, -1.85, HN)       # horns
+    eyes(m, 0, y0 + 2.6, -3.4, 0.6, w=0.42, h=0.5)
+    m.box(-0.2, y0 + 1.4, 2.4, 0.2, y0 + 2.6, 2.7, W); m.box(-0.25, y0 + 1.1, 2.45, 0.25, y0 + 1.45, 2.75, K)   # tail
+
+@design("mooshroom_buddy", "Mooshroom Buddy", "cute")
+def _(m):
+    R, RD, W, PK = '#c03a2e', '#9a2a22', '#f4f2ee', '#f2b0b8'
+    y0 = 4.6
+    legs4(m, R, 1.0, -0.9, 1.7, y0, 0.8, w=0.6, foot=W)
+    rbox(m, -1.6, y0 + 0.7, -1.3, 1.6, y0 + 2.8, 2.4, R, r=0.45)
+    patches(m, 'x', 1.6, 1, -1.0, 2.0, y0 + 1.0, y0 + 2.6, 3, [W], 3, s=0.7)
+    patches(m, 'x', -1.6, -1, -1.0, 2.0, y0 + 1.0, y0 + 2.6, 3, [W], 5, s=0.7)
+    rbox(m, -1.4, y0 + 1.1, -3.4, 1.4, y0 + 3.8, -1.0, R, r=0.4)
+    rbox(m, -1.0, y0 + 1.1, -3.85, 1.0, y0 + 2.1, -3.3, PK, r=0.2)
+    for sd in (-1, 1):
+        m.box(sd * 0.4 - 0.12, y0 + 1.5, -3.9, sd * 0.4 + 0.12, y0 + 1.75, -3.85, '#b86a78')
+        m.box(sd * 0.9 - 0.18, y0 + 3.8, -2.2, sd * 0.9 + 0.18, y0 + 4.4, -1.85, '#e8e0c8')
+    eyes(m, 0, y0 + 2.6, -3.4, 0.6, w=0.42, h=0.5)
+    cheeks(m, 0, y0 + 2.2, -3.4, 1.0, c='#ff8a8a')
+    for x, y, z in ((-0.7, y0 + 2.8, 0.0), (0.8, y0 + 2.8, 1.4), (0.3, y0 + 3.8, -2.4)):  # red mushrooms
+        m.box(x - 0.12, y, z - 0.12, x + 0.12, y + 0.6, z + 0.12, W)
+        rbox(m, x - 0.5, y + 0.5, z - 0.5, x + 0.5, y + 0.95, z + 0.5, RED, r=0.2)
+        m.box(x - 0.2, y + 0.95, z - 0.2, x, y + 1.0, z, W)
+
+@design("sheep_buddy", "Sheep Buddy", "cute")
+def _(m):
+    W, WS, F, FD = '#f4f2ee', '#e2ded6', '#e8cdb0', '#c9a888'
+    y0 = 4.6
+    legs4(m, F, 0.9, -0.8, 1.6, y0, 0.7, w=0.5)
+    rbox(m, -1.9, y0 + 0.6, -1.5, 1.9, y0 + 3.0, 2.4, W, r=0.7)                          # fluffy wool body
+    for x, y, z in ((-1.2, y0 + 3.0, -0.6), (0.6, y0 + 3.0, 0.8), (-0.4, y0 + 3.0, 1.8), (1.3, y0 + 2.6, -1.0)):
+        rbox(m, x - 0.7, y - 0.3, z - 0.7, x + 0.7, y + 0.35, z + 0.7, (W, WS)[int(x * 10) % 2], r=0.3)
+    rbox(m, -1.0, y0 + 1.4, -3.1, 1.0, y0 + 3.2, -1.3, F, r=0.35)                        # face
+    rbox(m, -1.25, y0 + 2.8, -2.6, 1.25, y0 + 3.7, -1.2, W, r=0.35)                      # wool fringe
+    for sd in (-1, 1):
+        m.box(min(sd * 1.0, sd * 1.7), y0 + 2.2, -2.2, max(sd * 1.0, sd * 1.7), y0 + 2.6, -1.8, FD)
+    eyes(m, 0, y0 + 2.2, -3.1, 0.45, w=0.38, h=0.45)
+    cheeks(m, 0, y0 + 1.8, -3.1, 0.7, w=0.3)
+    m.box(-0.15, y0 + 1.65, -3.15, 0.15, y0 + 1.8, -3.1, FD)
+
+@design("hen_buddy", "Hen Buddy", "cute")
+def _(m):
+    W, Y, R, O = '#f4f2ee', '#f2c23a', '#e0343a', '#f29a2a'
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.5 - 0.12, y0 + 0.2, -0.12, sd * 0.5 + 0.12, y0 + 0.9, 0.12, O)
+        m.box(sd * 0.5 - 0.35, y0, -0.6, sd * 0.5 + 0.35, y0 + 0.2, 0.3, O)
+    rbox(m, -1.2, y0 + 0.8, -1.0, 1.2, y0 + 2.6, 1.8, W, r=0.45)                         # body
+    for sd in (-1, 1):
+        m.box(min(sd * 1.2, sd * 1.4), y0 + 1.2, -0.4, max(sd * 1.2, sd * 1.4), y0 + 2.2, 1.4, '#e2ded6')   # wings
+    m.box(-0.5, y0 + 2.0, 1.8, 0.5, y0 + 3.0, 2.3, W)                                   # tail
+    rbox(m, -0.8, y0 + 2.4, -1.3, 0.8, y0 + 4.4, 0.2, W, r=0.25)                         # tall head
+    m.box(-0.5, y0 + 2.9, -1.95, 0.5, y0 + 3.4, -1.3, Y)                                # beak
+    m.box(-0.25, y0 + 2.4, -1.5, 0.25, y0 + 2.95, -1.3, R)                              # wattle
+    m.box(-0.2, y0 + 4.4, -1.0, 0.2, y0 + 4.9, 0.0, R)                                  # comb
+    eyes(m, 0, y0 + 3.55, -1.3, 0.48, w=0.3, h=0.42)
+
+@design("wolf_pup", "Wolf Pup", "cute")
+def _(m):
+    G, GD, GL, K, COL = '#d6d3d0', '#a8a49f', '#f0eeea', '#1a1418', '#d8343a'
+    y0 = 4.6
+    legs4(m, G, 0.8, -0.8, 1.6, y0, 0.8, w=0.55)
+    rbox(m, -1.2, y0 + 0.7, -1.2, 1.2, y0 + 2.4, 2.0, G, r=0.4)
+    m.box(-1.25, y0 + 1.7, -1.3, 1.25, y0 + 2.15, -0.8, COL)                            # red collar
+    m.box(-0.2, y0 + 1.4, -1.35, 0.2, y0 + 1.75, -1.3, GOLD)
+    rbox(m, -1.3, y0 + 1.8, -3.0, 1.3, y0 + 4.0, -0.8, G, r=0.4)                         # head
+    rbox(m, -0.6, y0 + 1.8, -3.7, 0.6, y0 + 2.7, -2.9, GL, r=0.2)                        # snout
+    m.box(-0.22, y0 + 2.4, -3.75, 0.22, y0 + 2.7, -3.7, K)
+    for sd in (-1, 1):
+        steps(m, sd * 0.8, -1.6, y0 + 4.0, [0.8, 0.55, 0.3], G, depth=0.4, h=0.3, smooth=1)   # ears
+        m.box(sd * 0.8 - 0.2, y0 + 4.0, -1.83, sd * 0.8 + 0.2, y0 + 4.25, -1.8, '#f2b0b8')
+    eyes(m, 0, y0 + 2.95, -3.0, 0.55, w=0.4, h=0.5)
+    cheeks(m, 0, y0 + 2.6, -3.0, 0.95, w=0.35)
+    m.box(-0.25, y0 + 1.8, 2.0, 0.25, y0 + 3.4, 2.5, G, rot=('x', 22.5, (0, y0 + 1.8, 2.25)))   # wagging tail
+    m.box(-0.27, y0 + 2.9, 2.35, 0.27, y0 + 3.45, 2.85, GL, rot=('x', 22.5, (0, y0 + 1.8, 2.25)))
+
+@design("parrot_buddy", "Parrot Buddy", "cute")
+def _(m):
+    G, GD, Y, B, BK = '#4cc34a', '#2f8a32', '#f2d23a', '#2f6fd8', '#3a3540'
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.4 - 0.25, y0, -0.5, sd * 0.4 + 0.25, y0 + 0.4, 0.3, BK)
+    rbox(m, -0.9, y0 + 0.4, -0.7, 0.9, y0 + 2.8, 1.0, G, r=0.35)                         # body
+    for sd in (-1, 1):
+        x1, x2 = sorted((sd * 0.9, sd * 1.15))
+        m.box(x1, y0 + 0.8, -0.4, x2, y0 + 2.5, 1.2, GD)
+        m.box(x1, y0 + 0.8, 0.6, x2, y0 + 1.4, 1.3, B)
+    m.box(-0.35, y0 - 0.4, 1.0, 0.35, y0 + 1.2, 1.5, B, rot=('x', -22.5, (0, y0 + 1.2, 1.25)))   # tail
+    rbox(m, -0.8, y0 + 2.6, -1.0, 0.8, y0 + 4.2, 0.6, G, r=0.3)                          # head
+    m.box(-0.6, y0 + 3.9, -0.6, 0.6, y0 + 4.5, 0.2, Y)                                  # yellow crest
+    m.box(-0.3, y0 + 2.6, -1.6, 0.3, y0 + 3.3, -1.0, '#3a3540')                         # beak
+    m.box(-0.3, y0 + 3.0, -1.7, 0.3, y0 + 3.3, -1.6, '#5a5560')
+    eyes(m, 0, y0 + 3.4, -1.0, 0.45, w=0.3, h=0.4)
+
+@design("bat_buddy", "Bat Buddy", "cute")
+def _(m):
+    BR, BRD, WG, K = '#5a4636', '#3e2f24', '#2e2420', '#1a1418'
+    y0 = 4.6
+    rbox(m, -0.9, y0, -0.8, 0.9, y0 + 1.8, 0.8, BR, r=0.4)                               # round body
+    rbox(m, -1.0, y0 + 1.6, -1.0, 1.0, y0 + 3.3, 0.8, BR, r=0.35)                        # head
+    for sd in (-1, 1):
+        steps(m, sd * 0.6, -0.2, y0 + 3.3, [0.7, 0.5, 0.25], BR, depth=0.3, h=0.35, smooth=1)   # ears
+        m.box(sd * 0.6 - 0.15, y0 + 3.3, -0.37, sd * 0.6 + 0.15, y0 + 3.7, -0.35, '#c08a7a')
+        r = ('z', 22.5 * sd, (sd * 0.9, y0 + 1.4, 0))
+        m.box(min(sd * 0.9, sd * 3.4), y0 + 1.2, -0.1, max(sd * 0.9, sd * 3.4), y0 + 1.6, 0.1, BRD, rot=r)   # wing bone
+        for k, (x_end, yb) in enumerate(((1.8, y0 + 0.2), (2.6, y0 + 0.4), (3.4, y0 + 0.7))):
+            x1, x2 = sorted((sd * (0.9 + 0.9 * k), sd * x_end))
+            m.box(x1, yb, -0.05, x2, y0 + 1.3, 0.05, WG, rot=r)                          # scalloped wing
+    eyes(m, 0, y0 + 2.4, -1.0, 0.42, w=0.35, h=0.45)
+    m.box(-0.35, y0 + 2.0, -1.06, -0.15, y0 + 2.2, -1.0, '#ffffff'); m.box(0.15, y0 + 2.0, -1.06, 0.35, y0 + 2.2, -1.0, '#ffffff')   # fangs
+    cheeks(m, 0, y0 + 2.05, -1.0, 0.75, w=0.3, h=0.2)
+
+@design("strider_buddy", "Strider Buddy", "cute")
+def _(m):
+    R, RD, H, K = '#b8343a', '#8a2228', '#5a2a30', '#1a1418'
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.8 - 0.3, y0, -0.3, sd * 0.8 + 0.3, y0 + 1.8, 0.3, '#6a3a4a')          # wobbly legs
+        m.box(sd * 0.8 - 0.35, y0 + 0.9, -0.35, sd * 0.8 + 0.35, y0 + 1.0, 0.35, '#8a4a5a')
+    rbox(m, -1.6, y0 + 1.8, -1.4, 1.6, y0 + 4.0, 1.4, R, r=0.4)                          # body-head
+    for i, x in enumerate((-1.2, -0.6, 0.0, 0.6, 1.2)):                                   # wavy hair strands
+        h = 1.0 + 0.4 * (i % 2)
+        m.box(x - 0.12, y0 + 4.0, -0.2, x + 0.12, y0 + 4.0 + h, 0.2, H, rot=('z', (-22.5, 22.5)[i % 2], (x, y0 + 4.0, 0)))
+    m.box(-1.62, y0 + 1.8, -1.42, 1.62, y0 + 2.3, 1.42, RD)
+    eyes(m, 0, y0 + 2.9, -1.4, 0.6, w=0.45, h=0.6)
+    m.box(-0.5, y0 + 2.4, -1.46, 0.5, y0 + 2.55, -1.4, K)                               # little smile
+    cheeks(m, 0, y0 + 2.5, -1.4, 1.1, c='#ff8a8a')
+
+@design("goat_buddy", "Goat Buddy", "cute")
+def _(m):
+    W, WS, HN, K = '#f4f2ee', '#d8d4cc', '#a89a86', '#1a1418'
+    y0 = 4.6
+    legs4(m, WS, 0.85, -0.8, 1.6, y0, 0.9, w=0.5, foot='#5a4a3a')
+    rbox(m, -1.3, y0 + 0.8, -1.2, 1.3, y0 + 2.6, 2.0, W, r=0.45)
+    rbox(m, -1.0, y0 + 1.6, -3.0, 1.0, y0 + 3.6, -0.9, W, r=0.35)                        # head
+    m.box(-0.4, y0 + 1.0, -2.8, 0.4, y0 + 1.7, -2.4, WS)                                # beard
+    for sd in (-1, 1):
+        r = ('x', 22.5, (sd * 0.6, y0 + 3.6, -1.6))
+        m.box(sd * 0.6 - 0.2, y0 + 3.5, -1.8, sd * 0.6 + 0.2, y0 + 4.8, -1.4, HN, rot=r)    # curved horns
+        m.box(sd * 0.6 - 0.18, y0 + 4.6, -1.2, sd * 0.6 + 0.18, y0 + 4.95, -0.4, HN, rot=r)
+        m.box(min(sd * 1.0, sd * 1.7), y0 + 2.8, -2.0, max(sd * 1.0, sd * 1.7), y0 + 3.1, -1.6, WS)
+    eyes(m, 0, y0 + 2.6, -3.0, 0.5, w=0.38, h=0.42, c='#6a4a2a')
+    m.box(-0.2, y0 + 2.0, -3.06, 0.2, y0 + 2.2, -3.0, '#c9a0a0')
+    cheeks(m, 0, y0 + 2.25, -3.0, 0.75, w=0.3)
+
+@design("camel_buddy", "Camel Buddy", "cute")
+def _(m):
+    C, CD, K = '#d9b07a', '#b98a54', '#1a1418'
+    y0 = 4.6
+    legs4(m, C, 0.9, -0.8, 1.8, y0, 1.1, w=0.5, foot=CD)
+    rbox(m, -1.3, y0 + 1.0, -1.2, 1.3, y0 + 2.6, 2.4, C, r=0.4)
+    rbox(m, -0.9, y0 + 2.5, -0.4, 0.9, y0 + 3.6, 1.4, C, r=0.4)                          # hump
+    m.box(-1.35, y0 + 2.3, -0.2, 1.35, y0 + 2.7, 1.2, '#c8312d')                         # blanket
+    for x in (-1.36, 1.36):
+        m.box(x - 0.02, y0 + 1.6, -0.2, x + 0.02, y0 + 2.3, 1.2, '#2f6fd8')
+    m.box(-0.45, y0 + 2.2, -2.0, 0.45, y0 + 3.8, -1.2, C)                               # neck
+    rbox(m, -0.75, y0 + 3.4, -3.2, 0.75, y0 + 4.6, -1.3, C, r=0.3)                       # head
+    m.box(-0.5, y0 + 3.4, -3.4, 0.5, y0 + 3.9, -3.2, CD)
+    for sd in (-1, 1):
+        m.box(sd * 0.55 - 0.15, y0 + 4.6, -1.7, sd * 0.55 + 0.15, y0 + 4.95, -1.45, CD)
+    eyes(m, 0, y0 + 4.0, -3.2, 0.38, w=0.3, h=0.36)
+    m.box(-0.2, y0 + 1.0, 2.4, 0.2, y0 + 2.1, 2.7, CD)
+
+@design("panda_buddy", "Panda Buddy", "cute")
+def _(m):
+    W, K, BB = '#f4f2ee', '#1d1b22', '#6cbd4b'
+    y0 = 4.6
+    rbox(m, -1.4, y0, -0.9, 1.4, y0 + 2.2, 1.6, W, r=0.6)                                # sitting body
+    m.box(-1.45, y0 + 1.4, -0.95, 1.45, y0 + 2.0, 1.65, K)                               # shoulder band
+    for sd in (-1, 1):
+        rbox(m, sd * 0.8 - 0.45, y0, -1.5, sd * 0.8 + 0.45, y0 + 0.7, -0.6, K, r=0.2)      # feet
+        m.box(sd * 1.0 - 0.3, y0 + 0.8, -1.3, sd * 1.0 + 0.3, y0 + 1.8, -0.8, K)           # arms
+    m.box(-1.4, y0 + 1.1, -1.6, 1.4, y0 + 1.4, -1.3, BB)                                # bamboo
+    m.box(-0.4, y0 + 1.1, -1.65, -0.3, y0 + 1.4, -1.25, '#4a9a3a')
+    m.box(1.2, y0 + 1.4, -1.6, 1.8, y0 + 1.8, -1.45, '#8fd06a')
+    rbox(m, -1.4, y0 + 2.0, -1.4, 1.4, y0 + 4.2, 1.2, W, r=0.5)                          # head
+    for sd in (-1, 1):
+        rbox(m, sd * 1.0 - 0.45, y0 + 4.0, -0.5, sd * 1.0 + 0.45, y0 + 4.6, 0.1, K, r=0.15)   # ears
+        m.box(sd * 0.6 - 0.4, y0 + 2.8, -1.46, sd * 0.6 + 0.4, y0 + 3.6, -1.4, K)         # eye patches
+    eyes(m, 0, y0 + 3.0, -1.46, 0.6, w=0.3, h=0.36)
+    m.box(-0.2, y0 + 2.5, -1.47, 0.2, y0 + 2.75, -1.4, K)
+    cheeks(m, 0, y0 + 2.45, -1.4, 1.0, w=0.35)
+
+@design("polar_bear_cub", "Polar Bear Cub", "cute")
+def _(m):
+    W, WS, K = '#f6f4ee', '#e0dcd2', '#1a1418'
+    y0 = 4.6
+    legs4(m, W, 0.9, -0.8, 1.7, y0, 0.7, w=0.65)
+    rbox(m, -1.4, y0 + 0.6, -1.2, 1.4, y0 + 2.6, 2.2, W, r=0.55)
+    rbox(m, -1.3, y0 + 1.2, -3.1, 1.3, y0 + 3.4, -0.9, W, r=0.5)                         # head
+    rbox(m, -0.6, y0 + 1.3, -3.6, 0.6, y0 + 2.2, -2.9, WS, r=0.2)                        # snout
+    m.box(-0.25, y0 + 1.85, -3.65, 0.25, y0 + 2.15, -3.6, K)
+    for sd in (-1, 1):
+        rbox(m, sd * 0.9 - 0.35, y0 + 3.2, -2.0, sd * 0.9 + 0.35, y0 + 3.75, -1.5, W, r=0.15)
+        m.box(sd * 0.9 - 0.18, y0 + 3.3, -2.03, sd * 0.9 + 0.18, y0 + 3.6, -2.0, '#c9c0b8')
+    eyes(m, 0, y0 + 2.4, -3.1, 0.6, w=0.36, h=0.42)
+    cheeks(m, 0, y0 + 2.05, -3.1, 0.95, w=0.32)
+    rbox(m, -0.3, y0 + 1.6, 2.2, 0.3, y0 + 2.1, 2.6, W, r=0.1)
+
+@design("glow_squid_buddy", "Glow Squid Buddy", "cute")
+def _(m):
+    T, TL, TD, GL = '#2fb8b0', '#7af0e0', '#1f8a86', '#a6ffef'
+    GLOW.update({T, TL})
+    y0 = 4.6
+    for i in range(8):                                                                  # tentacles drape over the head
+        import math
+        a = i * math.pi / 4; x, z = 1.0 * math.cos(a), 1.0 * math.sin(a)
+        m.box(x - 0.25, y0 - 0.2 - (i % 2) * 0.5, z - 0.25, x + 0.25, y0 + 1.0, z + 0.25, (T, TD)[i % 2])
+        m.box(x - 0.18, y0 - 0.4 - (i % 2) * 0.5, z - 0.18, x + 0.18, y0 - 0.2 - (i % 2) * 0.5, z + 0.18, TL)
+    rbox(m, -1.3, y0 + 0.8, -1.3, 1.3, y0 + 3.6, 1.3, T, r=0.4)                          # mantle
+    patches(m, 'x', 1.3, 1, -1.2, 1.2, y0 + 1.0, y0 + 3.4, 6, [TL, GL], 7, s=0.3)
+    patches(m, 'x', -1.3, -1, -1.2, 1.2, y0 + 1.0, y0 + 3.4, 6, [TL, GL], 8, s=0.3)
+    patches(m, 'z', 1.3, 1, -1.2, 1.2, y0 + 1.0, y0 + 3.4, 6, [TL, GL], 9, s=0.3)
+    eyes(m, 0, y0 + 1.6, -1.3, 0.55, w=0.45, h=0.55, c='#0f3a3a')
+    cheeks(m, 0, y0 + 1.25, -1.3, 0.9, c='#ff9fd2')
+    for x, y in ((-2.0, 9.4), (1.8, 10.0)):
+        m.box(x - 0.2, y, -0.2, x + 0.2, y + 0.4, 0.2, '#a6ffef80')
+
+@design("dolphin_buddy", "Dolphin Buddy", "cute")
+def _(m):
+    B, BL, BD = '#7d9ab8', '#d6e2ee', '#5a7898'
+    y0 = 4.6
+    r = ('x', 22.5, (0, y0 + 2.6, 0))
+    rbox(m, -0.9, y0 + 1.6, -1.6, 0.9, y0 + 3.4, 2.0, B, r=0.4, rot=r)                   # leaping body
+    m.box(-0.75, y0 + 1.6, -1.4, 0.75, y0 + 2.1, 1.6, BL, rot=r)                        # pale belly
+    m.box(-0.15, y0 + 3.4, 0.0, 0.15, y0 + 4.3, 0.9, BD, rot=r)                         # dorsal fin
+    m.box(-0.5, y0 + 2.0, -2.6, 0.5, y0 + 2.6, -1.6, B, rot=r)                          # beak
+    m.box(-0.35, y0 + 2.0, 2.0, 0.35, y0 + 2.8, 2.8, B, rot=r)
+    m.box(-1.2, y0 + 2.2, 2.6, 1.2, y0 + 2.6, 3.2, BD, rot=r)                           # tail flukes
+    for sd in (-1, 1):
+        m.box(min(sd * 0.9, sd * 1.5), y0 + 1.8, -0.6, max(sd * 0.9, sd * 1.5), y0 + 2.0, 0.2, BD, rot=r)
+        m.box(sd * 0.92 - (0.06 if sd > 0 else 0), y0 + 2.7, -1.2, sd * 0.92 + (0.06 if sd < 0 else 0), y0 + 3.1, -0.8, '#1a1418', rot=r)
+    for x, y, z in ((-0.6, y0 + 0.3, -1.6), (0.7, y0 + 0.1, 1.2), (0.0, y0 + 0.0, 0.0)):
+        m.box(x - 0.25, y, z - 0.25, x + 0.25, y + 0.5, z + 0.25, '#bfe8ffb0')            # splash
+    m.box(-1.6, y0, -1.6, 1.6, y0 + 0.2, 1.6, '#5fb8f080')
+
+@design("snow_golem_buddy", "Snow Golem Buddy", "cute")
+def _(m):
+    S, SS, P, PD, ST = '#f6f8fa', '#dfe6ee', '#e0862a', '#b8661c', '#6b4326'
+    y0 = 4.6
+    rbox(m, -1.3, y0, -1.3, 1.3, y0 + 2.2, 1.3, S, r=0.4)                                # lower snowball
+    rbox(m, -1.0, y0 + 2.0, -1.0, 1.0, y0 + 3.6, 1.0, S, r=0.3)                          # upper snowball
+    for sd in (-1, 1):
+        r = ('z', -45 * sd, (sd * 1.0, y0 + 3.0, 0))
+        m.box(min(sd * 1.0, sd * 2.4), y0 + 2.9, -0.1, max(sd * 1.0, sd * 2.4), y0 + 3.1, 0.1, ST, rot=r)   # stick arms
+    m.box(-1.32, y0 + 0.3, -1.32, 1.32, y0 + 0.5, 1.32, SS)
+    rbox(m, -1.2, y0 + 3.5, -1.2, 1.2, y0 + 5.9, 1.2, P, r=0.2)                          # carved pumpkin head
+    for x in (-0.6, 0.0, 0.6):
+        m.box(x - 0.04, y0 + 3.6, -1.24, x + 0.04, y0 + 5.8, -1.2, PD)
+    m.box(-0.15, y0 + 5.9, -0.15, 0.15, y0 + 6.4, 0.15, '#4a7a2a')
+    relief(m, [".EE.EE.", ".EE.EE.", ".......", "..MMM..", ".M...M."], -1.2,
+           {'E': ('#3a2210', 0.06), 'M': ('#3a2210', 0.06)}, cell=0.3, top=y0 + 5.4)
+    m.box(-0.75, y0 + 5.05, -1.29, -0.6, y0 + 5.2, -1.26, '#ffd27a'); m.box(0.3, y0 + 5.05, -1.29, 0.45, y0 + 5.2, -1.26, '#ffd27a')
+
+@design("iron_golem_buddy", "Iron Golem Buddy", "cute")
+def _(m):
+    I, ID, IL, V, K = '#d8d4cc', '#a8a49c', '#eeebe4', '#4a8a3a', '#1a1418'
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.6 - 0.4, y0, -0.4, sd * 0.6 + 0.4, y0 + 1.0, 0.4, ID)               # legs
+        m.box(min(sd * 1.4, sd * 2.0), y0 + 0.2, -0.35, max(sd * 1.4, sd * 2.0), y0 + 2.6, 0.35, I)   # long arms
+    rbox(m, -1.4, y0 + 0.9, -0.8, 1.4, y0 + 2.8, 0.9, I, r=0.3)                          # chest
+    for (x, y) in ((-1.0, y0 + 1.0), (0.6, y0 + 2.0), (1.1, y0 + 0.6)):
+        m.box(x, y, -0.86, x + 0.2, y + 1.0, -0.8, V)                                     # vines
+    rbox(m, -1.0, y0 + 2.6, -1.3, 1.0, y0 + 4.4, 0.6, I, r=0.25)                         # head
+    m.box(-0.25, y0 + 2.6, -1.7, 0.25, y0 + 3.5, -1.3, ID)                              # big nose
+    m.box(-0.9, y0 + 3.7, -1.36, 0.9, y0 + 3.95, -1.3, ID)                              # brow
+    eyes(m, 0, y0 + 3.15, -1.3, 0.55, w=0.32, h=0.4, c='#8a1a1a')
+    m.box(1.75, y0 + 2.6, -0.4, 1.85, y0 + 3.8, -0.3, '#3a7a2a')                        # poppy for you
+    rbox(m, 1.45, y0 + 3.7, -0.65, 2.15, y0 + 4.3, -0.05, '#d62828', r=0.15)
+    m.box(1.7, y0 + 3.9, -0.7, 1.9, y0 + 4.1, -0.65, K)
+
+@design("villager_buddy", "Villager Buddy", "cute")
+def _(m):
+    SK, SKD, R, RD, K = '#c9a07a', '#a87e5a', '#7a4a26', '#5a3418', '#1a1418'
+    y0 = 4.6
+    rbox(m, -1.0, y0, -0.8, 1.0, y0 + 2.6, 0.8, R, r=0.3)                                # robe
+    m.box(-1.05, y0, -0.85, 1.05, y0 + 0.3, 0.85, RD)
+    m.box(-1.3, y0 + 1.4, -1.25, 1.3, y0 + 2.0, -0.6, R)                                # crossed arms
+    m.box(-1.3, y0 + 1.5, -1.3, -0.9, y0 + 1.9, -1.25, SK); m.box(0.9, y0 + 1.5, -1.3, 1.3, y0 + 1.9, -1.25, SK)
+    rbox(m, -1.0, y0 + 2.5, -1.0, 1.0, y0 + 4.9, 1.0, SK, r=0.3)                          # tall head
+    m.box(-0.3, y0 + 2.5, -1.8, 0.3, y0 + 3.6, -1.0, SKD)                               # the nose
+    m.box(-0.85, y0 + 3.85, -1.06, 0.85, y0 + 4.05, -1.0, '#5a3a20')                    # unibrow
+    eyes(m, 0, y0 + 3.4, -1.0, 0.5, w=0.32, h=0.38, c='#2f8a32')
+    cheeks(m, 0, y0 + 3.0, -1.0, 0.75, w=0.28)
+
+@design("llama_buddy", "Llama Buddy", "cute")
+def _(m):
+    C, CD, K = '#efe3c8', '#d8c8a4', '#1a1418'
+    y0 = 4.6
+    legs4(m, C, 0.85, -0.8, 1.7, y0, 1.0, w=0.5)
+    rbox(m, -1.3, y0 + 0.9, -1.2, 1.3, y0 + 2.6, 2.2, C, r=0.5)
+    for i, c in enumerate(('#e8343f', '#f2a03a', '#4cc34a', '#2f6fd8')):                  # festive carpet
+        m.box(-1.35, y0 + 2.2, -0.6 + i * 0.5, 1.35, y0 + 2.65, -0.1 + i * 0.5, c)
+    m.box(-0.5, y0 + 2.2, -1.8, 0.5, y0 + 4.0, -1.0, C)                                 # neck
+    rbox(m, -0.75, y0 + 3.6, -2.6, 0.75, y0 + 4.9, -1.1, C, r=0.3)                       # head
+    rbox(m, -0.5, y0 + 3.6, -3.0, 0.5, y0 + 4.2, -2.5, CD, r=0.15)                       # snout
+    for sd in (-1, 1):
+        m.box(sd * 0.5 - 0.15, y0 + 4.9, -1.6, sd * 0.5 + 0.15, y0 + 5.5, -1.3, C)
+    eyes(m, 0, y0 + 4.3, -2.6, 0.4, w=0.3, h=0.36)
+    cheeks(m, 0, y0 + 4.0, -2.6, 0.6, w=0.25, h=0.18)
+    m.box(-0.35, y0 + 4.9, -2.2, 0.35, y0 + 5.2, -1.6, CD)                               # fluffy top
+
+@design("piglin_buddy", "Piglin Buddy", "cute")
+def _(m):
+    P, PD, BR, K = '#e6a08a', '#c8806a', '#6b4326', '#1a1418'
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.5 - 0.35, y0, -0.35, sd * 0.5 + 0.35, y0 + 1.0, 0.35, BR)
+    rbox(m, -1.0, y0 + 0.9, -0.7, 1.0, y0 + 2.6, 0.7, BR, r=0.25)                        # tunic
+    m.box(-1.02, y0 + 1.6, -0.72, 1.02, y0 + 1.8, 0.72, GOLD)                            # gold belt
+    m.box(0.9, y0 + 1.2, -1.3, 1.6, y0 + 1.6, -0.7, GOLD)                               # gold ingot in hand
+    m.box(1.0, y0 + 1.6, -0.8, 1.4, y0 + 2.4, -0.4, P)
+    rbox(m, -1.4, y0 + 2.5, -1.3, 1.4, y0 + 4.6, 1.0, P, r=0.35)                         # wide head
+    rbox(m, -0.65, y0 + 2.7, -1.75, 0.65, y0 + 3.5, -1.2, PD, r=0.15)                    # snout
+    for sd in (-1, 1):
+        m.box(sd * 0.28 - 0.12, y0 + 3.0, -1.8, sd * 0.28 + 0.12, y0 + 3.25, -1.75, '#8a4a3a')
+        m.box(sd * 0.8 - 0.1, y0 + 2.5, -1.4, sd * 0.8 + 0.1, y0 + 2.9, -1.3, '#f4f2ee')   # tusks
+        m.box(min(sd * 1.4, sd * 2.0), y0 + 3.0, -0.4, max(sd * 1.4, sd * 2.0), y0 + 4.0, 0.0, P,
+              rot=('z', 22.5 * sd, (sd * 1.4, y0 + 4.0, 0)))                              # floppy ears
+        m.box(sd * 1.3 - 0.15, y0 + 3.2, -1.36, sd * 1.3 + 0.15, y0 + 3.6, -1.3, GOLD)    # gold earrings
+    eyes(m, 0, y0 + 3.7, -1.3, 0.6, w=0.36, h=0.42)
+    cheeks(m, 0, y0 + 3.3, -1.3, 1.05, w=0.3)
+
+@design("shulker_buddy", "Shulker Buddy", "cute")
+def _(m):
+    S, SD, Y, K = '#9a6aa8', '#7a4e8a', '#f2e070', '#1a1418'
+    y0 = 4.6
+    rbox(m, -1.6, y0, -1.6, 1.6, y0 + 1.6, 1.6, S, r=0.15)                               # lower shell
+    m.box(-1.62, y0 + 1.3, -1.62, 1.62, y0 + 1.6, 1.62, SD)
+    rbox(m, -1.0, y0 + 1.0, -1.0, 1.0, y0 + 2.6, 1.0, Y, r=0.3)                          # little head peeking
+    eyes(m, 0, y0 + 1.8, -1.0, 0.4, w=0.3, h=0.42)
+    cheeks(m, 0, y0 + 1.45, -1.0, 0.65, w=0.25)
+    r = ('x', 22.5, (0, y0 + 2.1, 1.6))
+    rbox(m, -1.6, y0 + 2.1, -1.6, 1.6, y0 + 3.6, 1.6, S, r=0.15, rot=r)                 # lid tipped open
+    m.box(-1.62, y0 + 2.1, -1.62, 1.62, y0 + 2.4, 1.62, SD, rot=r)
+
+@design("phantom_buddy", "Phantom Buddy", "cute")
+def _(m):
+    B, BD, G = '#4a5a8a', '#34406a', '#7af08a'
+    GLOW.update({G})
+    y0 = 5.4
+    rbox(m, -0.9, y0, -1.2, 0.9, y0 + 0.9, 1.8, B, r=0.3)                                # body
+    rbox(m, -1.0, y0, -2.4, 1.0, y0 + 1.1, -1.1, B, r=0.25)                              # head
+    eyes(m, 0, y0 + 0.35, -2.4, 0.45, w=0.4, h=0.4, c=G, shine='#e8ffe8')
+    for sd in (-1, 1):
+        r = ('z', 22.5 * sd, (sd * 0.9, y0 + 0.6, 0))
+        m.box(min(sd * 0.9, sd * 3.6), y0 + 0.5, -0.8, max(sd * 0.9, sd * 3.6), y0 + 0.7, 1.4, BD, rot=r)   # wings
+        m.box(min(sd * 0.9, sd * 3.6), y0 + 0.7, -0.85, max(sd * 0.9, sd * 3.6), y0 + 0.75, -0.6, '#8a9ac8', rot=r)
+    m.box(-0.4, y0 + 0.2, 1.8, 0.4, y0 + 0.6, 3.0, BD)                                  # tail
+    m.box(-0.12, 4.6, -0.12, 0.12, y0, 0.12, '#4a5a8a60')
+
+@design("ocelot_buddy", "Ocelot Buddy", "cute")
+def _(m):
+    Y, YD, SP, K = '#e8c25a', '#c8a03a', '#7a5a2a', '#1a1418'
+    y0 = 4.6
+    rbox(m, -1.1, y0, -0.6, 1.1, y0 + 2.2, 1.6, Y, r=0.45)                               # sitting body
+    for sd in (-1, 1):
+        m.box(sd * 0.55 - 0.3, y0, -1.1, sd * 0.55 + 0.3, y0 + 1.2, -0.6, Y)
+    patches(m, 'x', 1.1, 1, -0.4, 1.4, y0 + 0.4, y0 + 2.0, 5, [SP], 3, s=0.3)
+    patches(m, 'x', -1.1, -1, -0.4, 1.4, y0 + 0.4, y0 + 2.0, 5, [SP], 4, s=0.3)
+    rbox(m, -1.1, y0 + 2.0, -1.4, 1.1, y0 + 3.8, 0.6, Y, r=0.35)                         # head
+    for sd in (-1, 1):
+        steps(m, sd * 0.65, -0.4, y0 + 3.8, [0.6, 0.4, 0.2], Y, depth=0.3, h=0.28, smooth=1)
+    eyes(m, 0, y0 + 2.9, -1.4, 0.5, w=0.36, h=0.42, c='#2f8a32')
+    m.box(-0.15, y0 + 2.6, -1.46, 0.15, y0 + 2.8, -1.4, '#d87a8a')
+    for sd in (-1, 1):
+        m.box(min(sd * 0.6, sd * 1.4), y0 + 2.55, -1.6, max(sd * 0.6, sd * 1.4), y0 + 2.6, -1.55, '#f4f2ee')
+    for k in range(4):                                                                  # striped tail wrapped round
+        m.box(-1.3 + k * 0.7, y0, 1.6, -0.7 + k * 0.7, y0 + 0.5, 2.1, (Y, SP)[k % 2])
