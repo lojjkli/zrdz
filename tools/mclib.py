@@ -42,6 +42,52 @@ class Model:
         self.name, self.title, self.tier = name, title, tier
         self.boxes = []
         self.colors = []
+        self.anim = None
+
+    def animate(self, *fx, frames=16, frametime=2, interpolate=True):
+        """Animated texture: fx are (kind, colours, ...) tuples applied per frame - see frame_tint()."""
+        self.anim = dict(fx=fx, frames=frames, frametime=frametime, interpolate=interpolate)
+        return self
+
+    def frame_tint(self, c, f):
+        """RGBA a colour should be painted with on frame f, or None to keep it."""
+        import colorsys
+        if not self.anim or not isinstance(c, str):
+            return None
+        N = self.anim['frames']
+        rgba = list(hex2rgb(c)); out = None
+        for fx in self.anim['fx']:
+            kind, cols = fx[0], fx[1]
+            if c not in cols:
+                continue
+            i = list(cols).index(c)
+            if kind == 'seq':                         # explicit colour per frame: {colour: [c0, c1, ...]}
+                seq = cols[c]
+                rgba = list(hex2rgb(seq[f % len(seq)]))[:3] + [rgba[3]]
+            elif kind == 'cycle':                       # each colour steps to the next one in the list
+                step = fx[2] if len(fx) > 2 else 1
+                rgba = list(hex2rgb(cols[(i + f // step) % len(cols)]))[:3] + [rgba[3]]
+            elif kind == 'blink':                     # swap to another colour on the listed frames
+                if f in fx[3]:
+                    rgba = list(hex2rgb(fx[2]))[:3] + [rgba[3]]
+            elif kind == 'hue':                       # rotate the hue a full turn over the loop
+                h, l, sat = colorsys.rgb_to_hls(*(v / 255 for v in rgba[:3]))
+                r, g, b = colorsys.hls_to_rgb((h + f / N) % 1, l, sat)
+                rgba[:3] = [int(v * 255) for v in (r, g, b)]
+            else:                                     # pulse / twinkle / flicker: brightness changes
+                amp = fx[2] if len(fx) > 2 else 0.35
+                if kind == 'pulse':
+                    k = math.sin(2 * math.pi * f / N)
+                elif kind == 'twinkle':
+                    k = math.sin(2 * math.pi * (f / N + i / max(1, len(cols))))
+                else:
+                    k = (int(hashlib.md5(f'{c}{f}'.encode()).hexdigest()[:6], 16) % 1000) / 500.0 - 1
+                if k >= 0:
+                    rgba[:3] = [v + (255 - v) * amp * k for v in rgba[:3]]
+                else:
+                    rgba[:3] = [v * (1 + amp * k) for v in rgba[:3]]
+            out = tuple(int(max(0, min(255, v))) for v in rgba)
+        return out
 
     def box(self, x1, y1, z1, x2, y2, z2, c, rot=None, flat=False):
         """Box in head-pixel coords (head = -4..4 on every axis, front = north/-z).
@@ -91,6 +137,7 @@ class Model:
                     cache[key] = len(patches)
                     c = bx['c']
                     patches.append((key, c.patch(d, w, h) if isinstance(c, Tex) else paint(w, h, c, d, rng)))
+                    self._paint_order = getattr(self, '_paint_order', []) + [key]
                 fu[d] = cache[key]
             self.face_uv.append(fu)
         order = sorted(range(len(patches)), key=lambda i: -patches[i][1].shape[0])
@@ -115,7 +162,27 @@ class Model:
             p = patches[i][1]; atlas[y:y + p.shape[0], x:x + p.shape[1]] = p
         self.rects = {i: (x, y, x + patches[i][1].shape[1], y + patches[i][1].shape[0]) for i, (x, y) in pos.items()}
         self._atlas = Image.fromarray(atlas, 'RGBA')
+        self._pos = pos
         return self._atlas
+
+    def frame_atlas(self, f):
+        """The atlas repainted for animation frame f (same layout and noise, tinted colours)."""
+        base = np.array(self.bake())
+        rng = np.random.default_rng(int(hashlib.md5(self.name.encode()).hexdigest()[:8], 16))
+        out = base.copy()
+        for i, (w, h, c, d) in enumerate(self._paint_order):
+            if isinstance(c, Tex):
+                continue
+            t = self.frame_tint(c, f)
+            p = paint(w, h, c, d, rng, tint=t)
+            if t is not None:
+                x, y = self._pos[i]
+                out[y:y + h, x:x + w] = p
+        return out
+
+    def anim_strip(self):
+        """Vertical strip of all frames, for an animated .png + .mcmeta."""
+        return Image.fromarray(np.concatenate([self.frame_atlas(f) for f in range(self.anim['frames'])], 0), 'RGBA')
 
     def texture(self):
         return self.bake()
@@ -147,7 +214,7 @@ class Model:
                             "fixed": {"scale": [0.5] * 3}}}
 
     def render_elements(self, tex=None):
-        arr = np.array(self.bake())
+        arr = np.array(self.bake()) if tex is None else tex
         out = []
         for bx, fu in zip(self.boxes, self.face_uv):
             f = [8 + S * v for v in bx['f']]
@@ -167,10 +234,10 @@ METAL = {'#f2c33a', '#b8861c', '#c9ced8', '#a9adb8', '#9ea2ad', '#8c8f99', '#7c8
 def _adj(c, k):
     return np.clip(np.array(c[:3], float) * k, 0, 255)
 
-def paint(w, h, color, d, rng):
+def paint(w, h, color, d, rng, tint=None):
     """Hand-painted look: noise, light-from-top gradient, darker rim, top-left highlight,
     metal sheen and soft glow cores."""
-    base = hex2rgb(color)
+    base = tint or hex2rgb(color)
     img = np.zeros((h, w, 4), np.uint8)
     metal, glow = color in METAL, color in GLOW
     if color in FLAT:

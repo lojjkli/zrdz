@@ -1,6 +1,6 @@
 """All ACONITE head cosmetics. Coords are player-head pixels: head spans -4..4,
 top of head is y=4, face is -z (north)."""
-from mclib import Model, GLOW
+from mclib import Model, GLOW, hex2rgb
 
 # ACONITE palette
 AC_DARK, AC, AC_LIGHT, AC_GLOW = '#2a0f4a', '#5b2a9e', '#8a55d6', '#c49bff'
@@ -5776,7 +5776,7 @@ def _(m):
     for sd in (-1, 1):
         cx = sd * 2.2
         m.box(cx - 1.9, -1.8, -4.8, cx + 1.9, 1.6, -4.6, K)
-        for i, c in enumerate((W, K, P, K, W)):                                           # spiral rings
+        for i, c in enumerate((W, '#2a1a3a', P, '#2a1a3a', W)):                           # spiral rings
             s = 1.6 - i * 0.32
             m.box(cx - s, -0.1 - s, -4.8 - 0.06 * (i + 1), cx + s, -0.1 + s, -4.8 - 0.06 * i, c)
     m.box(-0.4, 0.4, -4.9, 0.4, 0.8, -4.6, K)
@@ -7531,6 +7531,398 @@ def _(m):
         for sd in (-1, 1):
             m.box(min(x + sd * 0.9 * s, x + sd * 1.1 * s), Y0 + 0.3 * s, z, max(x + sd * 0.9 * s, x + sd * 1.1 * s), Y0 + 0.8 * s, z + 0.8 * s, YL)   # wings
 
+# ================= animated textures (existing designs) =================
+RAINBOW6 = ['#ff3d5a', '#ff8a1f', '#ffd23a', '#3ad06a', '#3aa6e3', '#9a5ae0']
+ANIMATE = {
+    # name: (effects, options)  - effects are (kind, colours, amount/step); see Model.frame_tint
+    "halo": ([('pulse', ['#fff1a0', '#fff4b0', '#f2c33a'], 0.35)], {}),
+    "aconite_halo": ([('pulse', ['#c49bff', '#8a55d6'], 0.4)], {}),
+    "ender_halo": ([('twinkle', ['#c45cff', '#38d6b8'], 0.5)], {}),
+    "portal_halo": ([('hue', ['#c49bff']), ('pulse', ['#8a2ae090'], 0.4)], {}),
+    "beacon_hat": ([('pulse', ['#7af7ff', '#7af7ff70', '#d8f8ff60'], 0.45)], {}),
+    "conduit_hat": ([('pulse', ['#f2c33a', '#6ac8b8'], 0.35)], {}),
+    "laser_eyes": ([('flicker', ['#ff2b2b', '#ff7a7a'], 0.45)], dict(frames=8, frametime=1, interpolate=False)),
+    "crystal_ball_hat": ([('hue', ['#c88aff', '#ff9fd2'])], dict(frames=24)),
+    "floating_runes": ([('twinkle', ['#b06cff', '#b06cff60'], 0.5)], {}),
+    "wisp_lantern": ([('flicker', ['#7ad8ff', '#c8f4ff'], 0.35)], dict(frames=12, frametime=3)),
+    "soul_lantern_hat": ([('flicker', ['#5fe3f0', '#a6ffef'], 0.35)], dict(frames=12, frametime=3)),
+    "lantern_hat": ([('flicker', ['#ffc85a'], 0.35)], dict(frames=12, frametime=3)),
+    "campfire_hat": ([('flicker', ['#ff8a1f', '#ffd23a'], 0.45)], dict(frames=12, frametime=2)),
+    "fire_crown": ([('cycle', ['#ff4b1f', '#e97a24', '#f7dc3c'], 1)], dict(frames=3, frametime=4)),
+    "blaze_halo": ([('pulse', ['#ffc21f', '#f5c542', '#fff2a8'], 0.35)], {}),
+    "star_crown": ([('twinkle', ['#ffe45c', '#fff4a0'], 0.5)], {}),
+    "sun_crown": ([('pulse', ['#ffe45c', '#ff8a1f'], 0.4)], {}),
+    "eclipse_halo": ([('pulse', ['#ff8a1f', '#ffe45c'], 0.5)], {}),
+    "afro_rainbow": ([('cycle', RAINBOW6, 1)], dict(frames=6, frametime=6)),
+    "rainbow_hair": ([('cycle', RAINBOW6, 1)], dict(frames=6, frametime=6)),
+    "headband_rainbow": ([('cycle', ['#e8343f', '#f2a03a', '#f7dc3c', '#4cc34a', '#2f8fe0', '#8a55d6'], 1)], dict(frames=6, frametime=6)),
+    "xmas_tree_hat": ([('cycle', ['#ff4f6a', '#5ce1ff', '#ffe45c'], 1)], dict(frames=3, frametime=10, interpolate=False)),
+    "firework_hat": ([('cycle', ['#ffe45c', '#ff5ce1', '#7af7ff'], 1)], dict(frames=3, frametime=6)),
+    "cyber_visor": ([('pulse', ['#7af7ff', '#29dfeb', '#29dfeb80'], 0.5)], {}),
+    "neon_horns": ([('hue', ['#7af7ff', '#ff5ce1'])], dict(frames=24)),
+    "heart_halo": ([('pulse', ['#ff9fd2', '#ff5ab4'], 0.4)], dict(frames=10)),
+    "jellyfish_hat": ([('pulse', ['#ffb3f0', '#c8a0ff', '#c8a0ffa0'], 0.45)], dict(frames=20)),
+    "glow_squid_buddy": ([('pulse', ['#2fb8b0', '#7af0e0', '#a6ffef', '#a6ffef80'], 0.4)], dict(frames=20)),
+    "end_portal_hat": ([('twinkle', ['#5fe3f0', '#c8fbff', '#2a8a7a'], 0.6)], {}),
+    "enchant_table_hat": ([('twinkle', ['#c49bff', '#4fd8e8'], 0.5)], {}),
+    "enchanted_book_hat": ([('pulse', ['#e8a0ff'], 0.5)], {}),
+    "headband_galaxy": ([('twinkle', ['#7af7ff', '#ffffff', '#ff9fd2', '#ffe45c'], 0.6)], {}),
+    "hypno_glasses": ([('cycle', ['#ffffff', '#2a1a3a', '#b04aff'], 1)], dict(frames=3, frametime=4)),
+    "shutter_shades": ([('hue', ['#39e05a'])], dict(frames=24)),
+    "star_glasses": ([('pulse', ['#ff5cb8', '#ffb3e0'], 0.3)], {}),
+    "panda_buddy": ([('blink', ['#1a1418', '#ffffff'], '#1d1b22', {0, 1})], dict(frames=40, interpolate=False)),
+    "owl_buddy": ([('blink', ['#fbf8f0', '#1d1414'], '#8a6a4a', {0, 1})], dict(frames=40, interpolate=False)),
+    "kitten_cup": ([('blink', ['#1a1418', '#ffffff'], '#c8c8d0', {0, 1})], dict(frames=40, interpolate=False)),
+    "corgi_buddy": ([('blink', ['#1a1418', '#ffffff'], '#e89a4a', {0, 1})], dict(frames=40, interpolate=False)),
+    "jack_lantern_hat": ([('flicker', ['#ffd23a'], 0.45)], dict(frames=12, frametime=2)),
+    "birthday_crown": ([('flicker', ['#ff8a1f'], 0.4), ('cycle', ['#ff7ab0', '#5ab8ff', '#3ad06a'], 4)], dict(frames=12, frametime=3, interpolate=False)),
+    "snowflake_crown": ([('twinkle', ['#7ad8ff', '#c8f4ff', '#ffffff'], 0.5)], {}),
+    "reindeer_antlers": ([('pulse', ['#ff2b3a'], 0.5)], {}),
+    "headband_flame": ([('cycle', ['#ff8a1f', '#ff5a1f', '#ffc21f'], 1)], dict(frames=3, frametime=4)),
+    "totem_halo": ([('pulse', ['#f2c33a', '#ffe45c'], 0.35)], {}),
+    "bubble_halo": ([('hue', ['#9be7ff'])], dict(frames=24)),
+    "vr_visor": ([('pulse', ['#38f6ff'], 0.5)], {}),
+}
+
+def _animated(fn, fx, opts):
+    def wrapped(m):
+        fn(m)
+        m.animate(*fx, **opts)
+    return wrapped
+
+def apply_animations(table):
+    for i, (n, t, tier, fn) in enumerate(D):
+        if n in table:
+            D[i] = (n, t, tier, _animated(fn, *table[n]))
+
 # ================= removed by request: full mob heads + Taggy Head =================
 REMOVED = {"creeper_mask", "creaking_mask", "taggy_mask"} | {d[0] for d in D if d[2] == "mob"}
 D[:] = [d for d in D if d[0] not in REMOVED]
+
+apply_animations(ANIMATE)
+
+# ================= batch 6A: animated =================
+def chase(c, n, dim=0.3):
+    """n distinct shades of c, brightest first, for a 'running lights' cycle."""
+    r, g, b = hex2rgb(c)[:3]
+    out = []
+    for i in range(n):
+        k = 1.0 if i == 0 else (0.62 if i == 1 else dim + 0.004 * i)
+        out.append('#%02x%02x%02x' % (int(r * k), int(g * k), int(b * k)))
+    return out
+
+def bulb_ring(m, y, r, cols, s=0.32, n=None):
+    """Bulbs evenly round a square ring of half-width r, coloured in order (for chase cycles)."""
+    n = n or len(cols)
+    L = 8 * r
+    for i in range(n):
+        u = i * L / n
+        seg, t = int(u // (2 * r)), u % (2 * r) - r
+        x, z = ((t, -r), (r, t), (-t, r), (-r, -t))[seg]
+        m.box(x - s, y - s, z - s, x + s, y + s, z + s, cols[i % len(cols)])
+
+@design("disco_ball_hat", "Disco Ball", "animated")
+def _(m):
+    F = ['#e8ecf4', '#ff7ad1', '#7af7ff', '#ffe45c', '#b6ff6b', '#c49bff']
+    m.box(-0.15, 4.6, -0.15, 0.15, 6.0, 0.15, '#3a3540')
+    import random as _r
+    rnd = _r.Random(61)
+    y = 6.0
+    for hw, h in ((1.4, 0.6), (2.2, 0.8), (2.6, 1.0), (2.2, 0.8), (1.4, 0.6)):           # mirror-tile ball
+        for x in range(int(-hw * 2), int(hw * 2)):
+            for z in (-hw, hw - 0.12):
+                m.box(x / 2, y, z, x / 2 + 0.5, y + h, z + 0.12, rnd.choice(F))
+                m.box(z, y, x / 2, z + 0.12, y + h, x / 2 + 0.5, rnd.choice(F))
+        m.box(-hw + 0.1, y, -hw + 0.1, hw - 0.1, y + h, hw - 0.1, '#9aa1ad')
+        y += h
+    m.animate(('cycle', F, 1), frames=6, frametime=3, interpolate=False)
+
+@design("police_siren_hat", "Police Siren", "animated")
+def _(m):
+    R, B, K, S = '#ff2b3a', '#2b6aff', '#1d1b22', '#c9ced8'
+    rbox(m, -2.6, 4.6, -1.6, 2.6, 5.4, 1.6, K, r=0.4)
+    for sd, c in ((-1, R), (1, B)):
+        rbox(m, *xs(sd, 0.2, 2.4)[:1], 5.4, -1.2, xs(sd, 0.2, 2.4)[1], 7.0, 1.2, c, r=0.4)
+        m.box(*xs(sd, 0.6, 1.6)[:1], 6.2, -1.25, xs(sd, 0.6, 1.6)[1], 6.6, -1.2, '#ffffff')
+    m.box(-0.2, 5.4, -1.3, 0.2, 7.2, 1.3, S)
+    m.animate(('cycle', [R, B], 1), frames=2, frametime=6, interpolate=False)
+GLOW.update({'#ff2b3a', '#2b6aff'})
+
+@design("rgb_headset", "RGB Gamer Headset", "animated")
+def _(m):
+    K, KD, L = '#1d1b22', '#2a2830', '#ff3d5a'
+    m.box(-4.9, 4.6, -0.8, 4.9, 5.4, 0.8, K)                                              # band
+    for sd in (-1, 1):
+        m.box(*xs(sd, 4.6, 5.4)[:1], 1.4, -0.8, xs(sd, 4.6, 5.4)[1], 5.4, 0.8, K)
+        rbox(m, *xs(sd, 4.6, 6.0)[:1], -1.8, -2.0, xs(sd, 4.6, 6.0)[1], 1.8, 2.0, KD, r=0.6)    # cups
+        m.box(*xs(sd, 6.0, 6.1)[:1], -1.2, -1.4, xs(sd, 6.0, 6.1)[1], 1.2, 1.4, L)            # rgb ring
+        m.box(*xs(sd, 6.1, 6.15)[:1], -0.6, -0.8, xs(sd, 6.1, 6.15)[1], 0.6, 0.8, K)
+    m.box(-0.6, 5.4, -0.85, 0.6, 5.5, 0.85, L)
+    m.box(4.8, -2.2, -4.6, 5.2, -1.6, -1.6, K); rbox(m, 3.6, -2.6, -5.4, 5.0, -1.4, -4.4, KD, r=0.3)   # mic
+    m.box(3.8, -2.2, -5.45, 4.6, -1.8, -5.4, L)
+    m.animate(('hue', [L]), frames=24, frametime=2)
+GLOW.add('#ff3d5a')
+
+LOAD = chase('#7af7ff', 8)
+GLOW.update(LOAD[:2])
+@design("loading_halo", "Loading Halo", "animated")
+def _(m):
+    ring(m, 6.85, 3.25, '#1d2a33', t=0.3, h=0.3)
+    bulb_ring(m, 7.0, 3.2, LOAD, s=0.5)
+    m.animate(('cycle', LOAD, 1), frames=8, frametime=2, interpolate=False)
+
+BULB = chase('#ffe45c', 12, dim=0.3)
+GLOW.update(BULB[:2])
+@design("marquee_crown", "Marquee Crown", "animated")
+def _(m):
+    R, RD, GD = '#c8202e', '#8a1420', '#e8b84a'
+    band(m, 3.4, 5.0, R, 4.8); band(m, 3.4, 3.7, GD, 4.88); band(m, 4.7, 5.0, GD, 4.88)
+    for x in (-3.0, 0.0, 3.0):
+        prong(m, x, -4.6, True, 5.0, 2.0, 2.0 if x else 2.8, R, t=0.5)
+    bulb_ring(m, 4.2, 4.95, BULB, s=0.36)
+    m.animate(('cycle', BULB, 1), frames=12, frametime=2, interpolate=False)
+
+ECG = chase('#5cff8a', 10)
+GLOW.update(ECG[:2])
+@design("heartbeat_visor", "Heartbeat Visor", "animated")
+def _(m):
+    K = '#14161c'
+    m.box(-4.8, -1.4, -5.2, 4.8, 1.6, -4.7, K)                                            # visor
+    m.box(-4.8, -1.4, -5.25, 4.8, -1.2, -5.2, '#2a2e38'); m.box(-4.8, 1.4, -5.25, 4.8, 1.6, -5.2, '#2a2e38')
+    trace = [0, 0, 0, 1, -1, 2, -2, 0, 0, 0]                                              # ecg spike, left to right
+    for i, dy in enumerate(trace):
+        x = 4.2 - i * 0.84
+        m.box(x - 0.42, 0.0 + dy * 0.4 - 0.15, -5.3, x + 0.42, 0.0 + dy * 0.4 + 0.15, -5.2, ECG[i])
+        if dy:
+            m.box(x - 0.12, min(0, dy * 0.4), -5.3, x + 0.12, max(0, dy * 0.4), -5.22, ECG[i])
+    strap_back(m, -0.4, 0.6, K)
+    m.animate(('cycle', ECG, 1), frames=10, frametime=2, interpolate=False)
+
+@design("lava_lamp_hat", "Lava Lamp", "animated")
+def _(m):
+    S, GL, B1, B2, B3 = '#c9ced8', '#ff5ce160', '#ff8a1f', '#ff5ce1', '#ffe45c'
+    rbox(m, -1.8, 4.6, -1.8, 1.8, 6.0, 1.8, S, r=0.5)                                     # base
+    m.box(-1.4, 6.0, -1.4, 1.4, 10.6, 1.4, GL)                                            # glass
+    for y, c, s in ((6.4, B1, 0.8), (7.8, B2, 0.6), (9.0, B3, 0.7), (6.9, B2, 0.4), (9.8, B1, 0.4)):
+        rbox(m, -s, y, -s, s, y + s * 1.6, s, c, r=0.3)                                   # wax blobs
+    rbox(m, -1.6, 10.6, -1.6, 1.6, 11.4, 1.6, S, r=0.4)
+    m.animate(('cycle', [B1, B2, B3], 1), ('pulse', [GL], 0.3), frames=12, frametime=4)
+GLOW.update({'#ff5ce1', '#ff8a1f', '#ffe45c'})
+
+@design("traffic_light_hat", "Traffic Light", "animated")
+def _(m):
+    K, Y = '#2a2a30', '#e8c43a'
+    rbox(m, -1.4, 4.6, -1.2, 1.4, 10.2, 1.2, K, r=0.4)
+    for k, y in enumerate((8.4, 6.8, 5.2)):                                               # red, amber, green lamps
+        rbox(m, -0.8, y, -1.4, 0.8, y + 1.4, -1.2, ('#ff2b2b', '#ffd23a', '#3ad06a')[k], r=0.3)
+        m.box(-1.0, y + 1.3, -1.9, 1.0, y + 1.5, -1.2, K)                                 # visor
+    m.box(-0.3, 10.2, -0.3, 0.3, 10.6, 0.3, Y)
+    m.animate(('seq', {'#ff2b2b': ['#ff2b2b', '#4a1a1a', '#4a1a1a'], '#3ad06a': ['#1a3a1a', '#3ad06a', '#1a3a1a'],
+                       '#ffd23a': ['#4a3a10', '#4a3a10', '#ffd23a']}), frames=3, frametime=20, interpolate=False)
+
+@design("fire_hair", "Fire Hair", "animated")
+def _(m):
+    F1, F2, F3, F4 = '#ff3a1f', '#ff7a1f', '#ffb41f', '#ffe45c'
+    hair_cap(m, F1, top=5.4, fringe=2.6)
+    import random as _r
+    rnd = _r.Random(66)
+    for k in range(14):                                                                   # flames licking upward
+        x, z = rnd.uniform(-4.0, 3.2), rnd.uniform(-4.0, 3.2)
+        h = rnd.uniform(1.4, 3.4)
+        for j, c in enumerate((F2, F3, F4)):
+            w = 0.9 * (1 - j * 0.28)
+            m.box(x - w / 2 + 0.4, 5.2 + j * h / 3, z - w / 2 + 0.4, x + w / 2 + 0.4, 5.2 + (j + 1) * h / 3, z + w / 2 + 0.4, c)
+    fringe_teeth(m, F2, ((-3.0, 1.0), (-1.0, 1.4), (1.0, 1.0), (3.0, 1.4)), 2.8)
+    m.animate(('cycle', [F1, F2, F3, F4], 1), frames=4, frametime=3)
+GLOW.update({'#ff3a1f', '#ff7a1f', '#ffb41f'})
+
+@design("lightning_cloud", "Lightning Cloud", "animated")
+def _(m):
+    C, CD, Y = '#8a8f9c', '#6a6f7c', '#ffe45c'
+    for x, y, z, s in ((0.0, 9.0, 0.0, 1.8), (-2.0, 8.6, 0.4, 1.4), (2.0, 8.6, -0.2, 1.5), (-0.6, 10.0, 0.2, 1.3), (1.0, 9.8, 1.2, 1.2)):
+        rbox(m, x - s, y - s * 0.7, z - s, x + s, y + s * 0.7, z + s, (C, CD)[int(s * 10) % 2], r=0.6)
+    for x, z in ((-1.4, -0.6), (1.4, 0.4)):                                               # zig-zag bolts
+        for k, (dx, y1, y2) in enumerate(((0.0, 6.8, 7.8), (0.5, 6.0, 7.0), (0.0, 5.0, 6.2))):
+            m.box(x + dx - 0.25, y1, z - 0.25, x + dx + 0.25, y2, z + 0.25, Y)
+    m.box(-0.2, 4.6, -0.2, 0.2, 7.6, 0.2, '#c9ced8')
+    m.animate(('blink', [Y], '#6a6f7c', {1, 2, 5, 6, 7, 8, 9, 10, 11}), frames=12, frametime=2, interpolate=False)
+
+AUR = ['#5cff8a', '#3ad0c8', '#7a5aff', '#c45cff']
+@design("aurora_halo", "Aurora Halo", "animated")
+def _(m):
+    for i, c in enumerate(AUR):                                                           # curtain of light, colours flowing upward
+        ring(m, 6.2 + i * 0.5, 3.8 - i * 0.15, c, t=0.25, h=0.5)
+    m.animate(('cycle', AUR, 1), frames=4, frametime=5)
+GLOW.update(AUR)
+
+@design("neon_cat_ears", "Neon Cat Ears", "animated")
+def _(m):
+    K, N = '#14141c', '#ff5ce1'
+    arch_band(m, K)
+    for sd in (-1, 1):
+        x = sd * 2.6
+        for k in range(4):                                                                # outlined triangle ear
+            w = 2.4 * (1 - k / 4)
+            m.box(x - w / 2, 5.0 + k * 0.8, -0.3, x + w / 2, 5.8 + k * 0.8, 0.3, N)
+            if w > 0.9:
+                m.box(x - w / 2 + 0.3, 5.0 + k * 0.8, -0.35, x + w / 2 - 0.3, 5.8 + k * 0.8, 0.35, K)
+    m.animate(('hue', [N]), frames=24, frametime=2)
+
+@design("pulsing_heart_hat", "Pulsing Heart", "animated")
+def _(m):
+    H, HL = '#ff2b6a', '#ffb3cc'
+    relief(m, [".HH.HH.", "HHHHHHH", "HHHHHHH", ".HHHHH.", "..HHH..", "...H..."], 0.6, {'H': (H, 1.2)}, cell=0.8, top=10.2, cx=0.0)
+    m.box(1.0, 9.0, -0.65, 1.6, 9.6, -0.6, HL)
+    m.box(-0.2, 4.6, -0.1, 0.2, 5.4, 0.1, '#3a3540')
+    m.animate(('pulse', [H, HL], 0.45), frames=10, frametime=2)
+GLOW.add('#ff2b6a')
+
+@design("glitch_crown", "Glitch Crown", "animated")
+def _(m):
+    C, M, K = '#29dfeb', '#ff2bd6', '#14141c'
+    crown(m, K, '#2a2a33', C, ph=2.4)
+    for x, y, c in ((-4.4, 6.4, C), (3.6, 7.2, M), (-1.2, 8.0, M), (2.0, 5.6, C), (-3.0, 7.6, C)):   # glitch pixels
+        m.box(x, y, -4.9, x + 0.8, y + 0.3, -4.7, c)
+    m.box(-4.9, 4.4, -4.95, 4.9, 4.6, -4.85, M)
+    m.animate(('flicker', [C, M], 0.7), ('cycle', [C, M], 3), frames=12, frametime=1, interpolate=False)
+GLOW.update({'#29dfeb', '#ff2bd6'})
+
+FF = chase('#d8ff6a', 6, dim=0.55)
+GLOW.update(FF[:2])
+@design("firefly_jar_hat", "Firefly Jar", "animated")
+def _(m):
+    GL, LD, R = '#d8f4ff50', '#a87a4a', '#c8a07a'
+    m.box(-2.0, 4.6, -2.0, 2.0, 8.6, 2.0, GL)                                             # jar
+    rbox(m, -1.6, 8.6, -1.6, 1.6, 9.4, 1.6, LD, r=0.3)                                    # cork lid
+    m.box(-2.05, 8.0, -2.05, 2.05, 8.3, 2.05, R)                                          # string
+    for i, (x, y, z) in enumerate(((-1.0, 5.4, -0.6), (0.8, 6.4, 0.4), (-0.4, 7.4, 0.8), (1.0, 7.8, -1.0), (0.0, 5.8, 1.0), (-1.2, 7.0, -1.2))):
+        m.box(x - 0.35, y - 0.35, z - 0.35, x + 0.35, y + 0.35, z + 0.35, FF[i])
+    m.box(-1.9, 4.6, -1.9, 1.9, 5.0, 1.9, '#5ec04a')
+    m.animate(('cycle', FF, 1), frames=6, frametime=3)
+
+@design("snow_globe_hat", "Snow Globe", "animated")
+def _(m):
+    GL, B, W, G = '#d8f4ff50', '#6b4326', '#ffffff', '#2a9a4a'
+    rbox(m, -2.4, 4.6, -2.4, 2.4, 5.6, 2.4, B, r=0.5)
+    dome(m, 5.6, [(2.4, 0.6), (2.8, 2.2), (2.2, 0.8), (1.2, 0.5)], GL)                     # glass
+    m.box(-2.2, 5.6, -2.2, 2.2, 6.0, 2.2, W)                                              # snow floor
+    for k, hw in enumerate((1.2, 0.8, 0.4)):                                              # tiny tree
+        m.box(-hw, 6.0 + k * 0.7, -hw, hw, 6.8 + k * 0.7, hw, G)
+    SN = ['#ffffff', '#f0f8ff', '#e8f4ff', '#fafcff']
+    for i, (x, y, z) in enumerate(((-1.6, 7.6, -1.2), (1.4, 8.0, 0.8), (-0.6, 8.8, 1.4), (1.8, 6.8, -1.4), (-1.8, 6.6, 1.2), (0.4, 9.2, -0.8))):
+        m.box(x - 0.15, y - 0.15, z - 0.15, x + 0.15, y + 0.15, z + 0.15, SN[i % 4])
+    m.animate(('twinkle', SN, 0.0), ('blink', SN[1:], '#d8f4ff', {0, 1, 4, 5}), frames=8, frametime=3, interpolate=False)
+
+@design("candle_crown", "Candle Crown", "animated")
+def _(m):
+    GD, W, F1, F2 = '#e8b84a', '#f4ecd8', '#ff8a1f', '#ffe45c'
+    band(m, 3.6, 4.6, GD, 4.8)
+    for x, z in ((-3.4, -4.4), (0.0, -4.4), (3.4, -4.4), (-4.4, 0.0), (4.4, 0.0), (0.0, 4.4)):
+        m.box(x - 0.35, 4.6, z - 0.35, x + 0.35, 6.2, z + 0.35, W)
+        m.box(x - 0.45, 5.6, z - 0.45, x + 0.45, 5.8, z + 0.45, W)                         # drip
+        m.box(x - 0.2, 6.2, z - 0.2, x + 0.2, 6.9, z + 0.2, F1)
+        m.box(x - 0.1, 6.6, z - 0.1, x + 0.1, 7.1, z + 0.1, F2)
+    m.animate(('flicker', [F1, F2], 0.45), frames=10, frametime=2)
+
+SPK = ['#ffe45c', '#ffffff', '#ff8a1f', '#fff4a0']
+@design("sparkler_headband", "Sparkler Headband", "animated")
+def _(m):
+    arch_band(m, '#3a3540')
+    for sd in (-1, 1):
+        x = sd * 2.6
+        m.box(x - 0.1, 5.0, -0.1, x + 0.1, 8.4, 0.1, '#8a8f9c', rot=('z', -22.5 * sd, (x, 5.0, 0)))
+        cx = x + sd * 1.3
+        for i, (dx, dy, dz) in enumerate(((0, 0, 0), (0.8, 0.4, 0), (-0.8, 0.5, 0), (0, 1.0, 0.4), (0.5, -0.7, -0.4), (-0.5, -0.5, 0.5), (0, 0.2, -0.9), (0.9, -0.2, 0.6))):
+            s = 0.3 if i else 0.45
+            m.box(cx + dx - s, 8.6 + dy - s, dz - s, cx + dx + s, 8.6 + dy + s, dz + s, SPK[i % 4])
+    m.animate(('twinkle', SPK, 0.7), frames=8, frametime=1)
+GLOW.update(SPK)
+
+@design("alarm_clock_hat", "Alarm Clock", "animated")
+def _(m):
+    R, W, K, S = '#e8202e', '#fbf8f0', '#1d1b22', '#c9ced8'
+    rbox(m, -2.2, 4.8, -1.2, 2.2, 9.0, 1.2, R, r=1.0)                                     # body
+    rbox(m, -1.7, 5.3, -1.3, 1.7, 8.5, -1.2, W, r=0.7)                                    # face
+    m.box(-0.12, 6.9, -1.35, 0.12, 8.0, -1.3, K); m.box(-0.12, 6.8, -1.35, 1.0, 7.04, -1.3, K)   # hands
+    for x, y in ((0, 8.2), (0, 5.6), (-1.4, 6.9), (1.4, 6.9)):
+        m.box(x - 0.1, y - 0.1, -1.33, x + 0.1, y + 0.1, -1.3, K)
+    for sd in (-1, 1):
+        rbox(m, sd * 1.6 - 0.9, 8.6, -0.8, sd * 1.6 + 0.9, 9.8, 0.8, S, r=0.4)              # bells
+        m.box(sd * 1.6 - 0.15, 4.6, -0.15, sd * 1.6 + 0.15, 5.0, 0.15, K)
+    m.box(-0.2, 9.0, -0.2, 0.2, 9.8, 0.2, S)
+    m.animate(('cycle', [S, '#fff4b0'], 1), ('blink', [R], '#ff6a6a', {1, 3}), frames=4, frametime=2, interpolate=False)
+
+@design("pixel_pet_screen", "Pixel Pet", "animated")
+def _(m):
+    C, SC, PX, K = '#ff9fc8', '#b6e8a0', '#2a3a2a', '#1d1b22'
+    rbox(m, -2.4, 4.6, -1.0, 2.4, 9.4, 1.0, C, r=1.2)                                     # egg-shaped device
+    m.box(-1.6, 6.4, -1.1, 1.6, 8.8, -1.0, SC)                                            # screen
+    relief(m, ["..PPP..", ".P.P.P.", ".PPPPP.", "..P.P.."], -1.1, {'P': (PX, 0.04)}, cell=0.4, top=8.4, cx=0.0)
+    for x in (-1.0, 0.0, 1.0):
+        rbox(m, x - 0.3, 5.0, -1.2, x + 0.3, 5.6, -1.0, K, r=0.1)                         # buttons
+    m.animate(('blink', [PX], SC, {0, 1, 8}), frames=24, frametime=3, interpolate=False)
+
+NOTES = ['#ff5ce1', '#7af7ff', '#ffe45c', '#b6ff6b']
+@design("music_note_halo", "Music Note Halo", "animated")
+def _(m):
+    import math as _m
+    for i in range(8):
+        a = i * _m.pi / 4
+        note_icon(m, 3.6 * _m.sin(a), 6.4 + (0.6 if i % 2 else 0), -3.6 * _m.cos(a), NOTES[i % 4], s=1.3)
+    m.animate(('cycle', NOTES, 1), frames=4, frametime=4)
+GLOW.update(NOTES)
+
+BUB = ['#7cfba5', '#b6ffd0', '#5ed07a']
+@design("cauldron_bubbles_hat", "Bubbling Cauldron", "animated")
+def _(m):
+    K, KD, LQ = '#2a2a30', '#1a1a20', '#3ad06a'
+    rbox(m, -2.8, 4.6, -2.8, 2.8, 7.4, 2.8, K, r=0.8)                                     # cauldron
+    m.box(-2.4, 7.0, -2.4, 2.4, 7.3, 2.4, LQ)
+    ring(m, 7.2, 3.0, KD, t=0.5, h=0.4)
+    for sd in (-1, 1):
+        m.box(sd * 2.0 - 0.3, 4.4, -0.3, sd * 2.0 + 0.3, 4.8, 0.3, KD)
+    for i, (x, y, z, s) in enumerate(((-1.0, 7.6, -0.6, 0.45), (0.8, 8.2, 0.6, 0.35), (-0.2, 8.9, 0.0, 0.3), (1.2, 7.5, -1.2, 0.3), (-1.4, 8.6, 1.0, 0.25))):
+        m.box(x - s, y - s, z - s, x + s, y + s, z + s, BUB[i % 3])
+    m.animate(('twinkle', BUB, 0.6), ('pulse', [LQ], 0.3), frames=12, frametime=2)
+
+UFO = chase('#7af7ff', 6, dim=0.35)
+GLOW.update(UFO[:2] + ['#b6ff6b'])
+@design("ufo_lights_hat", "Flashing UFO", "animated")
+def _(m):
+    S, SD, GL, AL = '#c9ced8', '#8a92a2', '#7af7ff70', '#b6ff6b'
+    rbox(m, -4.0, 7.0, -4.0, 4.0, 7.8, 4.0, S, r=1.4)                                     # saucer
+    rbox(m, -2.6, 6.6, -2.6, 2.6, 7.0, 2.6, SD, r=0.8)
+    dome(m, 7.8, [(1.8, 0.8), (1.2, 0.6)], GL)                                            # cockpit
+    rbox(m, -0.6, 7.8, -0.6, 0.6, 8.8, 0.6, AL, r=0.3)                                    # tiny alien
+    m.box(-0.35, 8.3, -0.65, -0.1, 8.55, -0.6, '#1d1b22'); m.box(0.1, 8.3, -0.65, 0.35, 8.55, -0.6, '#1d1b22')
+    bulb_ring(m, 7.4, 3.6, UFO, s=0.28, n=12)
+    m.box(-0.2, 4.6, -0.2, 0.2, 6.6, 0.2, SD)
+    m.animate(('cycle', UFO, 1), frames=6, frametime=2, interpolate=False)
+
+DJ = chase('#ff5ce1', 8)
+GLOW.update(DJ[:2])
+@design("dj_deck_hat", "DJ Deck", "animated")
+def _(m):
+    K, KD, V, S = '#1d1b22', '#2a2830', '#14141c', '#c9ced8'
+    rbox(m, -4.0, 4.6, -2.6, 4.0, 5.8, 2.6, K, r=0.4)                                     # deck
+    for sd in (-1, 1):
+        rbox(m, sd * 2.0 - 1.6, 5.8, -1.6, sd * 2.0 + 1.6, 6.1, 1.6, V, r=0.6)            # records
+        m.box(sd * 2.0 - 0.4, 6.1, -0.4, sd * 2.0 + 0.4, 6.2, 0.4, '#ff5ce1')
+        m.box(sd * 2.0 + 0.8, 6.1, -1.4, sd * 2.0 + 1.0, 6.6, 0.4, S)                     # tonearm
+    for i in range(8):
+        x = -3.6 + i * 1.03
+        m.box(x, 5.0, -2.65, x + 0.6, 5.5, -2.6, DJ[i])                                   # light strip
+    m.animate(('cycle', DJ, 1), frames=8, frametime=2, interpolate=False)
+
+@design("rainbow_cloud_hat", "Rainbow Cloud", "animated")
+def _(m):
+    W, WS = '#fbfcff', '#e4e8f4'
+    for i, c in enumerate(RAINBOW6):                                                      # arc of stripes
+        r = 4.4 - i * 0.45
+        m.box(-r, 6.4 + r * 0.9, -0.3, r, 6.4 + r * 0.9 + 0.45, 0.3, c)
+        for sd in (-1, 1):
+            m.box(*xs(sd, r - 0.45, r)[:1], 6.4, -0.3, xs(sd, r - 0.45, r)[1], 6.4 + r * 0.9 + 0.45, 0.3, c)
+    for sd in (-1, 1):                                                                    # clouds at both ends
+        for dx, dy, s in ((0.0, 0.0, 1.4), (sd * 1.0, 0.6, 1.1), (-sd * 0.9, 0.4, 1.0)):
+            rbox(m, sd * 4.0 + dx - s, 4.6 + dy, -s, sd * 4.0 + dx + s, 4.6 + dy + s * 1.4, s, (W, WS)[dy > 0.5], r=0.5)
+    m.animate(('cycle', RAINBOW6, 1), frames=6, frametime=4)
