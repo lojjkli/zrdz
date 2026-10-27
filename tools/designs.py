@@ -4959,3 +4959,364 @@ def _(m):
     relief(m, ["...yy...", "..yyyy..", ".yyyyyy.", "..yyyy..", "...yy..."], -0.1, {'y': (C2, 0.05)}, cell=0.4, top=11.0, cx=2.1)
     for k in range(4):
         m.box(0.2 + k * 0.95, 6.4, -0.1, 0.65 + k * 0.95, 7.0, 0.1, C1)                   # notched bottom
+
+# ---------- D: food ----------
+@design("sushi_hat", "Sushi Hat", "food")
+def _(m):
+    RI, SA, SAL, NO = '#f6f4ee', '#f28a5a', '#fcd0b8', '#1f3a2a'
+    rbox(m, -1.9, 4.6, -3.0, 1.9, 6.3, 3.0, RI, r=0.6)                                  # rice
+    for x, z in ((-1.4, -2.0), (0.8, 0.6), (-0.4, 2.2), (1.3, -1.6)):
+        m.box(x - 0.2, 5.4, z - 0.15, x + 0.2, 5.65, z + 0.15, '#e8e4dc')
+    rbox(m, -2.1, 6.1, -3.4, 2.1, 6.9, 3.4, SA, r=0.5)                                  # salmon
+    for z in (-2.4, -1.0, 0.4, 1.8):
+        m.box(-2.12, 6.85, z, 2.12, 6.92, z + 0.35, SAL)
+        for sd in (-1, 1):
+            m.box(sd * 2.1 - 0.02, 6.3, z, sd * 2.1 + 0.02, 6.85, z + 0.35, SAL)
+    m.box(-1.95, 5.2, -0.6, 1.95, 6.95, 0.6, NO)                                          # nori band
+    for dx in (-0.3, 0.3):                                                              # chopsticks
+        m.box(2.0 + dx, 5.6, -0.1, 2.2 + dx, 10.4, 0.1, '#c9a06a', rot=('z', -22.5, (2.1 + dx, 5.6, 0)))
+
+@design("taco_hat", "Taco Hat", "food")
+def _(m):
+    SH, SHD, LE, TO, CH, ME = '#f2c86a', '#d8a84a', '#6cbd4b', '#e8343f', '#ffd23a', '#7a3a1a'
+    for sd in (-1, 1):
+        r = ('z', -22.5 * sd, (0, 4.6, 0))
+        x1, x2 = sorted((sd * 0.2, sd * 0.6))
+        m.box(x1, 4.6, -3.6, x2, 8.0, 3.6, SH, rot=r)                                    # shell walls
+        m.box(x1, 7.6, -3.65, x2, 8.0, 3.65, SHD, rot=r)
+    m.box(-0.6, 4.6, -3.6, 0.6, 5.0, 3.6, SH)
+    m.box(-1.2, 5.0, -3.4, 1.2, 6.6, 3.4, ME)                                            # fillings
+    for z in (-2.8, -1.2, 0.4, 2.0):
+        m.box(-1.6, 6.4, z, 1.6, 7.1, z + 0.9, LE)
+        m.box(-0.6, 6.9, z + 0.4, 0.2, 7.4, z + 1.0, TO)
+    for z in (-3.0, -0.6, 1.4):
+        m.box(-0.8, 7.0, z, 0.9, 7.2, z + 0.25, CH)
+
+@design("burger_hat", "Burger Hat", "food")
+def _(m):
+    BUN, BUND, PAT, CH, LE, TO = '#e8a85a', '#c8803a', '#5a2e1a', '#ffd23a', '#6cbd4b', '#e8343f'
+    rbox(m, -3.2, 4.6, -3.2, 3.2, 5.6, 3.2, BUN, r=0.8)                                  # bottom bun
+    rbox(m, -3.4, 5.6, -3.4, 3.4, 6.6, 3.4, PAT, r=0.8)                                  # patty
+    m.box(-3.6, 6.6, -3.6, 3.6, 6.8, 3.6, CH)                                            # cheese
+    for (x, z) in ((-3.6, -3.6), (3.4, 3.4), (-3.6, 3.2)):
+        m.box(x, 6.0, z, x + 0.3, 6.6, z + 0.3, CH)
+    for k in range(9):
+        x = -3.6 + k * 0.9
+        m.box(x, 6.75 - 0.15 * (k % 2), -3.7, x + 0.9, 7.1, 3.7, LE)                     # lettuce
+    m.box(-2.8, 7.1, -2.8, 2.8, 7.4, 2.8, TO)                                            # tomato
+    dome(m, 7.4, [(3.3, 0.8), (2.8, 0.6), (1.9, 0.4)], BUN)                              # top bun
+    for (x, y, z) in ((-1.6, 8.75, -1.0), (0.8, 8.75, 1.2), (1.6, 8.15, -2.4), (-2.4, 8.15, 1.8), (0.2, 9.2, -0.2), (-0.6, 8.75, 2.4)):
+        m.box(x - 0.18, y, z - 0.1, x + 0.18, y + 0.1, z + 0.1, '#fff4dc')                  # sesame
+
+@design("donut_hat", "Donut Hat", "food")
+def _(m):
+    D, FR = '#d9a05a', '#f7a8c8'
+    ring(m, 4.6, 3.6, D, t=2.4, h=1.6)
+    ring(m, 5.0, 3.7, FR, t=2.6, h=1.3)
+    for (x1, z1, x2, z2) in ((-3.7, -3.7, 3.7, -2.2), (-3.7, 2.2, 3.7, 3.7), (-3.7, -2.2, -2.2, 2.2), (2.2, -2.2, 3.7, 2.2)):
+        for sd in (1,):
+            m.box(x1 + 0.6, 6.2, z1 + 0.4, x2 - 0.6, 6.4, z2 - 0.4, FR)
+    import random as _r
+    rnd = _r.Random(6)
+    for _ in range(22):
+        x, z = rnd.uniform(-3.2, 3.0), rnd.uniform(-3.2, 3.0)
+        if abs(x) < 1.6 and abs(z) < 1.6:
+            continue
+        m.box(x, 6.4, z, x + rnd.choice((0.5, 0.15)), 6.5, z + 0.15, rnd.choice(('#4cc3ff', '#ffe45c', '#7af08a', '#ffffff', '#ff5c5c')))
+
+@design("cupcake_hat", "Cupcake Hat", "food")
+def _(m):
+    WR, WRD, FR, FRL = '#f7a8c8', '#e888ae', '#fff4f7', '#ffd8e6'
+    for k in range(3):                                                                  # wrapper flaring up
+        w = 2.6 + 0.3 * k
+        m.box(-w, 4.6 + k * 0.7, -w, w, 5.3 + k * 0.7, w, WR)
+        for u in range(-2, 3):
+            m.box(u * 1.0 - 0.15, 4.6 + k * 0.7, -w - 0.04, u * 1.0 + 0.15, 5.3 + k * 0.7, -w, WRD)
+    for i, (w, h) in enumerate(((3.6, 0.9), (3.0, 0.8), (2.2, 0.8), (1.4, 0.7), (0.6, 0.6))):
+        y = 6.7 + sum(hh for _, hh in ((3.6, 0.9), (3.0, 0.8), (2.2, 0.8), (1.4, 0.7))[:i])
+        rbox(m, -w, y, -w, w, y + h, w, (FR, FRL)[i % 2], r=min(0.6, w / 2))
+    rbox(m, -0.6, 10.2, -0.6, 0.6, 11.2, 0.6, '#d62828', r=0.3)                         # cherry
+    m.box(0.0, 11.1, -0.05, 0.1, 11.8, 0.05, '#4a7a2a')
+    for x, z, c in ((-2.6, -2.4, '#4cc3ff'), (2.2, -2.8, '#ffe45c'), (-1.0, -3.0, '#7af08a'), (2.8, 1.0, '#ff5c5c')):
+        m.box(x - 0.25, 7.5, z - 0.08, x + 0.25, 7.6, z + 0.08, c)
+
+@design("popcorn_bucket", "Popcorn Bucket", "food")
+def _(m):
+    R, W, PC, PCY = '#d62828', '#f4f2ee', '#fff4d0', '#f2d06a'
+    for k in range(2):
+        w = 2.2 + 0.3 * k
+        m.box(-w, 4.6 + k * 1.2, -w, w, 5.8 + k * 1.2, w, W)
+    for u in (-2.0, -0.6, 0.8):
+        for sd in (-1, 1):
+            m.box(u, 4.6, sd * 2.25 - 0.05, u + 0.7, 5.8, sd * 2.25 + 0.05, R)
+            m.box(u - 0.1, 5.8, sd * 2.55 - 0.05, u + 0.7, 7.0, sd * 2.55 + 0.05, R)
+    import random as _r
+    rnd = _r.Random(8)
+    for _ in range(26):                                                                 # popcorn overflowing
+        x, z = rnd.uniform(-2.6, 2.0), rnd.uniform(-2.6, 2.0)
+        y = 7.0 + rnd.uniform(0, 1.4) - 0.3 * (abs(x) + abs(z)) / 2
+        rbox(m, x, y, z, x + 0.7, y + 0.6, z + 0.7, rnd.choice((PC, PC, PCY)), r=0.2)
+
+@design("ramen_bowl", "Ramen Bowl", "food")
+def _(m):
+    BW, BWD, BR, ND, EG, YO = '#e8343f', '#b8232d', '#d89a4a', '#f2d88a', '#f8f6ee', '#ffa81f'
+    rbox(m, -2.4, 4.6, -2.4, 2.4, 5.2, 2.4, BWD, r=0.6)
+    rbox(m, -3.4, 5.2, -3.4, 3.4, 7.2, 3.4, BW, r=1.0)                                   # bowl
+    m.box(-3.0, 7.0, -3.0, 3.0, 7.1, 3.0, BR)                                            # broth
+    for z in (-2.0, -1.0, 0.0, 1.0):
+        m.box(-2.6, 7.1, z, 0.4, 7.25, z + 0.35, ND)                                     # noodles
+    rbox(m, 0.6, 7.1, -2.4, 2.2, 7.6, -0.8, EG, r=0.3)                                   # soft egg
+    rbox(m, 1.0, 7.5, -2.0, 1.8, 7.65, -1.2, YO, r=0.2)
+    rbox(m, 0.8, 7.1, 0.4, 2.2, 7.4, 1.8, '#f4f2ee', r=0.5)                              # naruto
+    m.box(1.3, 7.4, 0.9, 1.7, 7.45, 1.3, '#f2709a')
+    m.box(-2.6, 7.1, 2.0, -0.6, 8.6, 2.2, '#1f3a2a')                                     # nori
+    for dx in (-0.25, 0.25):
+        m.box(-0.1 + dx, 7.0, -0.1, 0.1 + dx, 11.0, 0.1, '#c9a06a', rot=('x', 22.5, (dx, 7.0, 0)))
+
+@design("fries_hat", "Fries Hat", "food")
+def _(m):
+    R, RD, F, FD = '#d62828', '#a81a1a', '#ffd23a', '#e8b01f'
+    m.box(-2.4, 4.6, -1.6, 2.4, 7.4, 1.6, R)                                             # carton
+    m.box(-2.45, 6.8, -1.65, 2.45, 7.0, 1.65, RD)
+    for x in (-1.6, -0.4, 0.8):
+        m.box(x, 4.6, -1.65, x + 0.6, 6.8, -1.6, '#f4f2ee')                                # stripes
+    import random as _r
+    rnd = _r.Random(4)
+    for i in range(11):
+        x = -2.0 + i * 0.4; z = rnd.uniform(-1.2, 0.8)
+        h = rnd.uniform(1.6, 3.2)
+        m.box(x - 0.2, 6.6, z, x + 0.2, 7.4 + h, z + 0.4, (F, FD)[i % 2],
+              rot=None if i % 3 else ('z', (-22.5, 22.5)[i % 2], (x, 7.0, z)))
+
+@design("pineapple_hat", "Pineapple Hat", "food")
+def _(m):
+    Y, YD, G, GD = '#f2c23a', '#c8901a', '#4cc34a', '#2f8a32'
+    rbox(m, -2.2, 4.6, -2.2, 2.2, 8.8, 2.2, Y, r=0.7)
+    for y in (5.2, 6.2, 7.2, 8.2):                                                      # diamond scales
+        for ax, pl, out in (('z', -2.2, -1), ('z', 2.2, 1), ('x', 2.2, 1), ('x', -2.2, -1)):
+            for a in (-1.4, 0.0, 1.4):
+                aa = a + (0.7 if int(y) % 2 else 0)
+                if abs(aa) < 1.6:
+                    p1, p2 = sorted((pl, pl + out * 0.05))
+                    if ax == 'z':
+                        m.box(aa - 0.35, y - 0.12, p1, aa + 0.35, y + 0.12, p2, YD)
+                    else:
+                        m.box(p1, y - 0.12, aa - 0.35, p2, y + 0.12, aa + 0.35, YD)
+    for k, (ax, a) in enumerate((('x', -22.5), ('x', 22.5), ('z', -22.5), ('z', 22.5), ('x', 0), ('z', 45), ('z', -45))):
+        h = 2.6 if a == 0 else 2.0
+        rot = None if a == 0 else (ax, a, (0, 8.6, 0))
+        m.box(-0.3, 8.6, -0.3, 0.3, 8.6 + h, 0.3, (G, GD)[k % 2], rot=rot)               # leafy crown
+
+@design("avocado_hat", "Avocado Buddy", "food")
+def _(m):
+    SK, FL, FLL, PT, K = '#2f5a2a', '#c8e07a', '#e8f0a8', '#8a5a2a', '#1a1418'
+    y0 = 4.6
+    rbox(m, -2.6, y0, -1.0, 2.6, y0 + 5.2, 1.4, SK, r=1.0)                              # skin
+    rbox(m, -2.6, y0 + 3.6, -1.0, 2.6, y0 + 5.6, 1.4, SK, r=1.2) if False else None
+    rbox(m, -2.2, y0 + 0.4, -1.15, 2.2, y0 + 4.8, -1.0, FLL, r=0.8)                      # flesh
+    rbox(m, -1.8, y0 + 0.6, -1.2, 1.8, y0 + 3.8, -1.1, FL, r=0.7)
+    rbox(m, -1.2, y0 + 0.9, -1.9, 1.2, y0 + 3.1, -1.1, PT, r=0.5)                        # pit
+    eyes(m, 0, y0 + 2.1, -1.9, 0.48, w=0.34, h=0.4)
+    cheeks(m, 0, y0 + 1.7, -1.9, 0.82, w=0.28, h=0.2)
+    m.box(-0.22, y0 + 1.5, -1.95, 0.22, y0 + 1.62, -1.9, K)
+    for sd in (-1, 1):
+        m.box(sd * 2.6 - 0.3, y0 + 1.6, -0.3, sd * 2.6 + 0.3, y0 + 2.4, 0.3, FL)          # little arms
+
+@design("egg_yolk_hat", "Eggshell Helmet", "food")
+def _(m):
+    SH, SHD, YO = '#fbf8ee', '#e8e2d0', '#ffb31f'
+    dome(m, 2.0, [(4.9, 2.6), (4.4, 1.2), (3.4, 0.8), (2.0, 0.5)], SH)
+    for i in range(10):                                                                 # jagged cracked edge
+        u = -4.4 + i * 0.98
+        if i % 2:
+            for z in (-4.95, 4.95):
+                m.box(u - 0.45, 1.4, z - 0.05, u + 0.45, 2.0, z + 0.05, SH)
+            for x in (-4.95, 4.95):
+                m.box(x - 0.05, 1.4, u - 0.45, x + 0.05, 2.0, u + 0.45, SH)
+    m.box(-4.92, 2.4, -4.95, 4.92, 2.5, -4.9, SHD)
+    m.box(1.4, 0.2, -5.0, 2.2, 2.0, -4.9, YO)                                            # yolk drip
+    m.box(1.2, -0.4, -5.05, 2.4, 0.4, -4.9, YO)
+
+@design("croissant_hat", "Croissant Hat", "food")
+def _(m):
+    C, CD, CL = '#d9953a', '#a8682a', '#f0c070'
+    import math
+    for k in range(9):                                                                  # crescent of puffy segments
+        a = math.pi * (0.1 + 0.8 * k / 8)
+        x, z = 3.2 * math.cos(a), -0.6 + 2.0 * math.sin(a)
+        s = 1.0 - abs(k - 4) * 0.17
+        rbox(m, x - 0.6, 4.6, z - 0.9 * s - 0.3, x + 0.6, 4.6 + 1.8 * s + 0.2, z + 0.9 * s + 0.3, (C, CL)[k % 2], r=0.3)
+        m.box(x - 0.62, 4.6 + 1.2 * s, z - 0.6, x + 0.62, 4.6 + 1.25 * s + 0.1, z + 0.6, CD)
+
+@design("milk_carton_hat", "Milk Carton Hat", "food")
+def _(m):
+    W, B, BD, K = '#f4f2ee', '#4c8ad8', '#2f6ab8', '#2a2226'
+    m.box(-1.8, 4.6, -1.8, 1.8, 8.6, 1.8, W)
+    m.box(-1.82, 5.6, -1.82, 1.82, 7.4, 1.82, B)                                         # label band
+    for sd in (-1, 1):                                                                  # gabled top
+        x1, x2 = sorted((0, sd * 1.8))
+        m.box(x1, 8.6, -1.8, x2, 8.9, 1.8, W, rot=('z', -22.5 * sd, (sd * 1.8, 8.6, 0)))
+    m.box(-0.15, 8.6, -1.85, 0.15, 9.8, 1.85, W)
+    m.box(-0.6, 6.0, -1.88, 0.6, 7.0, -1.82, W)
+    m.box(-0.3, 6.2, -1.9, 0.0, 6.5, -1.88, K); m.box(0.1, 6.5, -1.9, 0.4, 6.8, -1.88, K)   # cow spots
+    m.box(-1.82, 4.6, -1.82, 1.82, 4.9, 1.82, BD)
+
+@design("sundae_hat", "Sundae Hat", "food")
+def _(m):
+    GL, V, ST, CO, CR, WF = '#e6f6ffa0', '#fff4dc', '#f7a8c8', '#6b3a22', '#fbfbfb', '#e8b46a'
+    m.box(-1.0, 4.6, -1.0, 1.0, 5.0, 1.0, GL)
+    m.box(-0.3, 5.0, -0.3, 0.3, 5.8, 0.3, GL)
+    m.box(-2.4, 5.8, -2.4, 2.4, 7.4, 2.4, GL)                                            # glass cup
+    rbox(m, -2.2, 6.6, -2.2, 0.0, 8.4, 0.0, ST, r=0.5)                                   # scoops
+    rbox(m, 0.0, 6.6, -2.2, 2.2, 8.4, 0.0, V, r=0.5)
+    rbox(m, -1.1, 6.6, 0.0, 1.1, 8.4, 2.2, CO, r=0.5)
+    m.box(-1.6, 8.0, -1.6, 1.6, 8.6, 1.6, CO)                                            # fudge
+    for k, w in enumerate((1.6, 1.1, 0.6)):
+        rbox(m, -w, 8.4 + k * 0.5, -w, w, 8.9 + k * 0.5, w, CR, r=0.3)                   # whipped cream
+    rbox(m, -0.45, 9.9, -0.45, 0.45, 10.8, 0.45, '#d62828', r=0.2)                       # cherry
+    m.box(1.2, 8.4, 0.6, 1.6, 10.4, 1.4, WF, rot=('z', -22.5, (1.4, 8.4, 1.0)))           # wafer
+
+@design("cotton_candy_hair", "Cotton Candy Hair", "food")
+def _(m):
+    P, PL, B, BL = '#f7a8c8', '#ffd0e4', '#a8d8ff', '#d0ecff'
+    import random as _r
+    rnd = _r.Random(12)
+    dome(m, 4.0, [(4.8, 1.2), (4.4, 1.0), (3.6, 1.0), (2.4, 0.8)], P)
+    for _ in range(30):                                                                 # puffy clumps
+        x, z = rnd.uniform(-4.6, 3.6), rnd.uniform(-4.6, 3.6)
+        y = 4.4 + rnd.uniform(0, 3.4) - 0.25 * max(abs(x), abs(z))
+        rbox(m, x, y, z, x + 1.4, y + 1.2, z + 1.4, rnd.choice((P, PL, B, BL)), r=0.4)
+    m.box(-0.2, 8.4, -0.2, 0.2, 11.2, 0.2, '#f4f2ee')                                    # paper stick poking out
+
+@design("corn_hat", "Corn Cob Hat", "food")
+def _(m):
+    Y, YD, H, HD = '#ffd23a', '#e8b01f', '#8fd06a', '#5a9a3a'
+    m.box(-1.2, 4.6, -1.2, 1.2, 10.0, 1.2, Y)
+    for y in [4.9 + k * 0.6 for k in range(9)]:
+        m.box(-1.22, y, -1.22, 1.22, y + 0.08, 1.22, YD)                                  # kernel rows
+    m.box(-0.8, 10.0, -0.8, 0.8, 10.6, 0.8, Y)
+    for sd in (-1, 1):                                                                  # husk leaves peeling
+        m.box(min(sd * 1.2, sd * 1.5), 4.6, -1.0, max(sd * 1.2, sd * 1.5), 8.0, 1.0, H, rot=('z', -22.5 * sd, (sd * 1.2, 4.6, 0)))
+        m.box(-1.0, 4.6, min(sd * 1.2, sd * 1.5), 1.0, 7.0, max(sd * 1.2, sd * 1.5), HD, rot=('x', 22.5 * sd, (0, 4.6, sd * 1.2)))
+
+@design("broccoli_hair", "Broccoli Hair", "food")
+def _(m):
+    G, GD, GL = '#3f8f3a', '#2a6a2a', '#6cbd4b'
+    import random as _r
+    rnd = _r.Random(14)
+    dome(m, 4.0, [(4.7, 1.4), (4.0, 1.2), (3.0, 1.0)], GD)
+    for _ in range(40):                                                                 # floret bumps
+        x, z = rnd.uniform(-5.0, 3.6), rnd.uniform(-5.0, 3.6)
+        y = 4.4 + rnd.uniform(0.5, 3.2) - 0.35 * max(abs(x), abs(z))
+        s = rnd.uniform(1.3, 2.1)
+        rbox(m, x, y, z, x + s, y + s * 0.8, z + s, rnd.choice((G, G, GL, GD)), r=0.35)
+    for x in (-3.6, 3.6):
+        m.box(x - 0.6, 1.6, -0.6, x + 0.6, 4.6, 0.6, '#9ac86a') if False else None
+
+@design("carrot_hat", "Carrot Hat", "food")
+def _(m):
+    O, OD, G = '#f2802a', '#c8601a', '#4cc34a'
+    for k, w in enumerate((2.0, 1.7, 1.4, 1.1, 0.8, 0.5, 0.3)):
+        y = 9.4 - k * 0.9
+        m.box(-w / 2, y - 0.9, -w / 2, w / 2, y, w / 2, O, rot=('z', 22.5, (0, 4.6, 0)))
+        m.box(-w / 2 - 0.02, y - 0.5, -w / 2 - 0.02, w / 2 + 0.02, y - 0.4, w / 2 + 0.02, OD, rot=('z', 22.5, (0, 4.6, 0)))
+    for k, (ax, a) in enumerate((('x', -22.5), ('x', 22.5), ('z', 0))):
+        m.box(-0.25, 9.4, -0.25, 0.25, 11.6, 0.25, G, rot=('z', 22.5, (0, 4.6, 0)) if a == 0 else ('x', a, (0, 9.4, 0)))
+    m.box(-1.0, 4.6, -1.0, 1.0, 5.0, 1.0, OD) if False else None
+
+@design("baguette_hat", "Baguette Hat", "food")
+def _(m):
+    B, BD, FL = '#d9953a', '#a8682a', '#f4ecd8'
+    r = ('y', 22.5, (0, 0, 0))
+    rbox(m, -1.0, 4.6, -6.0, 1.0, 6.4, 6.0, B, r=0.7, rot=r)
+    for z in (-4.0, -1.6, 0.8, 3.2):
+        m.box(-0.7, 6.35, z, 0.7, 6.45, z + 1.0, FL, rot=r)                              # scoring with flour
+        m.box(-0.75, 6.3, z + 1.0, 0.75, 6.42, z + 1.15, BD, rot=r)
+    rbox(m, -3.4, 4.0, -3.4, 3.4, 4.8, 3.4, '#22283a', r=1.0)                            # little beret under it
+    m.box(-0.2, 4.6, -0.2, 0.2, 5.2, 0.2, '#22283a')
+
+@design("pretzel_hat", "Pretzel Hat", "food")
+def _(m):
+    P, PD, S = '#a8682a', '#7a4a1a', '#ffffff'
+    y0 = 4.6
+    pts = [(-2.2, 0.0), (-2.6, 1.0), (-2.4, 2.0), (-1.8, 2.8), (-0.8, 3.0), (0.0, 2.2), (0.8, 3.0), (1.8, 2.8),
+           (2.4, 2.0), (2.6, 1.0), (2.2, 0.0), (1.2, 0.6), (0.0, 1.4), (-1.2, 0.6)]
+    pts = pts + pts[:1]
+    for i in range(len(pts) - 1):                                                       # knot loop, filled in between points
+        (xa, ya), (xb, yb) = pts[i], pts[i + 1]
+        for k in range(3):
+            t = k / 3; x, y = xa + (xb - xa) * t, ya + (yb - ya) * t
+            m.box(x - 0.5, y0 + y, -0.5, x + 0.5, y0 + y + 1.0, 0.5, P)
+    for x, y in ((-2.0, 2.4), (2.0, 2.4), (0.0, 1.5)):
+        m.box(x - 0.52, y0 + y, -0.52, x + 0.52, y0 + y + 0.25, 0.52, PD)
+    for x, y in ((-2.4, 1.8), (-0.8, 3.6), (1.2, 3.6), (2.6, 1.2), (0.0, 2.0)):
+        m.box(x - 0.12, y0 + y, -0.5, x + 0.12, y0 + y + 0.12, -0.45, S)                   # salt
+
+@design("lemon_hat", "Lemon Buddy", "food")
+def _(m):
+    Y, YD, G = '#fbe23a', '#e8c81f', '#4cc34a'
+    y0 = 4.6
+    rbox(m, -2.0, y0, -1.6, 2.0, y0 + 3.0, 1.6, Y, r=0.9)
+    m.box(-2.6, y0 + 1.2, -0.5, -2.0, y0 + 1.8, 0.5, YD); m.box(2.0, y0 + 1.2, -0.5, 2.6, y0 + 1.8, 0.5, YD)   # pointy ends
+    m.box(-0.1, y0 + 3.0, -0.1, 0.1, y0 + 3.5, 0.1, '#6b4326')
+    m.box(0.1, y0 + 3.2, -0.25, 1.4, y0 + 3.5, 0.45, G)
+    eyes(m, 0, y0 + 1.5, -1.6, 0.6, w=0.36, h=0.42)
+    cheeks(m, 0, y0 + 1.15, -1.6, 1.0, w=0.32)
+    m.box(-0.25, y0 + 1.05, -1.65, 0.25, y0 + 1.17, -1.6, '#1a1418')
+
+@design("cherry_clips", "Cherry Hair Clips", "food")
+def _(m):
+    R, RL, ST, LF = '#d62828', '#ff6a6a', '#4a7a2a', '#4cc34a'
+    for sd in (-1, 1):
+        x = sd * 4.7
+        x1, x2 = sorted((x, x + sd * 0.15))
+        m.box(x1, 2.0, -2.6, x2, 2.4, -0.6, '#f7a8c8')                                    # clip
+        for dz, h in ((-2.2, 0.0), (-1.0, 0.6)):
+            rbox(m, min(x, x + sd * 1.2), 0.4 + h, -2.6 + dz * 0.2 - 0.6, max(x, x + sd * 1.2), 1.6 + h, -2.6 + dz * 0.2 + 0.6, R, r=0.35)
+            m.box(min(x, x + sd * 0.4), 1.3 + h, -2.6 + dz * 0.2 - 0.4, max(x, x + sd * 0.4) if sd > 0 else max(x, x + sd * 0.4), 1.5 + h, -2.6 + dz * 0.2 - 0.2, RL)
+        m.box(min(x, x + sd * 0.3), 1.6, -2.4, max(x, x + sd * 0.3), 3.0, -2.2, ST)
+        m.box(min(x, x + sd * 0.2), 2.8, -2.4, max(x, x + sd * 0.2), 3.2, -1.2, LF)
+
+@design("dumpling_hat", "Dumpling Steamer", "food")
+def _(m):
+    BB, BBD, DU, DUD = '#d8b070', '#a8803a', '#f6f2e6', '#e2dccc'
+    m.box(-3.0, 4.6, -3.0, 3.0, 6.0, 3.0, BB)                                            # bamboo basket
+    for y in (4.9, 5.5):
+        m.box(-3.05, y, -3.05, 3.05, y + 0.15, 3.05, BBD)
+    for (x, z) in ((-1.4, -1.4), (1.4, -1.4), (-1.4, 1.4), (1.4, 1.4)):
+        rbox(m, x - 1.1, 5.9, z - 1.1, x + 1.1, 7.2, z + 1.1, DU, r=0.45)                 # dumplings
+        for k in range(3):
+            m.box(x - 0.6 + k * 0.5, 7.0, z - 0.1, x - 0.45 + k * 0.5, 7.5, z + 0.1, DUD)   # pleats
+    r = ('x', 22.5, (0, 6.0, 3.0))
+    m.box(-3.0, 7.4, -3.0, 3.0, 8.2, 3.0, BB, rot=r)                                     # lid tipped open
+    m.box(-3.05, 7.6, -3.05, 3.05, 7.75, 3.05, BBD, rot=r)
+    for x, y in ((-1.2, 9.0), (0.6, 9.8), (1.6, 8.8)):
+        m.box(x - 0.35, y, -1.4, x + 0.35, y + 0.6, -0.8, '#f4f4f8a0')                    # steam
+
+@design("onigiri_hat", "Onigiri Buddy", "food")
+def _(m):
+    RI, NO, K = '#f8f6ee', '#1f3a2a', '#1a1418'
+    y0 = 4.6
+    for k in range(8):                                                                  # rounded triangle
+        w = 4.4 - k * 0.48
+        rbox(m, -w / 2, y0 + k * 0.5, -1.0, w / 2, y0 + (k + 1) * 0.5, 1.0, RI, r=0.25)
+    m.box(-1.4, y0, -1.05, 1.4, y0 + 1.6, 1.05, NO)                                       # nori
+    eyes(m, 0, y0 + 2.1, -1.0, 0.55, w=0.32, h=0.38)
+    cheeks(m, 0, y0 + 1.75, -1.0, 0.95, w=0.3)
+    m.box(-0.2, y0 + 1.75, -1.05, 0.2, y0 + 1.85, -1.0, K)
+    for x, y in ((-0.8, y0 + 3.0), (0.9, y0 + 2.6), (0.2, y0 + 3.4)):
+        m.box(x - 0.1, y, -1.04, x + 0.1, y + 0.18, -1.0, '#e8e4dc')
+
+@design("coffee_cup_hat", "Coffee To Go", "food")
+def _(m):
+    CUP, SL, LID, K = '#f4f2ee', '#a8783a', '#3a3540', '#1a1418'
+    for k in range(4):
+        w = 1.6 + 0.15 * k
+        m.box(-w, 4.6 + k * 1.0, -w, w, 5.6 + k * 1.0, w, CUP)
+    m.box(-1.95, 6.0, -1.95, 1.95, 7.6, 1.95, SL)                                         # sleeve
+    m.box(-0.6, 6.4, -1.98, 0.6, 7.2, -1.95, '#5a3a20')
+    m.box(-2.2, 8.6, -2.2, 2.2, 9.1, 2.2, LID)
+    m.box(-1.7, 9.1, -1.7, 1.7, 9.5, 1.7, LID)
+    m.box(-0.5, 9.5, -1.6, 0.5, 9.6, -1.0, K)
+    for x, y in ((-0.4, 10.0), (0.4, 10.8), (-0.2, 11.6)):
+        m.box(x - 0.3, y, -1.4, x + 0.3, y + 0.6, -0.8, '#f4f4f8a0')
