@@ -5320,3 +5320,334 @@ def _(m):
     m.box(-0.5, 9.5, -1.6, 0.5, 9.6, -1.0, K)
     for x, y in ((-0.4, 10.0), (0.4, 10.8), (-0.2, 11.6)):
         m.box(x - 0.3, y, -1.4, x + 0.3, y + 0.6, -0.8, '#f4f4f8a0')
+
+# ---------- E: hats ----------
+def hood(m, c, r=5.0, frame=None):
+    """Plush animal hood: top, sides, back, and a rim round the face opening."""
+    dome(m, 4.0, [(r, 1.0), (r - 0.6, 0.6)], c)
+    m.box(-r, -4.6, 4.0, r, 4.6, r, c)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.0, sd * r), -4.6, -r, max(sd * 4.0, sd * r), 4.6, 4.0, c)
+        m.box(min(sd * 3.4, sd * 4.0), -4.6, -r, max(sd * 3.4, sd * 4.0), 4.6, -4.0, frame or c)
+    m.box(-4.0, 2.8, -r, 4.0, 4.6, -4.0, frame or c)
+
+@design("fedora", "Fedora", "hats")
+def _(m):
+    F, FD, BD = '#5a5a62', '#46464d', '#1d1b22'
+    m.box(-6.0, 3.8, -6.0, 6.0, 4.2, 6.0, F)                                             # brim
+    for sd in (-1, 1):
+        x1, x2 = sorted((sd * 4.6, sd * 6.0))
+        m.box(x1, 4.2, -6.0, x2, 4.5, 6.0, F)                                            # side curl
+    rbox(m, -4.0, 4.0, -4.0, 4.0, 7.4, 4.0, F, r=1.0)                                    # crown
+    m.box(-4.05, 4.2, -4.05, 4.05, 5.0, 4.05, BD)                                        # ribbon
+    m.box(-0.7, 7.0, -3.4, 0.7, 7.45, 3.4, FD)                                           # top crease
+    for sd in (-1, 1):
+        m.box(sd * 1.8 - 0.4, 6.0, -4.06, sd * 1.8 + 0.4, 7.2, -4.0, FD)                  # front pinches
+    m.box(3.0, 4.6, -4.12, 3.6, 5.6, -4.05, '#c8312d')                                   # tiny feather
+
+@design("bowler_hat", "Bowler Hat", "hats")
+def _(m):
+    K, KD = '#1d1b22', '#2c2a33'
+    m.box(-5.2, 3.8, -5.2, 5.2, 4.2, 5.2, K)
+    ring(m, 4.2, 5.2, K, t=0.5, h=0.4)                                                   # curled brim edge
+    dome(m, 4.0, [(4.0, 1.4), (3.6, 1.2), (2.8, 0.8), (1.6, 0.4)], K)
+    m.box(-4.05, 4.2, -4.05, 4.05, 4.8, 4.05, KD)
+
+@design("pompom_beanie", "Pompom Beanie", "hats")
+def _(m):
+    R, RD, W = '#e23a4a', '#b82a38', '#f4f2ee'
+    dome(m, 2.4, [(4.7, 1.6), (4.6, 1.4), (4.2, 1.0), (3.4, 0.8), (2.2, 0.5)], R)
+    for x in (-3.6, -1.8, 0.0, 1.8, 3.6):
+        m.box(x - 0.15, 2.5, -4.75, x + 0.15, 5.4, -4.7, RD)                              # ribs
+    band(m, 1.6, 3.2, W, 4.9)                                                             # folded cuff
+    for u in range(0, 40, 2):
+        wrap(m, u + 0.6, 0.5, 2.0, 2.8, '#e8e4dc', r=4.9)
+    for k in range(3):
+        rbox(m, -1.4 + k * 0.1, 7.4 + k * 0.2, -1.4, 1.4 - k * 0.1, 9.4 - k * 0.2, 1.4, W, r=0.6)   # pompom
+
+@design("trapper_hat", "Trapper Hat", "hats")
+def _(m):
+    L, F, FD = '#5a3a20', '#c8a07a', '#a8805a'
+    dome(m, 4.0, [(4.7, 1.2), (4.0, 0.6)], L)
+    m.box(-4.9, 2.6, -4.9, 4.9, 4.4, -4.3, F)                                            # front fur flap
+    m.box(-4.9, 1.2, 4.0, 4.9, 4.4, 4.9, F)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.0, sd * 4.9), -3.4, -2.6, max(sd * 4.0, sd * 4.9), 4.4, 2.6, F)   # ear flaps
+        m.box(min(sd * 4.9, sd * 5.0), -3.2, -2.4, max(sd * 4.9, sd * 5.0), 3.0, 2.4, L)
+        m.box(sd * 4.95 - 0.1, -4.6, -0.1, sd * 4.95 + 0.1, -3.4, 0.1, L)                 # ties
+    patches(m, 'z', -4.9, -1, -4.8, 4.8, 2.7, 4.3, 10, [FD, '#e0c098'], 3, s=0.5)
+
+@design("sombrero", "Sombrero", "hats")
+def _(m):
+    S, SD, C1, C2, C3 = '#e8c070', '#c89a40', '#e8343f', '#4cc34a', '#2f6fd8'
+    m.box(-8.0, 3.8, -8.0, 8.0, 4.3, 8.0, S)                                             # huge brim
+    ring(m, 4.3, 8.0, S, t=0.8, h=0.8)                                                   # upturned edge
+    for k, w in enumerate((3.6, 3.2, 2.8, 2.3, 1.8)):
+        m.box(-w, 4.0 + k * 1.0, -w, w, 5.0 + k * 1.0, w, S)                              # tall crown
+    m.box(-0.8, 9.0, -0.8, 0.8, 9.6, 0.8, SD)
+    for k, c in enumerate((C1, C2, C3)):
+        m.box(-3.65 + 0.4 * (k > 1), 4.4 + k * 0.35, -3.65 + 0.4 * (k > 1), 3.65 - 0.4 * (k > 1), 4.75 + k * 0.35, 3.65 - 0.4 * (k > 1), c)
+    for i in range(16):                                                                 # pompoms around the rim
+        import math
+        a = i * math.pi / 8; x, z = 7.7 * math.cos(a), 7.7 * math.sin(a)
+        x, z = max(-7.7, min(7.7, x * 1.2)), max(-7.7, min(7.7, z * 1.2))
+        rbox(m, x - 0.35, 3.0, z - 0.35, x + 0.35, 3.7, z + 0.35, (C1, C2, C3)[i % 3], r=0.15)
+        m.box(x - 0.05, 3.7, z - 0.05, x + 0.05, 3.85, z + 0.05, SD)
+
+@design("pharaoh_headdress", "Pharaoh Headdress", "hats")
+def _(m):
+    B, G, GD = '#2f5fd0', '#f2c33a', '#b8861c'
+    dome(m, 4.0, [(4.8, 0.8), (4.2, 0.4)], G)
+    band(m, 2.0, 4.6, G, 4.8)
+    for k in range(5):
+        band(m, 2.2 + k * 0.5, 2.45 + k * 0.5, B, 4.85)                                   # stripes
+    m.box(-4.8, 2.0, -4.85, 4.8, 2.4, -4.8, GD)
+    for sd in (-1, 1):                                                                  # side drapes
+        for k in range(6):
+            y = 2.0 - k * 1.0; w = 1.6 + k * 0.25
+            m.box(min(sd * 4.0, sd * 4.85), y - 1.0, -4.2, max(sd * 4.0, sd * 4.85), y, -4.2 + w, (G, B)[k % 2])
+        m.box(min(sd * 3.0, sd * 4.85), -6.2, -4.8, max(sd * 3.0, sd * 4.85), -3.0, -3.6, (G, B)[1])
+    m.box(-4.8, -4.4, 4.0, 4.8, 2.0, 4.85, G)                                            # back
+    m.box(-0.35, 3.0, -5.4, 0.35, 5.0, -4.85, G)                                         # cobra uraeus
+    m.box(-0.6, 4.6, -5.6, 0.6, 5.4, -5.0, G)
+    m.box(-0.2, 4.9, -5.65, 0.2, 5.1, -5.6, '#e8343f')
+
+@design("sun_visor", "Sun Visor", "hats")
+def _(m):
+    V, VD, W = '#7ad0f0', '#4aa8d0', '#f4f2ee'
+    band(m, 2.6, 3.6, W, 4.6)
+    m.box(-4.4, 2.8, -8.4, 4.4, 3.2, -4.6, V)                                            # big brim
+    m.box(-4.0, 2.75, -8.6, 4.0, 3.15, -8.4, VD)
+    m.box(-4.4, 2.75, -6.0, 4.4, 2.8, -4.6, '#2f3a4a')
+
+@design("newsboy_cap", "Newsboy Cap", "hats")
+def _(m):
+    T, TD, TL = '#8a7a62', '#6a5a42', '#a89880'
+    rbox(m, -5.0, 3.6, -5.2, 5.0, 5.8, 4.6, T, r=1.4)                                    # puffy crown
+    for x in (-2.5, 0.0, 2.5):
+        m.box(x - 0.08, 5.75, -4.0, x + 0.08, 5.85, 4.0, TD)                              # panel seams
+    m.box(-4.2, 5.75, -0.08, 4.2, 5.85, 0.08, TD)
+    patches(m, 'y', 5.8, 1, -4.0, 3.8, -4.0, 3.6, 18, [TD, TL], 5, s=0.35)
+    rbox(m, -0.5, 5.8, -0.5, 0.5, 6.2, 0.5, TD, r=0.2)                                   # button
+    m.box(-4.0, 3.4, -7.0, 4.0, 3.8, -4.6, TD)                                            # short brim
+
+@design("captain_hat", "Captain Hat", "hats")
+def _(m):
+    W, K, G = '#f4f2ee', '#1d1b22', '#f2c33a'
+    band(m, 3.0, 4.6, K, 4.7)
+    rbox(m, -5.2, 4.6, -5.4, 5.2, 6.0, 4.8, W, r=1.0)                                    # white top
+    m.box(-4.4, 2.8, -7.0, 4.4, 3.2, -4.7, K)                                             # brim
+    m.box(-4.0, 3.2, -4.8, 4.0, 3.4, -4.7, G)                                             # gold cord
+    m.box(-1.0, 3.6, -4.8, 1.0, 5.2, -4.7, G)                                             # anchor badge
+    m.box(-0.15, 3.8, -4.85, 0.15, 5.0, -4.8, K); m.box(-0.6, 4.6, -4.85, 0.6, 4.75, -4.8, K)
+    m.box(-0.6, 3.8, -4.85, 0.6, 3.95, -4.8, K)
+
+@design("police_cap", "Officer Cap", "hats")
+def _(m):
+    N, K, S = '#22283a', '#1d1b22', '#c9ced8'
+    band(m, 3.0, 4.6, K, 4.7)
+    rbox(m, -5.0, 4.6, -5.2, 5.0, 5.8, 4.8, N, r=1.0)
+    m.box(-4.4, 2.8, -7.0, 4.4, 3.2, -4.7, K)
+    m.box(-4.0, 3.2, -4.8, 4.0, 3.4, -4.7, S)
+    star(m, 0, 4.6, -4.7, 0.6, GOLD)
+
+@design("firefighter_helmet", "Firefighter Helmet", "hats")
+def _(m):
+    R, RD, G, K = '#d62828', '#a81a1a', '#f2c33a', '#1d1b22'
+    dome(m, 3.0, [(4.8, 1.6), (4.4, 1.2), (3.6, 0.8), (2.4, 0.4)], R)
+    m.box(-0.4, 3.0, -4.9, 0.4, 7.2, 4.9, RD)                                            # ridge
+    m.box(-5.4, 2.8, -5.6, 5.4, 3.2, 7.8, R)                                             # long back brim
+    m.box(-5.45, 2.75, 6.8, 5.45, 3.15, 7.85, RD)
+    m.box(-1.6, 3.4, -5.6, 1.6, 6.6, -4.8, G)                                            # front shield
+    m.box(-1.2, 3.8, -5.66, 1.2, 6.2, -5.6, K)
+    m.box(-0.5, 4.6, -5.7, 0.5, 5.4, -5.66, G)
+
+@design("hard_hat", "Hard Hat", "hats")
+def _(m):
+    Y, YD = '#f7c81f', '#d8a81a'
+    dome(m, 3.4, [(4.8, 1.4), (4.4, 1.0), (3.6, 0.8), (2.4, 0.4)], Y)
+    m.box(-0.6, 3.4, -4.9, 0.6, 7.2, 4.9, YD)                                            # ridge
+    m.box(-4.4, 3.2, -6.8, 4.4, 3.6, -4.6, Y)                                             # front brim
+    m.box(-5.0, 3.2, -5.0, 5.0, 3.6, 5.0, Y)
+    m.box(-1.0, 4.4, -4.85, 1.0, 5.6, -4.8, '#4cc34a')                                    # sticker
+
+@design("football_helmet", "Football Helmet", "hats")
+def _(m):
+    B, BD, W, G = '#2f5fd0', '#1f4aa8', '#f4f2ee', '#c9ced8'
+    top = dome(m, 2.4, [(5.2, 2.0), (4.8, 0.8), (4.0, 0.4)], B)                          # open-front shell
+    for sd in (-1, 1):
+        rbox(m, min(sd * 4.6, sd * 5.2), -3.0, -5.2, max(sd * 4.6, sd * 5.2), 2.4, 5.2, B, r=0.6, top=False)
+        m.box(min(sd * 3.8, sd * 4.6), -3.0, -5.2, max(sd * 3.8, sd * 4.6), 2.4, -4.6, BD)   # cheek pads
+    m.box(-4.6, -3.0, 4.6, 4.6, 2.4, 5.2, B)                                               # back
+    m.box(-0.6, 2.4, -5.3, 0.6, top + 0.05, 5.3, W)                                       # stripe
+    m.box(-0.2, top - 0.6, -5.35, 0.2, top + 0.1, 5.35, '#d62828')
+    for x in (-4.2, -2.0, 2.0, 4.2):
+        m.box(x - 0.2, -4.4, -6.6, x + 0.2, -0.2, -6.2, G)                                # face mask bars
+    for y in (-4.4, -2.6, -0.8):
+        m.box(-4.4, y, -6.6, 4.4, y + 0.4, -6.2, G)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.4, sd * 5.3), -1.0, -6.6, max(sd * 4.4, sd * 5.3), -0.6, -5.2, G)
+        rbox(m, min(sd * 5.2, sd * 5.5), -1.6, -1.0, max(sd * 5.2, sd * 5.5), 0.4, 1.0, W, r=0.3)   # ear holes
+
+@design("bike_helmet", "Bike Helmet", "hats")
+def _(m):
+    C1, C2, K = '#7af08a', '#2a2a33', '#1d1b22'
+    dome(m, 3.2, [(4.8, 1.6), (4.4, 1.2), (3.4, 0.8)], C1)
+    for z in (-3.0, -0.4, 2.2):
+        for x in (-2.4, 0.0, 2.4):
+            m.box(x - 0.6, 6.75, z - 0.9, x + 0.6, 6.85, z + 0.9, K)                       # vents
+    for x in (-3.0, 3.0):
+        m.box(x - 0.4, 3.6, -4.85, x + 0.4, 5.6, -4.8, K)
+    m.box(-4.4, 3.4, -6.0, 4.4, 3.8, -4.6, C2)                                            # mini visor
+    m.box(-2.0, 3.0, 4.6, 2.0, 4.6, 5.6, C2)                                              # rear point
+    for sd in (-1, 1):
+        m.box(sd * 3.4 - 0.1, -4.0, -2.6, sd * 3.4 + 0.1, 3.2, -2.4, K) if False else None
+        x1, x2 = sorted((sd * 4.6, sd * 4.7))
+        m.box(x1, -4.4, -1.0, x2, 3.2, -0.7, K)                                           # straps
+
+@design("flat_cap", "Flat Cap", "hats")
+def _(m):
+    T, TD, TL = '#6a6a5a', '#4e4e42', '#8a8a78'
+    rbox(m, -4.8, 3.6, -5.0, 4.8, 5.0, 4.8, T, r=1.2, rot=('x', -22.5, (0, 3.6, 4.8)))  # sloped flat top
+    patches(m, 'y', 5.0, 1, -4.0, 3.6, -4.2, 4.0, 14, [TD, TL], 8, s=0.35)
+    m.box(-4.2, 3.4, -6.6, 4.2, 3.8, -4.6, TD)
+    m.box(-5.0, 3.0, -5.0, 5.0, 3.8, 5.0, T)
+
+@design("nurse_cap", "Nurse Cap", "hats")
+def _(m):
+    W, WD, R = '#f8f8fa', '#e0e0e8', '#e8343f'
+    m.box(-3.8, 4.0, -3.4, 3.8, 6.0, -1.6, W, rot=('x', -22.5, (0, 4.0, -2.5)))          # folded cap
+    m.box(-3.6, 4.0, -1.6, 3.6, 5.0, 1.0, W)
+    m.box(-3.85, 5.6, -3.45, 3.85, 6.05, -1.55, WD, rot=('x', -22.5, (0, 4.0, -2.5)))
+    m.box(-0.25, 4.6, -3.5, 0.25, 5.8, -3.4, R, rot=('x', -22.5, (0, 4.0, -2.5)))        # red cross
+    m.box(-0.75, 5.0, -3.5, 0.75, 5.4, -3.4, R, rot=('x', -22.5, (0, 4.0, -2.5)))
+
+@design("bunny_hood", "Bunny Hood", "hats")
+def _(m):
+    W, P = '#f4f2ee', '#f7a8c8'
+    hood(m, W, frame='#ffe8f0')
+    for sd in (-1, 1):
+        r = ('z', -22.5 * sd, (sd * 2.0, 5.2, 0))
+        rbox(m, sd * 2.0 - 0.9, 5.2, -0.5, sd * 2.0 + 0.9, 10.4, 0.5, W, r=0.3, rot=r)
+        m.box(sd * 2.0 - 0.45, 5.8, -0.55, sd * 2.0 + 0.45, 9.8, -0.5, P, rot=r)
+    rbox(m, -0.8, -1.6, 5.0, 0.8, 0.0, 5.8, W, r=0.3)                                     # cotton tail
+
+@design("frog_hood", "Frog Hood", "hats")
+def _(m):
+    G, GD, W, K = '#6cbd4b', '#4a9a3a', '#f4f2ee', '#1a1418'
+    hood(m, G, frame=GD)
+    for sd in (-1, 1):
+        rbox(m, sd * 2.4 - 1.3, 5.0, -3.6, sd * 2.4 + 1.3, 7.4, -1.0, G, r=0.6)          # eye bumps
+        m.box(sd * 2.4 - 0.9, 5.6, -3.66, sd * 2.4 + 0.9, 7.0, -3.6, W)
+        m.box(sd * 2.4 - 0.45, 5.8, -3.7, sd * 2.4 + 0.45, 6.6, -3.66, K)
+        m.box(sd * 2.4 - 0.2, 6.3, -3.72, sd * 2.4 + 0.05, 6.55, -3.7, W)
+        m.box(sd * 2.6 - 0.4, 2.0, -5.1, sd * 2.6 + 0.4, 2.4, -5.0, '#ff9fb8')
+    m.box(-2.4, 3.0, -5.1, 2.4, 3.2, -5.0, '#2a5a1a')                                    # smile on the brim
+
+@design("dino_hood", "Dino Hood", "hats")
+def _(m):
+    G, GD, Y, W = '#5fb84a', '#3e8a32', '#f2d23a', '#f4f2ee'
+    hood(m, G, frame=GD)
+    for k in range(6):                                                                  # back spikes
+        z = -2.6 + k * 1.6; y = 6.4 - max(0, k - 2) * 1.6
+        h = 1.6 - abs(k - 2) * 0.15
+        steps(m, 0, z if k < 3 else 5.0, y if k < 3 else 4.0 - (k - 3) * 2.4, [1.4, 1.0, 0.5], Y, depth=0.6, h=h / 3 * 1.0, smooth=1) if False else None
+    for (y, z) in ((6.0, -3.0), (6.0, -0.6), (6.0, 1.8), (5.0, 4.2), (2.4, 5.0), (-0.4, 5.0), (-3.0, 5.0)):
+        if z < 4:
+            for k, w in enumerate((1.4, 1.0, 0.5)):
+                m.box(-0.25, y + k * 0.5, z - w / 2, 0.25, y + (k + 1) * 0.5, z + w / 2, Y)
+        else:
+            for k, w in enumerate((1.4, 1.0, 0.5)):
+                m.box(-0.25, y - w / 2, z + k * 0.5, 0.25, y + w / 2, z + (k + 1) * 0.5, Y)
+    for x in (-3.2, -2.2, -1.2, 1.2, 2.2, 3.2):
+        steps(m, x, -5.0, 2.2, [0.5, 0.3], W, depth=0.3, h=-0.35, smooth=1)                # teeth on the brim
+    for x in (-4.4, -3.6, 3.6, 4.4):
+        m.box(x - 0.2, -1.0 + abs(x) * 0.3, -5.1, x + 0.2, -0.4 + abs(x) * 0.3, -5.0, W) if False else None
+
+@design("bear_hood", "Bear Hood", "hats")
+def _(m):
+    B, BL, BD = '#8a5a34', '#c8966a', '#5a3a20'
+    hood(m, B, frame=BL)
+    for sd in (-1, 1):
+        rbox(m, sd * 3.0 - 1.2, 5.2, -1.2, sd * 3.0 + 1.2, 7.4, 0.0, B, r=0.5)           # round ears
+        m.box(sd * 3.0 - 0.6, 5.6, -1.26, sd * 3.0 + 0.6, 6.9, -1.2, BL)
+    for sd in (-1, 1):
+        m.box(sd * 1.8 - 0.35, 5.0, -4.2, sd * 1.8 + 0.35, 5.6, -4.1, '#1a1418')          # sleepy eyes on top
+    m.box(-0.5, 4.6, -4.4, 0.5, 5.2, -4.1, BD)
+
+@design("bonnet", "Flower Bonnet", "hats")
+def _(m):
+    S, SD, R = '#f2e0c8', '#d8c0a0', '#f7a8c8'
+    dome(m, 2.0, [(4.9, 2.4), (4.6, 1.4), (3.8, 0.8)], S)
+    m.box(-5.0, -1.0, 2.0, 5.0, 2.0, 5.0, S)
+    m.box(-5.4, 2.0, -5.6, 5.4, 6.0, -4.6, S)                                            # brim framing the face
+    m.box(-5.45, 2.0, -5.7, 5.45, 2.3, -5.5, SD)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.6, sd * 5.4), -2.0, -5.6, max(sd * 4.6, sd * 5.4), 6.0, -2.0, S)
+        m.box(sd * 4.6 - 0.2, -5.2, -1.8, sd * 4.6 + 0.2, -0.4, -1.2, R)                  # ribbons
+    m.box(-4.4, -5.2, -1.8, 4.4, -4.8, -1.2, R)
+    rbox(m, -1.2, -5.6, -2.0, 1.2, -4.4, -1.0, R, r=0.3)                                  # bow under the chin
+    for x, c in ((-3.4, '#f7a8c8'), (-2.2, '#fff0a0'), (3.2, '#a8d8ff')):
+        flower(m, x, 5.0, -5.6, c, '#fff0a0' if c != '#fff0a0' else '#f2a03a', s=0.7)
+
+@design("boater_hat", "Straw Boater", "hats")
+def _(m):
+    S, SD, R = '#e8d08a', '#c8b06a', '#2f5fd0'
+    m.box(-6.0, 3.8, -6.0, 6.0, 4.2, 6.0, S)
+    m.box(-4.0, 4.0, -4.0, 4.0, 6.4, 4.0, S)                                             # flat crown
+    m.box(-4.05, 4.2, -4.05, 4.05, 5.0, 4.05, R)                                          # ribbon
+    m.box(-4.06, 4.5, -4.06, 4.06, 4.7, 4.06, '#d62828')
+    for y in (5.4, 6.0):
+        m.box(-4.02, y, -4.02, 4.02, y + 0.08, 4.02, SD)
+    patches(m, 'y', 4.2, 1, -5.8, 5.8, -5.8, 5.8, 20, [SD], 6, s=0.4)
+
+@design("jockey_cap", "Jockey Silks Cap", "hats")
+def _(m):
+    C1, C2 = '#f2c33a', '#8a2ae0'
+    dome(m, 3.0, [(4.8, 1.6), (4.4, 1.2), (3.6, 0.6)], C1)
+    for (x1, x2) in ((-4.85, -2.4), (2.4, 4.85)):
+        m.box(x1, 3.0, -4.85, x2, 5.8, 4.85, C2) if False else None
+    for z1 in (-4.85, -1.6, 1.6):
+        m.box(-4.85, 4.6, z1, 4.85, 6.2, z1 + 1.6, C2)                                     # quarters
+    m.box(-4.0, 2.8, -7.0, 4.0, 3.2, -4.8, C2)                                            # visor
+    rbox(m, -0.8, 7.4, -0.8, 0.8, 8.4, 0.8, C2, r=0.4)                                   # pompom
+
+@design("diving_helmet", "Diving Helmet", "hats")
+def _(m):
+    BR, BRD, BRL, GL = '#c88a3a', '#9a6a2a', '#e8b05a', '#bfe8ff48'
+    dome(m, 4.4, [(5.6, 1.4), (4.8, 0.6)], BR)                                            # open-front shell
+    for sd in (-1, 1):
+        rbox(m, min(sd * 4.6, sd * 5.6), -5.2, -5.6, max(sd * 4.6, sd * 5.6), 4.4, 5.6, BR, r=0.8, top=False)
+    m.box(-4.6, -5.2, 4.6, 4.6, 4.4, 5.6, BR)                                             # back
+    for sd in (-1, 1):                                                                    # front plate around the window
+        m.box(min(sd * 3.0, sd * 4.6), -5.2, -5.6, max(sd * 3.0, sd * 4.6), 4.4, -4.6, BR)
+    m.box(-3.0, 2.0, -5.6, 3.0, 4.4, -4.6, BR)
+    m.box(-3.0, -5.2, -5.6, 3.0, -2.6, -4.6, BR)
+    for sd in (-1, 1):                                                                    # window rim
+        m.box(min(sd * 3.0, sd * 3.6), -3.2, -6.2, max(sd * 3.0, sd * 3.6), 2.6, -5.4, BRL)
+    for y1 in (-3.2, 2.0):
+        m.box(-3.0, y1, -6.2, 3.0, y1 + 0.6, -5.4, BRL)
+    m.box(-3.0, -2.6, -6.1, 3.0, 2.0, -6.05, GL)                                          # glass
+    for x in (-1.0, 1.0):
+        m.box(x - 0.1, -2.6, -6.2, x + 0.1, 2.0, -6.1, BRD)                               # grille
+    for (x, y) in ((-3.3, -2.9), (3.3, -2.9), (-3.3, 2.3), (3.3, 2.3), (0.0, 2.3), (0.0, -2.9)):
+        m.box(x - 0.25, y - 0.25, -6.3, x + 0.25, y + 0.25, -6.2, '#5a5a62')              # bolts
+    for sd in (-1, 1):
+        rbox(m, min(sd * 5.4, sd * 6.0), -1.4, -1.4, max(sd * 5.4, sd * 6.0), 1.4, 1.4, BRL, r=0.5)   # side ports
+        m.box(min(sd * 6.0, sd * 6.05), -0.9, -0.9, max(sd * 6.0, sd * 6.05), 0.9, 0.9, GL)
+    m.box(-5.8, -5.6, -5.8, 5.8, -4.6, 5.8, BRD)                                          # collar
+    m.box(-0.6, 6.0, 3.0, 0.6, 7.2, 4.2, BRD)                                             # air valve
+
+@design("aviator_cap", "Aviator Cap", "hats")
+def _(m):
+    L, LD, FUR, BR, GL = '#6b4326', '#4a2e1a', '#e8dcc0', '#c8a040', '#bfeff2aa'
+    dome(m, 2.0, [(4.8, 2.8), (4.4, 0.6)], L)
+    m.box(-4.8, -2.0, 4.0, 4.8, 2.0, 4.8, L)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.0, sd * 4.8), -4.0, -2.6, max(sd * 4.0, sd * 4.8), 2.4, 2.6, L)   # ear flaps
+        m.box(min(sd * 4.8, sd * 4.95), -3.8, -2.4, max(sd * 4.8, sd * 4.95), -2.6, 2.4, FUR)
+    band(m, 2.0, 2.5, FUR, 4.9)
+    for sd in (-1, 1):                                                                  # goggles pushed up
+        rbox(m, sd * 1.9 - 1.3, 2.6, -5.6, sd * 1.9 + 1.3, 4.6, -4.8, BR, r=0.5)
+        m.box(sd * 1.9 - 0.9, 3.0, -5.65, sd * 1.9 + 0.9, 4.2, -5.6, GL)
+    m.box(-0.4, 3.2, -5.2, 0.4, 3.8, -4.8, BR)
