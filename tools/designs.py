@@ -4322,3 +4322,319 @@ def _(m):
         m.box(min(sd * 0.6, sd * 1.4), y0 + 2.55, -1.6, max(sd * 0.6, sd * 1.4), y0 + 2.6, -1.55, '#f4f2ee')
     for k in range(4):                                                                  # striped tail wrapped round
         m.box(-1.3 + k * 0.7, y0, 1.6, -0.7 + k * 0.7, y0 + 0.5, 2.1, (Y, SP)[k % 2])
+
+# ---------- B: mob masks ----------
+def mask8(m, base, rows=None, spec=None, r=4.6, tex=None, seed=1):
+    """Full-head mob mask: a cube just outside the hat layer with an 8x8 pixel face on the front."""
+    m.box(-r, -r, -r, r, r, r, base)
+    if rows:
+        relief(m, rows, -r, {k: (c, 0.06) for k, c in spec.items()}, cell=2 * r / 8, top=r)
+    if tex:
+        for ax, pl, out in (('x', r, 1), ('x', -r, -1), ('z', r, 1)):
+            patches(m, ax, pl, out, -r, r, -r, r, 14, tex, seed + int(pl * 7) + (3 if ax == 'z' else 0), s=2 * r / 8)
+        patches(m, 'y', r, 1, -r, r, -r, r, 14, tex, seed + 50, s=2 * r / 8)
+
+@design("enderman_mask", "Enderman Mask", "mob")
+def _(m):
+    GLOW.update({'#e079fa', '#cc00fa'})
+    mask8(m, '#161616', ["........", "........", "........", "........", "eEe..eEe", "........", "........", "........"],
+          {'e': '#e079fa', 'E': '#cc00fa'}, tex=['#0e0e0e', '#1f1f22'])
+    for x, y in ((-5.6, 2.0), (5.4, -1.0), (-4.8, 6.0), (3.6, 6.8)):
+        m.box(x - 0.2, y, -1.0, x + 0.2, y + 0.4, -0.6, '#e079fa')
+
+@design("zombie_mask", "Zombie Mask", "mob")
+def _(m):
+    mask8(m, '#4f8a3a', ["dddddddd", "d......d", "........", "........", ".kk..kk.", "...nn...", "..mmmm..", "........"],
+          {'d': '#3a6e2a', 'k': '#1d2a1a', 'n': '#3a6a2a', 'm': '#2a4a22'}, tex=['#3f7a2e', '#5f9a48'])
+
+@design("skeleton_mask", "Skeleton Mask", "mob")
+def _(m):
+    mask8(m, '#c9c9c9', ["........", "........", "........", ".kk..kk.", ".kk..kk.", "...nn...", ".mmmmmm.", "........"],
+          {'k': '#2a2a2a', 'n': '#6a6a6a', 'm': '#5a5a5a'}, tex=['#b4b4b4', '#d8d8d8'])
+    for x in (-2.3, -1.15, 0.0, 1.15, 2.3):
+        m.box(x - 0.06, -3.45, -4.68, x + 0.06, -2.3, -4.6, '#c9c9c9')                    # teeth gaps
+
+@design("spider_mask", "Spider Mask", "mob")
+def _(m):
+    GLOW.update({'#ff4a3a'})
+    mask8(m, '#2e2620', ["........", "........", "..r..r..", "........", ".RR..RR.", ".RR..RR.", "........", "...ff..."],
+          {'r': '#ff4a3a', 'R': '#c8201a', 'f': '#5a4a3a'}, tex=['#241e1a', '#3a302a'])
+    for sd in (-1, 1):
+        for z in (-2.6, -0.6, 1.4, 3.2):                                                 # bent legs on each side
+            x1, x2 = sorted((sd * 4.6, sd * 6.8))
+            m.box(x1, 0.6, z - 0.3, x2, 1.2, z + 0.3, '#2e2620')
+            x1, x2 = sorted((sd * 6.2, sd * 6.8))
+            m.box(x1, -2.6, z - 0.3, x2, 0.6, z + 0.3, '#2e2620')
+
+@design("pig_mask", "Pig Mask", "mob")
+def _(m):
+    mask8(m, '#f0a0b0', ["........", "........", "........", ".wk..kw.", "........", "........", "........", "........"],
+          {'w': '#ffffff', 'k': '#1a1418'}, tex=['#e890a2', '#f8b8c4'])
+    rbox(m, -2.3, -3.4, -5.6, 2.3, -0.9, -4.6, '#f8c0cc', r=0.4)
+    for sd in (-1, 1):
+        m.box(sd * 1.0 - 0.45, -2.6, -5.66, sd * 1.0 + 0.45, -1.7, -5.6, '#c06a7c')
+
+@design("cow_mask", "Cow Mask", "mob")
+def _(m):
+    mask8(m, '#f4f2ee', ["KKK.....", "KKK...KK", "KK......", ".kw..wk.", "........", "........", "........", "........"],
+          {'K': '#2a2226', 'k': '#1a1418', 'w': '#ffffff'}, tex=['#2a2226', '#f4f2ee', '#e8e4dc'])
+    rbox(m, -2.6, -4.6, -5.5, 2.6, -1.6, -4.6, '#c9b0a4', r=0.4)
+    for sd in (-1, 1):
+        m.box(sd * 1.2 - 0.4, -2.8, -5.56, sd * 1.2 + 0.4, -2.2, -5.5, '#5a3a3a')
+        m.box(sd * 3.4 - 0.4, 4.6, -1.2, sd * 3.4 + 0.4, 6.4, -0.4, '#e8e0c8')              # horns
+        m.box(min(sd * 4.6, sd * 6.0), 1.6, -1.6, max(sd * 4.6, sd * 6.0), 2.6, -0.4, '#2a2226')   # ears
+
+@design("sheep_hood", "Sheep Hood", "mob")
+def _(m):
+    W, WS, F = '#f4f2ee', '#e2ded6', '#e8cdb0'
+    dome(m, 4.0, [(5.2, 1.2), (4.4, 0.6)], W)
+    m.box(-5.2, -4.0, 4.0, 5.2, 4.6, 5.2, W)                                             # back
+    for sd in (-1, 1):
+        m.box(min(sd * 4.0, sd * 5.2), -4.0, -5.2, max(sd * 4.0, sd * 5.2), 4.6, 4.0, W)   # sides
+        m.box(min(sd * 3.2, sd * 4.0), -4.0, -5.2, max(sd * 3.2, sd * 4.0), 4.6, -4.0, W)  # face frame
+        m.box(min(sd * 5.2, sd * 6.6), 1.4, -1.6, max(sd * 5.2, sd * 6.6), 2.2, -0.4, F)  # ears
+    m.box(-4.0, 2.8, -5.2, 4.0, 4.6, -4.0, W)
+    import random as _r
+    rnd = _r.Random(3)
+    for _ in range(26):                                                                 # fluffy bumps
+        x, y = rnd.uniform(-5.0, 4.0), rnd.uniform(-3.8, 5.4)
+        z = rnd.choice((-5.4, 5.2)) if abs(x) < 3 else rnd.uniform(-4.8, 4.0)
+        if abs(x) < 3.2 and y < 2.8 and z < 0:
+            continue
+        rbox(m, x, y, z, x + 1.0, y + 0.9, z + 0.4 if z > 5 or z < -5 else z + 1.0, (W, WS)[rnd.random() < 0.4], r=0.2)
+
+@design("villager_nose", "Villager Nose", "mob")
+def _(m):
+    rbox(m, -1.15, -3.4, -6.6, 1.15, 0.2, -4.6, '#b88a64', r=0.25)                       # hmm
+    m.box(-1.15, -3.4, -6.62, 1.15, -3.0, -4.6, '#a07a54')
+    m.box(-3.6, 0.4, -4.8, 3.6, 1.1, -4.6, '#4a2e1a')                                    # unibrow
+
+@design("iron_golem_mask", "Iron Golem Mask", "mob")
+def _(m):
+    mask8(m, '#d8d4cc', None, tex=['#c8c4bc', '#e8e4dc', '#b8b4ac'])
+    m.box(-4.6, 0.4, -5.4, 4.6, 1.6, -4.6, '#c8c4bc')                                    # brow ridge
+    for sd in (-1, 1):
+        m.box(sd * 2.3 - 0.6, -0.6, -4.68, sd * 2.3 + 0.6, 0.4, -4.6, '#8a1a1a')
+    rbox(m, -1.15, -3.6, -6.0, 1.15, 0.6, -4.6, '#c8c4bc', r=0.2)                        # golem nose
+    for (x, y, h) in ((-4.0, -4.6, 6.0), (3.4, -4.6, 3.2), (-2.6, 2.0, 2.6)):
+        m.box(x, y, -4.68, x + 0.5, y + h, -4.6, '#4a8a3a')                               # vines
+    m.box(4.6, -2.0, -2.0, 4.66, 3.0, -1.5, '#4a8a3a'); m.box(-4.66, -4.0, 1.0, -4.6, 1.0, 1.5, '#4a8a3a')
+    for x, y in ((1.8, 2.6), (-3.4, -3.0)):
+        m.box(x, y, -4.66, x + 0.9, y + 0.12, -4.6, '#8c887f')                             # cracks
+
+@design("blaze_mask", "Blaze Mask", "mob")
+def _(m):
+    mask8(m, '#f2c33a', ["........", "........", "........", ".kk..kk.", "........", "........", "..mmmm..", "........"],
+          {'k': '#3a1a0a', 'm': '#c8781a'}, tex=['#e0a020', '#fff070', '#d89018'])
+    for x, z in ((-5.8, -5.8), (5.8, -5.8), (-5.8, 5.8), (5.8, 5.8)):
+        m.box(x - 0.45, -3.0, z - 0.45, x + 0.45, 2.6, z + 0.45, '#ffc21f')               # floating rods
+        m.box(x - 0.47, -1.0, z - 0.47, x + 0.47, -0.6, z + 0.47, '#d9861a')
+    for x, y in ((-2.0, 5.6), (1.4, 6.4), (2.8, 5.2)):
+        m.box(x - 0.4, y, -0.4, x + 0.4, y + 0.8, 0.4, '#5a5a62a0')
+
+@design("wither_skull_mask", "Wither Skull Mask", "mob")
+def _(m):
+    mask8(m, '#2b2b2f', ["........", "........", "........", ".ee..ee.", "........", "...nn...", ".tttttt.", ".t.tt.t."],
+          {'e': '#c9ced8', 'n': '#18181b', 't': '#8c8f99'}, tex=['#232327', '#36363b'])
+
+@design("piglin_mask", "Piglin Mask", "mob")
+def _(m):
+    mask8(m, '#e6a08a', ["........", "........", ".bb..bb.", ".wk..kw.", "........", "........", "........", "........"],
+          {'b': '#6b4326', 'w': '#ffffff', 'k': '#1a1418'}, tex=['#d8907a', '#f2b8a0'])
+    rbox(m, -2.0, -3.4, -5.8, 2.0, -0.8, -4.6, '#f2b8a0', r=0.35)
+    for sd in (-1, 1):
+        m.box(sd * 0.9 - 0.35, -2.4, -5.86, sd * 0.9 + 0.35, -1.7, -5.8, '#8a4a3a')
+        m.box(sd * 2.6 - 0.3, -4.6, -5.2, sd * 2.6 + 0.3, -3.0, -4.6, '#f4f2ee')          # tusks
+        m.box(min(sd * 4.6, sd * 6.4), 0.4, -1.6, max(sd * 4.6, sd * 6.4), 3.4, -0.4, '#e6a08a',
+              rot=('z', 22.5 * sd, (sd * 4.6, 3.4, -1.0)))                               # floppy ears
+        m.box(min(sd * 4.6, sd * 4.9), -1.0, -2.0, max(sd * 4.6, sd * 4.9), 0.0, -1.4, GOLD)
+
+@design("guardian_eye_hat", "Guardian Buddy", "mob")
+def _(m):
+    T, TD, O, K = '#5aa89a', '#3e8a7e', '#e8803a', '#3a1a5a'
+    y0 = 4.6
+    rbox(m, -2.2, y0, -2.2, 2.2, y0 + 3.6, 2.2, T, r=0.3)
+    patches(m, 'x', 2.2, 1, -2.0, 2.0, y0 + 0.2, y0 + 3.4, 6, [TD, '#7ac8b8'], 2, s=0.55)
+    patches(m, 'x', -2.2, -1, -2.0, 2.0, y0 + 0.2, y0 + 3.4, 6, [TD, '#7ac8b8'], 3, s=0.55)
+    m.box(-1.2, y0 + 1.0, -2.26, 1.2, y0 + 2.6, -2.2, '#f4f2ee')                          # big eye
+    m.box(-0.4, y0 + 1.3, -2.3, 0.4, y0 + 2.2, -2.26, K)
+    m.box(-0.1, y0 + 1.9, -2.32, 0.15, y0 + 2.1, -2.3, '#ffffff')
+    for (x, y, z, ax) in ((0, y0 + 3.6, 0, 'y'), (-2.2, y0 + 1.8, 0, 'x'), (2.2, y0 + 1.8, 0, 'x'), (0, y0 + 1.8, 2.2, 'z'),
+                          (-1.4, y0 + 3.6, -1.4, 'y'), (1.4, y0 + 3.6, 1.4, 'y'), (-2.2, y0 + 3.2, -1.6, 'x'), (2.2, y0 + 0.6, 1.4, 'x')):
+        if ax == 'y':
+            m.box(x - 0.2, y, z - 0.2, x + 0.2, y + 1.0, z + 0.2, O)
+        elif ax == 'x':
+            x1, x2 = sorted((x, x + (1.0 if x > 0 else -1.0)))
+            m.box(x1, y - 0.2, z - 0.2, x2, y + 0.2, z + 0.2, O)
+        else:
+            m.box(x - 0.2, y - 0.2, z, x + 0.2, y + 0.2, z + 1.0, O)                      # spikes
+    for k in range(3):
+        m.box(-0.6 + 0.15 * k, y0 + 1.2, 2.2 + k * 0.9, 0.6 - 0.15 * k, y0 + 2.2, 3.1 + k * 0.9, (T, TD)[k % 2])
+    m.box(-0.8, y0 + 1.4, 4.9, 0.8, y0 + 2.0, 5.3, O)
+
+@design("slime_helmet", "Slime Helmet", "mob")
+def _(m):
+    K = '#1e3a1a'
+    m.box(-5.2, -5.2, -5.2, 5.2, 5.2, 5.2, '#7ad35a70')                                  # jelly
+    for sd in (-1, 1):
+        m.box(sd * 2.2 - 0.9, 2.0, -5.3, sd * 2.2 + 0.9, 3.6, -5.2, K)
+        m.box(sd * 2.2 + 0.1, 3.0, -5.32, sd * 2.2 + 0.6, 3.5, -5.3, '#e6ffd8')
+    m.box(-0.6, 1.0, -5.3, 0.6, 1.5, -5.2, K)
+    m.box(-4.6, 4.4, -5.26, -3.2, 4.8, -5.2, '#e6ffd8c0')                                # shine
+    for x, z in ((-3.0, -1.0), (2.4, 2.0)):
+        rbox(m, x - 0.6, 5.2, z - 0.6, x + 0.6, 6.2, z + 0.6, '#7ad35a90', r=0.2)         # baby slimes bouncing
+
+@design("magma_cube_helmet", "Magma Cube Helmet", "mob")
+def _(m):
+    D, DL, O, Y = '#4a1410', '#6a2018', '#ff8a1f', '#ffd23a'
+    GLOW.update({O, Y})
+    m.box(-4.5, -4.5, -4.5, 4.5, 4.5, 4.5, O)                                           # glowing core
+    for i, (y1, y2) in enumerate(((-4.8, -3.0), (-2.4, -0.8), (-0.2, 1.6), (2.2, 4.0), (4.0, 4.8))):
+        m.box(-4.8 - 0.1 * (i % 2), y1, -4.8 - 0.1 * (i % 2), 4.8 + 0.1 * (i % 2), y2, 4.8 + 0.1 * (i % 2), D)
+        patches(m, 'z', -4.8 - 0.1 * (i % 2), -1, -4.6, 4.6, y1 + 0.1, y2 - 0.1, 4, [DL, '#2a0a08'], i + 2, s=0.6)
+    for sd in (-1, 1):
+        m.box(sd * 1.8 - 0.9, 0.2, -5.0, sd * 1.8 + 0.9, 1.3, -4.8, Y)                   # eyes
+        m.box(sd * 1.8 - 0.3, 0.2, -5.04, sd * 1.8 + 0.3, 0.9, -5.0, '#c8201a')
+
+@design("shulker_helmet", "Shulker Helmet", "mob")
+def _(m):
+    S, SD, Y = '#9a6aa8', '#7a4e8a', '#f2e070'
+    m.box(-5.0, -4.6, 4.0, 5.0, 2.4, 5.0, S)                                             # back
+    for sd in (-1, 1):
+        m.box(min(sd * 4.0, sd * 5.0), -4.6, -5.0, max(sd * 4.0, sd * 5.0), 2.4, 4.0, S)
+    m.box(-5.05, -4.6, -5.05, 5.05, -3.8, 5.05, SD)
+    r = ('x', 22.5, (0, 3.0, 5.0))
+    m.box(-5.0, 2.6, -5.0, 5.0, 5.6, 5.0, S, rot=r)                                      # lid tipped open
+    m.box(-5.05, 2.6, -5.05, 5.05, 3.2, 5.05, SD, rot=r)
+    rbox(m, -1.6, 4.3, -2.6, 1.6, 5.8, 0.4, Y, r=0.3)                                    # head peeking from inside
+    eyes(m, 0, 4.8, -2.6, 0.6, w=0.4, h=0.5)
+
+@design("ghast_mask", "Ghast Mask", "mob")
+def _(m):
+    mask8(m, '#f0f0f0', ["........", "........", "........", ".kk..kk.", "..t..t..", "..t..t..", "...mm...", "...mm..."],
+          {'k': '#3a3a3a', 't': '#9ab8d8', 'm': '#3a3a3a'}, tex=['#e4e4e4', '#fafafa'])
+    import random as _r
+    rnd = _r.Random(2)
+    for x in (-3.4, -1.1, 1.1, 3.4):
+        for z in (-3.4, 0.0, 3.4):
+            if z > -1 and abs(x) < 2:
+                continue
+            m.box(x - 0.4, -4.6 - rnd.uniform(1.0, 2.2), z - 0.4, x + 0.4, -4.6, z + 0.4, '#e8e8e8')   # tentacles
+
+@design("snow_golem_head", "Snowman Mask", "mob")
+def _(m):
+    mask8(m, '#f6f8fa', None, tex=['#e2e8ee', '#ffffff'])
+    for sd in (-1, 1):
+        rbox(m, sd * 1.9 - 0.55, 0.0, -5.2, sd * 1.9 + 0.55, 1.1, -4.6, '#2a2a2e', r=0.2)  # coal eyes
+        r = ('z', -45 * sd, (sd * 4.6, -0.5, 0))
+        m.box(min(sd * 4.6, sd * 7.4), -0.7, -0.2, max(sd * 4.6, sd * 7.4), -0.3, 0.2, '#6b4326', rot=r)   # stick arms
+    steps(m, 0, 0, -1.6, [1.2, 0.9, 0.6, 0.3], ORANGE, h=0.6, smooth=1) if False else None
+    for k, w in enumerate((1.1, 0.85, 0.6, 0.35)):
+        m.box(-w / 2, -1.6 - w / 2 + 0.3, -5.6 - k * 0.7, w / 2, -1.6 + w / 2 + 0.3, -4.6 - k * 0.7, ORANGE)   # carrot
+    for x in (-2.0, -1.0, 0.0, 1.0, 2.0):
+        m.box(x - 0.3, -3.6 + abs(x) * 0.35, -4.9, x + 0.3, -3.0 + abs(x) * 0.35, -4.6, '#2a2a2e')   # coal smile
+
+@design("drowned_mask", "Drowned Mask", "mob")
+def _(m):
+    GLOW.update({'#7af7ff'})
+    mask8(m, '#3a8a7a', ["ssssssss", "s.....ss", "........", "........", ".ee..ee.", "........", "..mmmm..", "........"],
+          {'s': '#2a5a4a', 'e': '#7af7ff', 'm': '#1a3a32'}, tex=['#2a6a5a', '#5aa898'])
+    for sd in (-1, 1):
+        for z, ln in ((-2.6, 4.0), (0.4, 6.4), (3.0, 3.0)):
+            x1, x2 = sorted((sd * 4.6, sd * 4.95))
+            m.box(x1, 4.6 - ln, z - 0.3, x2, 4.6, z + 0.3, '#3a8a3a')                        # seaweed
+    for x in (-2.0, 1.0, 2.6):
+        m.box(x - 0.25, 4.6, -1.0, x + 0.25, 6.6 + x * 0.3, -0.5, '#4cc34a')
+
+@design("stray_hood", "Stray Hood", "mob")
+def _(m):
+    H, HD = '#4a5a5e', '#36444a'
+    mask8(m, '#b8c6c8', ["........", "........", "........", ".kk..kk.", ".kk..kk.", "...nn...", ".mmmmmm.", "........"],
+          {'k': '#2a3436', 'n': '#6a7a7c', 'm': '#5a6a6c'}, tex=['#a8b6b8', '#c8d6d8'])
+    dome(m, 4.6, [(5.0, 0.7), (4.2, 0.5)], H)
+    m.box(-5.0, -4.6, 4.6, 5.0, 4.8, 5.2, H)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.6, sd * 5.2), -4.6, -4.4, max(sd * 4.6, sd * 5.2), 4.8, 5.2, H)
+    m.box(-5.0, 2.4, -5.2, 5.0, 4.8, -4.6, H)
+    for x in (-4.0, -2.0, 0.6, 2.8):
+        m.box(x, 1.8, -5.25, x + 1.0, 2.4, -4.8, HD)                                      # ragged edge
+    for x in (-4.8, 4.8):
+        for z in (-3.0, 0.0, 3.0):
+            m.box(x - 0.3, -5.6 + abs(z) * 0.2, z - 0.4, x + 0.3, -4.6, z + 0.4, HD)
+
+@design("bee_hive_hat", "Beehive Hat", "mob")
+def _(m):
+    H, HD, HN = '#e8c070', '#c89a40', '#f2a01f'
+    rbox(m, -2.6, 4.6, -2.6, 2.6, 8.6, 2.6, H, r=0.2)
+    for y in (5.4, 6.4, 7.4):
+        m.box(-2.65, y, -2.65, 2.65, y + 0.2, 2.65, HD)
+    m.box(-0.8, 5.8, -2.7, 0.8, 6.8, -2.6, '#4a2e1a')                                   # entrance
+    m.box(-0.4, 4.8, -2.75, 0.2, 5.8, -2.6, HN)                                         # honey drip
+    m.box(-2.7, 8.4, -2.7, 2.7, 8.8, 2.7, '#a8783a')
+    for (x, y, z) in ((-3.8, 7.6, -1.0), (3.6, 6.4, 0.8), (1.4, 9.6, -1.8)):             # tiny bees
+        m.box(x - 0.4, y, z - 0.3, x + 0.4, y + 0.6, z + 0.3, '#f2c23a')
+        m.box(x - 0.1, y - 0.01, z - 0.31, x + 0.1, y + 0.61, z + 0.31, '#3d2a1c')
+        m.box(x - 0.3, y + 0.6, z - 0.1, x + 0.3, y + 0.65, z + 0.4, '#eef8ffaa')
+
+@design("chest_mimic", "Chest Mimic", "mob")
+def _(m):
+    W, WD, MO, T = '#b07a3a', '#6b4a20', '#7a1a2a', '#f4f2ee'
+    m.box(-4.9, -4.9, -4.9, 4.9, -1.4, 4.9, W)                                           # lower jaw
+    m.box(-4.95, -2.0, -4.95, 4.95, -1.4, 4.95, WD)
+    r = ('x', 22.5, (0, -1.0, 4.9))
+    m.box(-4.9, -1.0, -4.9, 4.9, 4.9, 4.9, W, rot=r)                                     # lid, open
+    m.box(-4.95, -1.0, -4.95, 4.95, -0.4, 4.95, WD, rot=r)
+    m.box(-0.6, -1.6, -5.25, 0.6, 0.4, -4.95, GOLD, rot=r)                               # latch
+    for k in range(7):
+        x = -3.9 + k * 1.3
+        m.box(x - 0.3, -1.4, -5.0, x + 0.3, -0.5, -4.6, T)                                # bottom teeth
+        m.box(x - 0.3 + 0.6, -1.6, -5.0, x + 0.3 + 0.6, -0.8, -4.6, T, rot=r)             # top teeth
+    m.box(-1.6, -1.6, -6.4, 1.6, -1.3, -4.9, '#e05a7a')                                 # tongue
+    m.box(-1.0, -1.7, -6.6, 1.0, -1.3, -6.4, '#e05a7a')
+    for x in (-4.95, 4.95):
+        m.box(x - 0.05, -4.9, -4.95, x + 0.05, -1.4, -4.4, WD)
+
+@design("crafting_table_hat", "Crafting Table Hat", "mob")
+def _(m):
+    W, WD, WL = '#b07a3a', '#6b4a20', '#c8925a'
+    m.box(-2.4, 4.6, -2.4, 2.4, 9.0, 2.4, W)
+    m.box(-2.45, 8.4, -2.45, 2.45, 9.0, 2.45, '#8a5a2a')
+    for k in range(4):
+        m.box(-2.4 + k * 1.2 + 1.15, 9.0, -2.4, -2.4 + k * 1.2 + 1.25, 9.06, 2.4, WD)         # crafting grid
+        m.box(-2.4, 9.0, -2.4 + k * 1.2 + 1.15, 2.4, 9.06, -2.4 + k * 1.2 + 1.25, WD)
+    m.box(-1.6, 5.4, -2.46, -0.2, 7.6, -2.4, '#8c8f99'); m.box(-1.0, 7.6, -2.46, -0.8, 8.2, -2.4, WD)   # saw
+    m.box(0.6, 6.4, -2.46, 1.8, 7.0, -2.4, '#5a5d66'); m.box(1.0, 5.2, -2.46, 1.4, 6.4, -2.4, WD)     # hammer
+    patches(m, 'x', 2.4, 1, -2.4, 2.4, 4.8, 8.4, 6, [WD, WL], 4, s=0.5)
+    patches(m, 'x', -2.4, -1, -2.4, 2.4, 4.8, 8.4, 6, [WD, WL], 5, s=0.5)
+
+@design("creeper_hood", "Creeper Hoodie Hood", "mob")
+def _(m):
+    G, GD, K = '#5fae46', '#3f8a32', '#1d2a1a'
+    dome(m, 4.0, [(5.0, 1.0), (4.4, 0.5)], G)
+    m.box(-5.0, -4.6, 4.0, 5.0, 4.6, 5.0, G)
+    for sd in (-1, 1):
+        m.box(min(sd * 4.0, sd * 5.0), -4.6, -5.0, max(sd * 4.0, sd * 5.0), 4.6, 4.0, G)
+        m.box(sd * 2.4 - 0.12, -6.6, -5.1, sd * 2.4 + 0.12, -4.0, -4.9, '#e8e4dc')         # drawstrings
+        m.box(sd * 2.4 - 0.2, -6.9, -5.15, sd * 2.4 + 0.2, -6.6, -4.85, '#c9ced8')
+    m.box(-5.0, 2.6, -5.2, 5.0, 4.6, -4.0, G)                                            # hood brim
+    m.box(-5.0, -4.6, -5.2, -3.6, 2.6, -4.0, G); m.box(3.6, -4.6, -5.2, 5.0, 2.6, -4.0, G)
+    m.box(-5.0, 2.55, -5.25, 5.0, 2.75, -5.2, GD)
+    relief(m, ["........", ".EE..EE.", ".EE..EE.", "...MM...", "..MMMM..", "..M..M.."], -1.0,
+           {'E': (K, 0.06), 'M': (K, 0.06)}, cell=0.5, top=1.0) if False else None
+    for (x1, y1, x2, y2) in ((-2.0, 5.6, -1.0, 6.4), (1.0, 5.6, 2.0, 6.4), (-0.5, 5.2, 0.5, 5.6), (-1.0, 4.6, 1.0, 5.2)):
+        m.box(x1, y1, -4.72, x2, y2, -4.66, K) if False else None
+    for (x1, z1, x2, z2) in ((-2.0, -3.2, -0.8, -2.0), (0.8, -3.2, 2.0, -2.0), (-0.6, -2.0, 0.6, -1.0), (-1.2, -1.0, 1.2, 0.4),
+                             (-1.2, 0.4, -0.6, 1.0), (0.6, 0.4, 1.2, 1.0)):
+        m.box(x1, 5.5, z1, x2, 5.56, z2, K)                                               # creeper face on top of the hood
+    patches(m, 'x', 5.0, 1, -4.8, 4.8, -4.4, 4.4, 12, [GD, '#8fd06a'], 6, s=0.8)
+    patches(m, 'x', -5.0, -1, -4.8, 4.8, -4.4, 4.4, 12, [GD, '#8fd06a'], 7, s=0.8)
+
+@design("warden_mask", "Warden Mask", "mob")
+def _(m):
+    GLOW.update({'#29dfeb'})
+    mask8(m, '#0f3a42', ["........", "........", ".kk..kk.", ".kk..kk.", "........", ".cc..cc.", "..mmmm..", "..mmmm.."],
+          {'k': '#062026', 'c': '#29dfeb', 'm': '#062026'}, tex=['#1a5560', '#0a2a30'])
+    for sd in (-1, 1):
+        x = sd * 4.0; r = ('z', -22.5 * sd, (x, 4.6, 0))
+        m.box(x - 0.8, 4.6, -0.4, x + 0.8, 7.8, 0.4, '#173d47', rot=r)
+        m.box(x - 0.4, 5.0, -0.5, x + 0.4, 7.4, -0.4, '#29dfeb', rot=r)
