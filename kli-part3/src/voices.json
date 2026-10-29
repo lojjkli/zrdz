@@ -1,0 +1,162 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 3.062,
+  "text": "Last time... kli beat the donut with a fork."
+ },
+ "n_peace": {
+  "file": "voice/n_peace.wav",
+  "sec": 4.043,
+  "text": "Life was peaceful. Kli was rich. The donut made tea."
+ },
+ "d_tea": {
+  "file": "voice/d_tea.wav",
+  "sec": 1.524,
+  "text": "More tea, sir?"
+ },
+ "k_yes": {
+  "file": "voice/k_yes.wav",
+  "sec": 1.563,
+  "text": "Yes please."
+ },
+ "n_but": {
+  "file": "voice/n_but.wav",
+  "sec": 3.275,
+  "text": "But somewhere far away... someone was watching."
+ },
+ "p_coo": {
+  "file": "voice/p_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "n_pigeon": {
+  "file": "voice/n_pigeon.wav",
+  "sec": 3.872,
+  "text": "It was the pigeon. The same pigeon that stole his bread."
+ },
+ "n_huge": {
+  "file": "voice/n_huge.wav",
+  "sec": 1.952,
+  "text": "And now... it was huge."
+ },
+ "p_bread": {
+  "file": "voice/p_bread.wav",
+  "sec": 3.282,
+  "text": "Give me... all the bread."
+ },
+ "n_sun": {
+  "file": "voice/n_sun.wav",
+  "sec": 2.23,
+  "text": "Then the pigeon stole the sun."
+ },
+ "k_sun": {
+  "file": "voice/k_sun.wav",
+  "sec": 2.506,
+  "text": "Bro took the sun."
+ },
+ "m_how": {
+  "file": "voice/m_how.wav",
+  "sec": 2.019,
+  "text": "How do you even steal the sun?"
+ },
+ "c_dark": {
+  "file": "voice/c_dark.wav",
+  "sec": 1.114,
+  "text": "Who turned off the lights?!"
+ },
+ "n_team": {
+  "file": "voice/n_team.wav",
+  "sec": 3.339,
+  "text": "Kli, myninn and the donut needed a plan."
+ },
+ "d_idea": {
+  "file": "voice/d_idea.wav",
+  "sec": 2.062,
+  "text": "Sir. Pigeons love bread."
+ },
+ "k_blender": {
+  "file": "voice/k_blender.wav",
+  "sec": 3.594,
+  "text": "Then I'll make the biggest bread ever."
+ },
+ "n_model": {
+  "file": "voice/n_model.wav",
+  "sec": 2.827,
+  "text": "He opened Blender one more time."
+ },
+ "k_render": {
+  "file": "voice/k_render.wav",
+  "sec": 2.942,
+  "text": "Rendering. Please be fast."
+ },
+ "n_render": {
+  "file": "voice/n_render.wav",
+  "sec": 2.571,
+  "text": "The render said: three hours left."
+ },
+ "m_440": {
+  "file": "voice/m_440.wav",
+  "sec": 2.725,
+  "text": "Bro. Just render it at 440p."
+ },
+ "n_bait": {
+  "file": "voice/n_bait.wav",
+  "sec": 2.976,
+  "text": "They put the bread in the middle of the lobby."
+ },
+ "p_mine": {
+  "file": "voice/p_mine.wav",
+  "sec": 2.483,
+  "text": "Bread... mine."
+ },
+ "n_ate": {
+  "file": "voice/n_ate.wav",
+  "sec": 3.574,
+  "text": "The pigeon ate the whole thing. And fell asleep."
+ },
+ "k_now": {
+  "file": "voice/k_now.wav",
+  "sec": 1.042,
+  "text": "Now!"
+ },
+ "n_back": {
+  "file": "voice/n_back.wav",
+  "sec": 1.76,
+  "text": "They took the sun back."
+ },
+ "c_yay": {
+  "file": "voice/c_yay.wav",
+  "sec": 0.664,
+  "text": "Yaaay!"
+ },
+ "p_sorry": {
+  "file": "voice/p_sorry.wav",
+  "sec": 4.243,
+  "text": "Coo... I was just hungry."
+ },
+ "k_share": {
+  "file": "voice/k_share.wav",
+  "sec": 3.402,
+  "text": "Here. You can have the original."
+ },
+ "n_pet": {
+  "file": "voice/n_pet.wav",
+  "sec": 2.55,
+  "text": "And that's how kli got a pet pigeon."
+ },
+ "n_end": {
+  "file": "voice/n_end.wav",
+  "sec": 1.696,
+  "text": "Kli. The trilogy."
+ },
+ "q_deleted": {
+  "file": "voice/q_deleted.wav",
+  "sec": 1.279,
+  "text": "You... deleted me."
+ },
+ "k_ohno": {
+  "file": "voice/k_ohno.wav",
+  "sec": 1.366,
+  "text": "Oh no."
+ }
+}

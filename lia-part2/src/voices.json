@@ -1,0 +1,167 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 6.091,
+  "text": "Previously... Lia found love, had 67 kids, and REQ blew up the world."
+ },
+ "n_respawn": {
+  "file": "voice/n_respawn.wav",
+  "sec": 2.4,
+  "text": "Luckily, everyone respawned."
+ },
+ "n_moved": {
+  "file": "voice/n_moved.wav",
+  "sec": 5.046,
+  "text": "Lia and Boompje moved to the Netherlands. With all 67 kids."
+ },
+ "b_dinner": {
+  "file": "voice/b_dinner.wav",
+  "sec": 1.525,
+  "text": "Kids! Dinner time!"
+ },
+ "c_67": {
+  "file": "voice/c_67.wav",
+  "sec": 1.22,
+  "text": "SIX SEVEN!"
+ },
+ "l_count": {
+  "file": "voice/l_count.wav",
+  "sec": 3.741,
+  "text": "Okay, let me count. 64, 65, 66..."
+ },
+ "l_missing": {
+  "file": "voice/l_missing.wav",
+  "sec": 1.578,
+  "text": "Where is number 67?!"
+ },
+ "l_help": {
+  "file": "voice/l_help.wav",
+  "sec": 1.469,
+  "text": "Guys! I lost a kid!"
+ },
+ "m_bro": {
+  "file": "voice/m_bro.wav",
+  "sec": 1.902,
+  "text": "Bro. You have 66 more."
+ },
+ "a_track": {
+  "file": "voice/a_track.wav",
+  "sec": 2.043,
+  "text": "Relax. I'm actually good at this."
+ },
+ "n_tracks": {
+  "file": "voice/n_tracks.wav",
+  "sec": 2.614,
+  "text": "Ade followed the tiny footprints."
+ },
+ "n_found": {
+  "file": "voice/n_found.wav",
+  "sec": 2.166,
+  "text": "They led straight to... REQ."
+ },
+ "r_natural": {
+  "file": "voice/r_natural.wav",
+  "sec": 1.327,
+  "text": "Lia! Look! He's a natural!"
+ },
+ "x_spin": {
+  "file": "voice/x_spin.wav",
+  "sec": 1.367,
+  "text": "One more spin!"
+ },
+ "l_req": {
+  "file": "voice/l_req.wav",
+  "sec": 0.706,
+  "text": "REQ!!!"
+ },
+ "r_99": {
+  "file": "voice/r_99.wav",
+  "sec": 3.034,
+  "text": "99% of gamblers quit before the big win!"
+ },
+ "n_jackpot": {
+  "file": "voice/n_jackpot.wav",
+  "sec": 2.144,
+  "text": "And then... he hit the jackpot."
+ },
+ "c_what": {
+  "file": "voice/c_what.wav",
+  "sec": 0.558,
+  "text": "WHAT?!"
+ },
+ "x_keep": {
+  "file": "voice/x_keep.wav",
+  "sec": 1.639,
+  "text": "Mom, can I keep it?"
+ },
+ "l_fine": {
+  "file": "voice/l_fine.wav",
+  "sec": 0.802,
+  "text": "...Fine."
+ },
+ "n_party": {
+  "file": "voice/n_party.wav",
+  "sec": 2.336,
+  "text": "That night, they threw a party."
+ },
+ "k_wsg": {
+  "file": "voice/k_wsg.wav",
+  "sec": 3.782,
+  "text": "wsg. I brought a friend."
+ },
+ "d_hello": {
+  "file": "voice/d_hello.wav",
+  "sec": 1.7,
+  "text": "Hello, children."
+ },
+ "c_donut": {
+  "file": "voice/c_donut.wav",
+  "sec": 1.025,
+  "text": "DONUT!"
+ },
+ "r_feel": {
+  "file": "voice/r_feel.wav",
+  "sec": 1.348,
+  "text": "Guys... I feel it again."
+ },
+ "c_no": {
+  "file": "voice/c_no.wav",
+  "sec": 0.618,
+  "text": "NOOOO!"
+ },
+ "l_dont": {
+  "file": "voice/l_dont.wav",
+  "sec": 0.904,
+  "text": "REQ, DON'T!"
+ },
+ "n_tiny": {
+  "file": "voice/n_tiny.wav",
+  "sec": 3.147,
+  "text": "It was the smallest fart in Roblox history."
+ },
+ "r_hehe": {
+  "file": "voice/r_hehe.wav",
+  "sec": 0.924,
+  "text": "Hehe. Sorry."
+ },
+ "n_windmill": {
+  "file": "voice/n_windmill.wav",
+  "sec": 2.4,
+  "text": "The windmill did not survive."
+ },
+ "n_soon": {
+  "file": "voice/n_soon.wav",
+  "sec": 2.486,
+  "text": "Lia. Part three. Coming soon."
+ },
+ "l_68": {
+  "file": "voice/l_68.wav",
+  "sec": 2.588,
+  "text": "66, 67... 68?!"
+ },
+ "p_coo": {
+  "file": "voice/p_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ }
+}
