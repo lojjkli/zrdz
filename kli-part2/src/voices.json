@@ -1,0 +1,157 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 4.107,
+  "text": "Previously... kli got rich. Then a donut ate the server."
+ },
+ "n_woke": {
+  "file": "voice/n_woke.wav",
+  "sec": 3.04,
+  "text": "Kli woke up in his old box. Again."
+ },
+ "k_robux": {
+  "file": "voice/k_robux.wav",
+  "sec": 2.133,
+  "text": "Where's my Robux?"
+ },
+ "m_gone": {
+  "file": "voice/m_gone.wav",
+  "sec": 2.145,
+  "text": "Bro. The donut took everything."
+ },
+ "k_donut": {
+  "file": "voice/k_donut.wav",
+  "sec": 1.442,
+  "text": "The donut?"
+ },
+ "n_ceo": {
+  "file": "voice/n_ceo.wav",
+  "sec": 3.51,
+  "text": "The donut had become... the CEO of Roblox."
+ },
+ "c_hail": {
+  "file": "voice/c_hail.wav",
+  "sec": 1.028,
+  "text": "All hail the donut!"
+ },
+ "d_kli": {
+  "file": "voice/d_kli.wav",
+  "sec": 3.429,
+  "text": "Kli. You made me. Now I make the rules."
+ },
+ "d_rule": {
+  "file": "voice/d_rule.wav",
+  "sec": 3.333,
+  "text": "Rule number one. No more deep voices."
+ },
+ "k_ohno": {
+  "file": "voice/k_ohno.wav",
+  "sec": 1.026,
+  "text": "Oh no. Not again!"
+ },
+ "c_laugh": {
+  "file": "voice/c_laugh.wav",
+  "sec": 1.596,
+  "text": "Hahaha! Squeaky kli is back!"
+ },
+ "n_plan": {
+  "file": "voice/n_plan.wav",
+  "sec": 1.952,
+  "text": "Kli needed a plan."
+ },
+ "m_fork": {
+  "file": "voice/m_fork.wav",
+  "sec": 1.858,
+  "text": "Bro. What eats a donut?"
+ },
+ "k_fork": {
+  "file": "voice/k_fork.wav",
+  "sec": 0.634,
+  "text": "A fork!"
+ },
+ "n_built": {
+  "file": "voice/n_built.wav",
+  "sec": 4.086,
+  "text": "So he opened Blender, and built the biggest fork in history."
+ },
+ "n_hours": {
+  "file": "voice/n_hours.wav",
+  "sec": 3.915,
+  "text": "It took him forty hours. And thirty energy drinks."
+ },
+ "k_done": {
+  "file": "voice/k_done.wav",
+  "sec": 0.898,
+  "text": "It's beautiful."
+ },
+ "n_battle": {
+  "file": "voice/n_battle.wav",
+  "sec": 2.144,
+  "text": "The final battle began."
+ },
+ "d_laugh": {
+  "file": "voice/d_laugh.wav",
+  "sec": 3.168,
+  "text": "You cannot defeat me. I am delicious."
+ },
+ "k_charge": {
+  "file": "voice/k_charge.wav",
+  "sec": 0.792,
+  "text": "Fork time!"
+ },
+ "d_ow": {
+  "file": "voice/d_ow.wav",
+  "sec": 1.793,
+  "text": "Ow! My sprinkles!"
+ },
+ "d_cry": {
+  "file": "voice/d_cry.wav",
+  "sec": 2.598,
+  "text": "I just wanted... to be loved."
+ },
+ "k_hug": {
+  "file": "voice/k_hug.wav",
+  "sec": 1.007,
+  "text": "Bro... come here."
+ },
+ "n_friends": {
+  "file": "voice/n_friends.wav",
+  "sec": 3.062,
+  "text": "And just like that, they became best friends."
+ },
+ "d_gift": {
+  "file": "voice/d_gift.wav",
+  "sec": 2.181,
+  "text": "Here. Take your voice back."
+ },
+ "k_back": {
+  "file": "voice/k_back.wav",
+  "sec": 1.74,
+  "text": "Thanks, donut."
+ },
+ "n_butler": {
+  "file": "voice/n_butler.wav",
+  "sec": 3.04,
+  "text": "Now the donut works as kli's butler."
+ },
+ "d_tea": {
+  "file": "voice/d_tea.wav",
+  "sec": 1.474,
+  "text": "Your tea, sir."
+ },
+ "k_nice": {
+  "file": "voice/k_nice.wav",
+  "sec": 1.077,
+  "text": "Nice."
+ },
+ "n_part3": {
+  "file": "voice/n_part3.wav",
+  "sec": 2.635,
+  "text": "Kli will return... in part three."
+ },
+ "k_post": {
+  "file": "voice/k_post.wav",
+  "sec": 2.795,
+  "text": "Wait. Where's the pigeon?"
+ }
+}
