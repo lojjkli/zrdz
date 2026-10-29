@@ -1,0 +1,167 @@
+{
+ "n_intro": {
+  "file": "voice/n_intro.wav",
+  "sec": 1.334,
+  "text": "This is Req."
+ },
+ "n_problem": {
+  "file": "voice/n_problem.wav",
+  "sec": 3.424,
+  "text": "An ordinary kid... with an extraordinary problem."
+ },
+ "n_found": {
+  "file": "voice/n_found.wav",
+  "sec": 3.254,
+  "text": "One day, he found Pet Simulator ninety nine."
+ },
+ "n_had": {
+  "file": "voice/n_had.wav",
+  "sec": 3.808,
+  "text": "He had pets. He had diamonds. He had... everything."
+ },
+ "r_fire": {
+  "file": "voice/r_fire.wav",
+  "sec": 1.629,
+  "text": "Yo, this game is actually fire."
+ },
+ "n_machine": {
+  "file": "voice/n_machine.wav",
+  "sec": 1.995,
+  "text": "Then... he found the machine."
+ },
+ "r_onespin": {
+  "file": "voice/r_onespin.wav",
+  "sec": 1.348,
+  "text": "Okay. Just one spin."
+ },
+ "r_onemore1": {
+  "file": "voice/r_onemore1.wav",
+  "sec": 0.784,
+  "text": "One more."
+ },
+ "n_everyday": {
+  "file": "voice/n_everyday.wav",
+  "sec": 3.531,
+  "text": "Every single day, he said the exact same thing."
+ },
+ "r_onemore2": {
+  "file": "voice/r_onemore2.wav",
+  "sec": 0.965,
+  "text": "Just one more!"
+ },
+ "r_onemore3": {
+  "file": "voice/r_onemore3.wav",
+  "sec": 1.187,
+  "text": "One more! One more!"
+ },
+ "r_99": {
+  "file": "voice/r_99.wav",
+  "sec": 3.592,
+  "text": "Bro! Ninety nine percent of gamblers quit right before the big win!"
+ },
+ "n_gone": {
+  "file": "voice/n_gone.wav",
+  "sec": 5.387,
+  "text": "His diamonds? Gone. His Robux? Gone. But his hope... was stronger than ever."
+ },
+ "r_onemore_sad": {
+  "file": "voice/r_onemore_sad.wav",
+  "sec": 0.965,
+  "text": "...one more."
+ },
+ "n_flying": {
+  "file": "voice/n_flying.wav",
+  "sec": 2.4,
+  "text": "And then... someone came flying in."
+ },
+ "r_woah": {
+  "file": "voice/r_woah.wav",
+  "sec": 1.059,
+  "text": "Woah... who is that?"
+ },
+ "n_wedding": {
+  "file": "voice/n_wedding.wav",
+  "sec": 3.766,
+  "text": "Nobody saw it coming. But lowkey... they had a wedding."
+ },
+ "r_ido": {
+  "file": "voice/r_ido.wav",
+  "sec": 0.699,
+  "text": "I do!"
+ },
+ "r_after": {
+  "file": "voice/r_after.wav",
+  "sec": 1.206,
+  "text": "...after one more spin."
+ },
+ "c_letsgo": {
+  "file": "voice/c_letsgo.wav",
+  "sec": 1.002,
+  "text": "Let's gooo!"
+ },
+ "c_w": {
+  "file": "voice/c_w.wav",
+  "sec": 0.924,
+  "text": "W wedding!"
+ },
+ "n_perfect": {
+  "file": "voice/n_perfect.wav",
+  "sec": 1.44,
+  "text": "It was perfect."
+ },
+ "n_collapse": {
+  "file": "voice/n_collapse.wav",
+  "sec": 2.059,
+  "text": "And then... the Earth collapsed."
+ },
+ "r_sky": {
+  "file": "voice/r_sky.wav",
+  "sec": 1.518,
+  "text": "Wait... why is the sky red?"
+ },
+ "r_run": {
+  "file": "voice/r_run.wav",
+  "sec": 0.851,
+  "text": "RUN! RUUUN!"
+ },
+ "r_pets": {
+  "file": "voice/r_pets.wav",
+  "sec": 0.99,
+  "text": "WAIT! MY PETS!"
+ },
+ "s_aah1": {
+  "file": "voice/s_aah1.wav",
+  "sec": 0.691,
+  "text": "Aaaaaah!"
+ },
+ "s_aah2": {
+  "file": "voice/s_aah2.wav",
+  "sec": 1.331,
+  "text": "Aaaaaaah! Help!"
+ },
+ "s_noo": {
+  "file": "voice/s_noo.wav",
+  "sec": 0.982,
+  "text": "Nooooo!"
+ },
+ "s_run": {
+  "file": "voice/s_run.wav",
+  "sec": 1.099,
+  "text": "Run! Run!"
+ },
+ "s_oof": {
+  "file": "voice/s_oof.wav",
+  "sec": 0.808,
+  "text": "Oof!"
+ },
+ "n_soon": {
+  "file": "voice/n_soon.wav",
+  "sec": 1.76,
+  "text": "Req. Coming soon."
+ },
+ "r_whisper": {
+  "file": "voice/r_whisper.wav",
+  "sec": 0.965,
+  "text": "...one more."
+ }
+}
