@@ -1,0 +1,247 @@
+{
+ "n_intro": {
+  "file": "voice/n_intro.wav",
+  "sec": 1.398,
+  "text": "This is Lia."
+ },
+ "n_loved": {
+  "file": "voice/n_loved.wav",
+  "sec": 3.659,
+  "text": "She loved one thing... more than anything in the world."
+ },
+ "n_mm2": {
+  "file": "voice/n_mm2.wav",
+  "sec": 1.888,
+  "text": "Murder Mystery 2."
+ },
+ "n_friends": {
+  "file": "voice/n_friends.wav",
+  "sec": 2.827,
+  "text": "Every day, she played with her best friends."
+ },
+ "n_req": {
+  "file": "voice/n_req.wav",
+  "sec": 0.843,
+  "text": "REQ."
+ },
+ "n_mikey": {
+  "file": "voice/n_mikey.wav",
+  "sec": 0.992,
+  "text": "Mikey."
+ },
+ "n_ade": {
+  "file": "voice/n_ade.wav",
+  "sec": 1.184,
+  "text": "And Ade."
+ },
+ "l_round": {
+  "file": "voice/l_round.wav",
+  "sec": 3.637,
+  "text": "Okay guys, one more round. I'm so gonna be murderer this time!"
+ },
+ "r_bring": {
+  "file": "voice/r_bring.wav",
+  "sec": 1.65,
+  "text": "Wait, wait. I'm bringing someone."
+ },
+ "n_met": {
+  "file": "voice/n_met.wav",
+  "sec": 2.678,
+  "text": "And that's the day Lia met... kli."
+ },
+ "l_cute": {
+  "file": "voice/l_cute.wav",
+  "sec": 3.249,
+  "text": "Omg, hiii! Your avatar is so cute! Are you a girl?"
+ },
+ "n_thought": {
+  "file": "voice/n_thought.wav",
+  "sec": 2.55,
+  "text": "Everyone thought kli was a girl."
+ },
+ "n_mic": {
+  "file": "voice/n_mic.wav",
+  "sec": 2.144,
+  "text": "Until... he turned on his mic."
+ },
+ "k_wsg": {
+  "file": "voice/k_wsg.wav",
+  "sec": 1.367,
+  "text": "wsg."
+ },
+ "k_girl": {
+  "file": "voice/k_girl.wav",
+  "sec": 2.671,
+  "text": "Nah. I'm not a girl."
+ },
+ "l_what": {
+  "file": "voice/l_what.wav",
+  "sec": 0.708,
+  "text": "WHAT?!"
+ },
+ "n_eboy": {
+  "file": "voice/n_eboy.wav",
+  "sec": 4.171,
+  "text": "Kli had the deepest e-boy voice... in Roblox history."
+ },
+ "k_yf": {
+  "file": "voice/k_yf.wav",
+  "sec": 3.621,
+  "text": "Yo. This is my friend, YF."
+ },
+ "y_trash": {
+  "file": "voice/y_trash.wav",
+  "sec": 2.075,
+  "text": "Bro, you guys are trash at this game."
+ },
+ "y_lia": {
+  "file": "voice/y_lia.wav",
+  "sec": 1.908,
+  "text": "And Lia? Nobody even likes you."
+ },
+ "n_mean": {
+  "file": "voice/n_mean.wav",
+  "sec": 2.72,
+  "text": "YF was... not a nice guy."
+ },
+ "y_out": {
+  "file": "voice/y_out.wav",
+  "sec": 1.643,
+  "text": "This game is mid. I'm out."
+ },
+ "n_gone": {
+  "file": "voice/n_gone.wav",
+  "sec": 2.891,
+  "text": "And just like that... everyone was gone."
+ },
+ "l_cry": {
+  "file": "voice/l_cry.wav",
+  "sec": 1.382,
+  "text": "Nobody loves me..."
+ },
+ "n_nolove": {
+  "file": "voice/n_nolove.wav",
+  "sec": 2.72,
+  "text": "No friends. No love. Nothing."
+ },
+ "n_but": {
+  "file": "voice/n_but.wav",
+  "sec": 1.099,
+  "text": "But then..."
+ },
+ "n_boomp": {
+  "file": "voice/n_boomp.wav",
+  "sec": 3.275,
+  "text": "BoompjeJunior. Tall. Strong. Dutch."
+ },
+ "n_lives": {
+  "file": "voice/n_lives.wav",
+  "sec": 2.784,
+  "text": "And he lived... like, twenty minutes away."
+ },
+ "b_hoi": {
+  "file": "voice/b_hoi.wav",
+  "sec": 1.985,
+  "text": "Hoi, Lia. Why are you crying?"
+ },
+ "l_oh": {
+  "file": "voice/l_oh.wav",
+  "sec": 1.163,
+  "text": "Oh. My. Gosh."
+ },
+ "n_love": {
+  "file": "voice/n_love.wav",
+  "sec": 2.443,
+  "text": "They fell in love. Instantly."
+ },
+ "l_kids": {
+  "file": "voice/l_kids.wav",
+  "sec": 0.972,
+  "text": "I want kids."
+ },
+ "b_many": {
+  "file": "voice/b_many.wav",
+  "sec": 1.119,
+  "text": "How many?"
+ },
+ "l_67": {
+  "file": "voice/l_67.wav",
+  "sec": 1.31,
+  "text": "Sixty... seven. 🤲"
+ },
+ "c_67": {
+  "file": "voice/c_67.wav",
+  "sec": 0.943,
+  "text": "SIX SEVEN!"
+ },
+ "c_67b": {
+  "file": "voice/c_67b.wav",
+  "sec": 1.002,
+  "text": "Six seveeen!"
+ },
+ "n_67": {
+  "file": "voice/n_67.wav",
+  "sec": 2.763,
+  "text": "And so... they had 67 kids."
+ },
+ "n_perfect": {
+  "file": "voice/n_perfect.wav",
+  "sec": 1.995,
+  "text": "Everything was perfect."
+ },
+ "r_feel": {
+  "file": "voice/r_feel.wav",
+  "sec": 1.607,
+  "text": "Guys... I don't feel so good."
+ },
+ "k_bro": {
+  "file": "voice/k_bro.wav",
+  "sec": 1.018,
+  "text": "Bro."
+ },
+ "n_fart": {
+  "file": "voice/n_fart.wav",
+  "sec": 1.803,
+  "text": "And then... REQ farted."
+ },
+ "n_explode": {
+  "file": "voice/n_explode.wav",
+  "sec": 2.23,
+  "text": "And the world... exploded."
+ },
+ "s_aah1": {
+  "file": "voice/s_aah1.wav",
+  "sec": 0.691,
+  "text": "Aaaaaah!"
+ },
+ "s_aah2": {
+  "file": "voice/s_aah2.wav",
+  "sec": 1.331,
+  "text": "Aaaaaaah! Help!"
+ },
+ "s_noo": {
+  "file": "voice/s_noo.wav",
+  "sec": 0.982,
+  "text": "Nooooo!"
+ },
+ "s_ew": {
+  "file": "voice/s_ew.wav",
+  "sec": 1.176,
+  "text": "Ewww! REQ!"
+ },
+ "r_mybad": {
+  "file": "voice/r_mybad.wav",
+  "sec": 0.966,
+  "text": "...my bad."
+ },
+ "n_soon": {
+  "file": "voice/n_soon.wav",
+  "sec": 1.76,
+  "text": "Lia. Coming soon."
+ },
+ "k_post": {
+  "file": "voice/k_post.wav",
+  "sec": 1.367,
+  "text": "wsg."
+ }
+}
