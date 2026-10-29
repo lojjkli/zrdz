@@ -1,0 +1,257 @@
+{
+ "n_intro": {
+  "file": "voice/n_intro.wav",
+  "sec": 1.419,
+  "text": "This is kli."
+ },
+ "n_problem": {
+  "file": "voice/n_problem.wav",
+  "sec": 2.976,
+  "text": "Before he was a legend... he had a problem."
+ },
+ "k_hi": {
+  "file": "voice/k_hi.wav",
+  "sec": 1.597,
+  "text": "Hiii guys! Wanna be friends?"
+ },
+ "n_squeak": {
+  "file": "voice/n_squeak.wav",
+  "sec": 2.422,
+  "text": "His voice was... very high."
+ },
+ "k_please": {
+  "file": "voice/k_please.wav",
+  "sec": 1.477,
+  "text": "Guys, wait! Please don't leave!"
+ },
+ "c_ew": {
+  "file": "voice/c_ew.wav",
+  "sec": 1.525,
+  "text": "Ew, it's the squeaky kid!"
+ },
+ "n_hated": {
+  "file": "voice/n_hated.wav",
+  "sec": 1.739,
+  "text": "Everyone hated him."
+ },
+ "n_poor": {
+  "file": "voice/n_poor.wav",
+  "sec": 3.68,
+  "text": "He was poor. So poor... he couldn't even afford a face."
+ },
+ "n_sell": {
+  "file": "voice/n_sell.wav",
+  "sec": 2.251,
+  "text": "He even tried to sell his hair."
+ },
+ "k_hair": {
+  "file": "voice/k_hair.wav",
+  "sec": 1.696,
+  "text": "Hair for sale! Only one Robux!"
+ },
+ "k_bread": {
+  "file": "voice/k_bread.wav",
+  "sec": 1.346,
+  "text": "At least I still have my bread."
+ },
+ "n_pigeon": {
+  "file": "voice/n_pigeon.wav",
+  "sec": 2.379,
+  "text": "Then a pigeon stole his bread."
+ },
+ "k_why": {
+  "file": "voice/k_why.wav",
+  "sec": 0.562,
+  "text": "WHY?!"
+ },
+ "n_lowest": {
+  "file": "voice/n_lowest.wav",
+  "sec": 2.315,
+  "text": "It was the lowest point of his life."
+ },
+ "n_then": {
+  "file": "voice/n_then.wav",
+  "sec": 2.998,
+  "text": "But then, his friend myninn showed up."
+ },
+ "m_box": {
+  "file": "voice/m_box.wav",
+  "sec": 2.16,
+  "text": "Bro. Why are you living in a box?"
+ },
+ "k_poor": {
+  "file": "voice/k_poor.wav",
+  "sec": 0.894,
+  "text": "Because I'm poor."
+ },
+ "m_studio": {
+  "file": "voice/m_studio.wav",
+  "sec": 2.608,
+  "text": "Have you ever heard of... Roblox Studio?"
+ },
+ "k_whats": {
+  "file": "voice/k_whats.wav",
+  "sec": 0.725,
+  "text": "What's that?"
+ },
+ "m_make": {
+  "file": "voice/m_make.wav",
+  "sec": 2.772,
+  "text": "You make games. You make money. You get rich."
+ },
+ "k_lets": {
+  "file": "voice/k_lets.wav",
+  "sec": 0.831,
+  "text": "Let's gooo!"
+ },
+ "n_started": {
+  "file": "voice/n_started.wav",
+  "sec": 2.059,
+  "text": "So he started developing."
+ },
+ "n_bad": {
+  "file": "voice/n_bad.wav",
+  "sec": 1.974,
+  "text": "He was... really bad."
+ },
+ "k_oops": {
+  "file": "voice/k_oops.wav",
+  "sec": 0.556,
+  "text": "Oops."
+ },
+ "n_dislike": {
+  "file": "voice/n_dislike.wav",
+  "sec": 3.723,
+  "text": "His first game got one player. And one dislike."
+ },
+ "s_oof": {
+  "file": "voice/s_oof.wav",
+  "sec": 0.808,
+  "text": "Oof!"
+ },
+ "n_baseplate": {
+  "file": "voice/n_baseplate.wav",
+  "sec": 1.888,
+  "text": "Even the baseplate left."
+ },
+ "k_giveup": {
+  "file": "voice/k_giveup.wav",
+  "sec": 0.879,
+  "text": "I give up."
+ },
+ "n_met": {
+  "file": "voice/n_met.wav",
+  "sec": 1.867,
+  "text": "And then... he met Blender."
+ },
+ "k_cube": {
+  "file": "voice/k_cube.wav",
+  "sec": 0.935,
+  "text": "Bye bye, cube."
+ },
+ "n_love": {
+  "file": "voice/n_love.wav",
+  "sec": 2.123,
+  "text": "It was love at first sight."
+ },
+ "n_changed": {
+  "file": "voice/n_changed.wav",
+  "sec": 3.595,
+  "text": "And at that very moment... his voice... changed."
+ },
+ "k_wsg": {
+  "file": "voice/k_wsg.wav",
+  "sec": 1.367,
+  "text": "wsg."
+ },
+ "n_deepest": {
+  "file": "voice/n_deepest.wav",
+  "sec": 3.574,
+  "text": "It was the deepest voice the world had ever heard."
+ },
+ "n_glaze": {
+  "file": "voice/n_glaze.wav",
+  "sec": 2.998,
+  "text": "Smart. Strong. The coolest dev alive."
+ },
+ "n_donut": {
+  "file": "voice/n_donut.wav",
+  "sec": 1.547,
+  "text": "He made a donut."
+ },
+ "n_models": {
+  "file": "voice/n_models.wav",
+  "sec": 3.467,
+  "text": "Then he made models for every game on Roblox."
+ },
+ "k_rich": {
+  "file": "voice/k_rich.wav",
+  "sec": 2.445,
+  "text": "I'm kind of rich now."
+ },
+ "c_please": {
+  "file": "voice/c_please.wav",
+  "sec": 1.467,
+  "text": "Kli, please be our friend!"
+ },
+ "k_nah": {
+  "file": "voice/k_nah.wav",
+  "sec": 0.948,
+  "text": "Nah."
+ },
+ "n_richest": {
+  "file": "voice/n_richest.wav",
+  "sec": 4.043,
+  "text": "Kli became the richest developer in Roblox history."
+ },
+ "m_welcome": {
+  "file": "voice/m_welcome.wav",
+  "sec": 1.843,
+  "text": "You're welcome, by the way."
+ },
+ "k_thanks": {
+  "file": "voice/k_thanks.wav",
+  "sec": 1.634,
+  "text": "Thanks, myninn."
+ },
+ "n_forgot": {
+  "file": "voice/n_forgot.wav",
+  "sec": 1.846,
+  "text": "But he forgot one thing."
+ },
+ "n_physics": {
+  "file": "voice/n_physics.wav",
+  "sec": 2.678,
+  "text": "He never turned off the donut's physics."
+ },
+ "k_bro": {
+  "file": "voice/k_bro.wav",
+  "sec": 1.018,
+  "text": "Bro."
+ },
+ "s_aah1": {
+  "file": "voice/s_aah1.wav",
+  "sec": 0.691,
+  "text": "Aaaaaah!"
+ },
+ "s_aah2": {
+  "file": "voice/s_aah2.wav",
+  "sec": 1.583,
+  "text": "Aaaaaaah! The donut!"
+ },
+ "n_soon": {
+  "file": "voice/n_soon.wav",
+  "sec": 1.803,
+  "text": "Kli. Coming soon."
+ },
+ "k_post": {
+  "file": "voice/k_post.wav",
+  "sec": 0.596,
+  "text": "...hi."
+ },
+ "k_jk": {
+  "file": "voice/k_jk.wav",
+  "sec": 1.448,
+  "text": "Just kidding."
+ }
+}
