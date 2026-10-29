@@ -1,0 +1,142 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 5.515,
+  "text": "Previously... REQ lost all his diamonds, had a wedding, and the Earth collapsed."
+ },
+ "n_space": {
+  "file": "voice/n_space.wav",
+  "sec": 5.152,
+  "text": "Luckily, everyone respawned. Except the Earth. The Earth needed a minute."
+ },
+ "r_floor": {
+  "file": "voice/r_floor.wav",
+  "sec": 1.248,
+  "text": "Bro. Where is the floor?"
+ },
+ "n_lobby": {
+  "file": "voice/n_lobby.wav",
+  "sec": 2.592,
+  "text": "Eventually, the server came back."
+ },
+ "k_broke": {
+  "file": "voice/k_broke.wav",
+  "sec": 3.109,
+  "text": "wsg. You're broke."
+ },
+ "r_prerich": {
+  "file": "voice/r_prerich.wav",
+  "sec": 1.505,
+  "text": "I'm not broke. I'm pre-rich."
+ },
+ "r_quit": {
+  "file": "voice/r_quit.wav",
+  "sec": 2.229,
+  "text": "From today on, I'm done gambling. Forever."
+ },
+ "n_day": {
+  "file": "voice/n_day.wav",
+  "sec": 2.123,
+  "text": "Day one without gambling."
+ },
+ "n_min": {
+  "file": "voice/n_min.wav",
+  "sec": 1.312,
+  "text": "...Minute three."
+ },
+ "v_req": {
+  "file": "voice/v_req.wav",
+  "sec": 2.197,
+  "text": "REQ... one more spin..."
+ },
+ "r_changed": {
+  "file": "voice/r_changed.wav",
+  "sec": 1.436,
+  "text": "No! I'm a changed man!"
+ },
+ "v_free": {
+  "file": "voice/v_free.wav",
+  "sec": 1.344,
+  "text": "Free spin."
+ },
+ "r_free": {
+  "file": "voice/r_free.wav",
+  "sec": 0.7,
+  "text": "...Free?"
+ },
+ "k_no": {
+  "file": "voice/k_no.wav",
+  "sec": 1.476,
+  "text": "REQ, NO!"
+ },
+ "n_won": {
+  "file": "voice/n_won.wav",
+  "sec": 1.931,
+  "text": "He won... one pigeon."
+ },
+ "p_coo": {
+  "file": "voice/p_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "r_what": {
+  "file": "voice/r_what.wav",
+  "sec": 1.388,
+  "text": "What do I do with a pigeon?"
+ },
+ "n_peck": {
+  "file": "voice/n_peck.wav",
+  "sec": 2.848,
+  "text": "The pigeon pecked the machine. Once."
+ },
+ "c_jackpot": {
+  "file": "voice/c_jackpot.wav",
+  "sec": 0.766,
+  "text": "JACKPOT!"
+ },
+ "r_99": {
+  "file": "voice/r_99.wav",
+  "sec": 3.034,
+  "text": "99% of gamblers quit before the big win!"
+ },
+ "n_rich": {
+  "file": "voice/n_rich.wav",
+  "sec": 4.235,
+  "text": "REQ was rich again. For exactly eleven seconds."
+ },
+ "r_gold": {
+  "file": "voice/r_gold.wav",
+  "sec": 2.389,
+  "text": "Gold mansion. Gold car. Gold everything."
+ },
+ "n_spent": {
+  "file": "voice/n_spent.wav",
+  "sec": 2.827,
+  "text": "Then he spent it all on... one more spin."
+ },
+ "v_thanks": {
+  "file": "voice/v_thanks.wav",
+  "sec": 1.605,
+  "text": "Thanks for playing."
+ },
+ "r_worth": {
+  "file": "voice/r_worth.wav",
+  "sec": 0.819,
+  "text": "...Worth it."
+ },
+ "n_soon": {
+  "file": "voice/n_soon.wav",
+  "sec": 2.507,
+  "text": "REQ. Part three. Coming soon."
+ },
+ "k_earth": {
+  "file": "voice/k_earth.wav",
+  "sec": 3.535,
+  "text": "REQ. The Earth is collapsing again."
+ },
+ "r_hehe": {
+  "file": "voice/r_hehe.wav",
+  "sec": 1.023,
+  "text": "Hehe. My bad."
+ }
+}

@@ -1,0 +1,167 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 6.731,
+  "text": "Previously... Kid 67 won a golden dragon, REQ farted, and the windmill died."
+ },
+ "n_morning": {
+  "file": "voice/n_morning.wav",
+  "sec": 3.147,
+  "text": "The next morning, the family had a new member."
+ },
+ "b_family": {
+  "file": "voice/b_family.wav",
+  "sec": 2.127,
+  "text": "Kids! Say hi to your new brother!"
+ },
+ "p_coo": {
+  "file": "voice/p_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "l_sign": {
+  "file": "voice/l_sign.wav",
+  "sec": 1.709,
+  "text": "I did NOT sign anything for this."
+ },
+ "n_rumble": {
+  "file": "voice/n_rumble.wav",
+  "sec": 2.528,
+  "text": "But then... the ground started shaking."
+ },
+ "n_back": {
+  "file": "voice/n_back.wav",
+  "sec": 3.787,
+  "text": "The windmill had respawned. And it remembered everything."
+ },
+ "w_req": {
+  "file": "voice/w_req.wav",
+  "sec": 1.162,
+  "text": "REQ."
+ },
+ "r_me": {
+  "file": "voice/r_me.wav",
+  "sec": 0.826,
+  "text": "...Who, me?"
+ },
+ "w_you": {
+  "file": "voice/w_you.wav",
+  "sec": 2.015,
+  "text": "YOU. FARTED."
+ },
+ "c_67": {
+  "file": "voice/c_67.wav",
+  "sec": 1.22,
+  "text": "SIX SEVEN!"
+ },
+ "l_run": {
+  "file": "voice/l_run.wav",
+  "sec": 0.876,
+  "text": "REQ, RUN!"
+ },
+ "n_chase": {
+  "file": "voice/n_chase.wav",
+  "sec": 4.214,
+  "text": "REQ ran faster than he had ever run in his life."
+ },
+ "r_spin": {
+  "file": "voice/r_spin.wav",
+  "sec": 1.436,
+  "text": "Not before my next spin!"
+ },
+ "m_sorry": {
+  "file": "voice/m_sorry.wav",
+  "sec": 1.505,
+  "text": "Bro. Just say sorry."
+ },
+ "a_math": {
+  "file": "voice/a_math.wav",
+  "sec": 2.663,
+  "text": "Relax. I did the math. He has to apologize."
+ },
+ "k_wsg": {
+  "file": "voice/k_wsg.wav",
+  "sec": 3.176,
+  "text": "wsg. Need a hand?"
+ },
+ "d_allow": {
+  "file": "voice/d_allow.wav",
+  "sec": 1.44,
+  "text": "Allow me."
+ },
+ "d_ow": {
+  "file": "voice/d_ow.wav",
+  "sec": 0.991,
+  "text": "Ow."
+ },
+ "n_useless": {
+  "file": "voice/n_useless.wav",
+  "sec": 2.166,
+  "text": "The donut was not helpful."
+ },
+ "r_sorry": {
+  "file": "voice/r_sorry.wav",
+  "sec": 2.39,
+  "text": "Okay! I'm sorry! I'm really, really sorry!"
+ },
+ "w_flowers": {
+  "file": "voice/w_flowers.wav",
+  "sec": 3.036,
+  "text": "...Are those for me?"
+ },
+ "r_tulips": {
+  "file": "voice/r_tulips.wav",
+  "sec": 1.465,
+  "text": "Yeah. Tulips. Very Dutch."
+ },
+ "n_friends": {
+  "file": "voice/n_friends.wav",
+  "sec": 3.126,
+  "text": "And just like that... they became best friends."
+ },
+ "r_uhoh": {
+  "file": "voice/r_uhoh.wav",
+  "sec": 0.661,
+  "text": "Uh oh."
+ },
+ "c_again": {
+  "file": "voice/c_again.wav",
+  "sec": 0.725,
+  "text": "NOT AGAIN!"
+ },
+ "n_blow": {
+  "file": "voice/n_blow.wav",
+  "sec": 3.04,
+  "text": "But this time, the windmill blew it all away."
+ },
+ "w_useful": {
+  "file": "voice/w_useful.wav",
+  "sec": 3.23,
+  "text": "Finally. I am useful."
+ },
+ "l_normal": {
+  "file": "voice/l_normal.wav",
+  "sec": 1.593,
+  "text": "Can we have ONE normal day?"
+ },
+ "c_nope": {
+  "file": "voice/c_nope.wav",
+  "sec": 0.561,
+  "text": "NO!"
+ },
+ "n_end": {
+  "file": "voice/n_end.wav",
+  "sec": 2.891,
+  "text": "Lia. Part three. The end... probably."
+ },
+ "l_69": {
+  "file": "voice/l_69.wav",
+  "sec": 2.575,
+  "text": "67, 68... 69?!"
+ },
+ "d_mother": {
+  "file": "voice/d_mother.wav",
+  "sec": 1.437,
+  "text": "Hello, mother."
+ }
+}

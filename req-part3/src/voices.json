@@ -1,0 +1,137 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 5.558,
+  "text": "Previously... REQ won a pigeon, got rich for eleven seconds, and lost it all."
+ },
+ "n_night": {
+  "file": "voice/n_night.wav",
+  "sec": 3.19,
+  "text": "That night, REQ came back. Alone."
+ },
+ "r_one": {
+  "file": "voice/r_one.wav",
+  "sec": 2.311,
+  "text": "Okay. Just one more. For real this time."
+ },
+ "v_closer": {
+  "file": "voice/v_closer.wav",
+  "sec": 1.747,
+  "text": "Come closer, REQ..."
+ },
+ "r_closer": {
+  "file": "voice/r_closer.wav",
+  "sec": 0.778,
+  "text": "...Okay."
+ },
+ "n_pulled": {
+  "file": "voice/n_pulled.wav",
+  "sec": 2.272,
+  "text": "And then... the machine pulled him in."
+ },
+ "r_where": {
+  "file": "voice/r_where.wav",
+  "sec": 1.025,
+  "text": "Bro. Where am I?"
+ },
+ "n_inside": {
+  "file": "voice/n_inside.wav",
+  "sec": 2.656,
+  "text": "He was inside the Lucky Spin."
+ },
+ "v_welcome": {
+  "file": "voice/v_welcome.wav",
+  "sec": 4.117,
+  "text": "Welcome, REQ. You have spun me four thousand times."
+ },
+ "r_alot": {
+  "file": "voice/r_alot.wav",
+  "sec": 1.305,
+  "text": "That's... actually a lot."
+ },
+ "n_curtain": {
+  "file": "voice/n_curtain.wav",
+  "sec": 2.891,
+  "text": "But behind the curtain, he found the truth."
+ },
+ "n_hamster": {
+  "file": "voice/n_hamster.wav",
+  "sec": 3.382,
+  "text": "The whole machine was powered by... one hamster."
+ },
+ "h_tired": {
+  "file": "voice/h_tired.wav",
+  "sec": 1.321,
+  "text": "I'm so tired, bro."
+ },
+ "r_you": {
+  "file": "voice/r_you.wav",
+  "sec": 1.372,
+  "text": "Wait. YOU'RE the Lucky Spin?"
+ },
+ "h_every": {
+  "file": "voice/h_every.wav",
+  "sec": 1.572,
+  "text": "Every spin. Every time. Me."
+ },
+ "r_break": {
+  "file": "voice/r_break.wav",
+  "sec": 2.03,
+  "text": "Bro, take a break. I'll run for you."
+ },
+ "n_run": {
+  "file": "voice/n_run.wav",
+  "sec": 3.318,
+  "text": "So REQ ran. And ran. And ran."
+ },
+ "k_scream": {
+  "file": "voice/k_scream.wav",
+  "sec": 3.248,
+  "text": "Why is the machine screaming?"
+ },
+ "p_coo": {
+  "file": "voice/p_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "n_peck": {
+  "file": "voice/n_peck.wav",
+  "sec": 2.912,
+  "text": "The pigeon pecked the machine. Again."
+ },
+ "h_free": {
+  "file": "voice/h_free.wav",
+  "sec": 1.195,
+  "text": "I'm free! I'm FREE!"
+ },
+ "r_hard": {
+  "file": "voice/r_hard.wav",
+  "sec": 2.071,
+  "text": "Running is so hard. How did you do this?"
+ },
+ "h_cardio": {
+  "file": "voice/h_cardio.wav",
+  "sec": 1.092,
+  "text": "Cardio, bro."
+ },
+ "n_quit": {
+  "file": "voice/n_quit.wav",
+  "sec": 3.83,
+  "text": "REQ quit gambling that day. For real this time."
+ },
+ "r_probably": {
+  "file": "voice/r_probably.wav",
+  "sec": 0.944,
+  "text": "...Probably."
+ },
+ "n_end": {
+  "file": "voice/n_end.wav",
+  "sec": 2.187,
+  "text": "REQ. Part three. The end."
+ },
+ "h_best": {
+  "file": "voice/h_best.wav",
+  "sec": 1.17,
+  "text": "Best. Day. Ever."
+ }
+}
