@@ -1,0 +1,237 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 4.491,
+  "text": "Previously... kli got rich, fought a donut, and deleted a cube."
+ },
+ "n_besties": {
+  "file": "voice/n_besties.wav",
+  "sec": 4.448,
+  "text": "Now kli and the donut were best friends. And business partners."
+ },
+ "donut_news": {
+  "file": "voice/donut_news.wav",
+  "sec": 2.098,
+  "text": "Partner. We need to talk."
+ },
+ "kli_talk": {
+  "file": "voice/kli_talk.wav",
+  "sec": 1.527,
+  "text": "Talk to me."
+ },
+ "donut_leaving": {
+  "file": "voice/donut_leaving.wav",
+  "sec": 2.487,
+  "text": "I'm leaving you... for a bagel."
+ },
+ "kli_bagel": {
+  "file": "voice/kli_bagel.wav",
+  "sec": 1.373,
+  "text": "A BAGEL?!"
+ },
+ "donut_hole": {
+  "file": "voice/donut_hole.wav",
+  "sec": 3.64,
+  "text": "She has a hole too, kli. She understands me."
+ },
+ "kli_gave": {
+  "file": "voice/kli_gave.wav",
+  "sec": 5.557,
+  "text": "I gave you everything. A bowtie. A mansion. A whole company."
+ },
+ "donut_cousin": {
+  "file": "voice/donut_cousin.wav",
+  "sec": 1.793,
+  "text": "You ate my cousin."
+ },
+ "kli_once": {
+  "file": "voice/kli_once.wav",
+  "sec": 2.424,
+  "text": "...That was ONE time."
+ },
+ "bagel_hi": {
+  "file": "voice/bagel_hi.wav",
+  "sec": 1.411,
+  "text": "Hey, babe. Ready to go?"
+ },
+ "donut_bye": {
+  "file": "voice/donut_bye.wav",
+  "sec": 1.571,
+  "text": "Goodbye, kli."
+ },
+ "n_court": {
+  "file": "voice/n_court.wav",
+  "sec": 3.104,
+  "text": "Then came the worst part. Splitting the stuff."
+ },
+ "cube_order": {
+  "file": "voice/cube_order.wav",
+  "sec": 3.046,
+  "text": "Order. I am the judge now. Because you deleted me."
+ },
+ "kli_ohno": {
+  "file": "voice/kli_ohno.wav",
+  "sec": 1.366,
+  "text": "Oh no."
+ },
+ "cube_mansion": {
+  "file": "voice/cube_mansion.wav",
+  "sec": 1.319,
+  "text": "Who gets the mansion?"
+ },
+ "kli_me": {
+  "file": "voice/kli_me.wav",
+  "sec": 0.891,
+  "text": "Me."
+ },
+ "donut_me": {
+  "file": "voice/donut_me.wav",
+  "sec": 0.991,
+  "text": "ME!"
+ },
+ "cube_pigeon": {
+  "file": "voice/cube_pigeon.wav",
+  "sec": 1.38,
+  "text": "And who gets the pigeon?"
+ },
+ "pig_coo": {
+  "file": "voice/pig_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "cube_mine": {
+  "file": "voice/cube_mine.wav",
+  "sec": 3.676,
+  "text": "The pigeon chooses me. So I get the mansion too. Court is over."
+ },
+ "kli_lost": {
+  "file": "voice/kli_lost.wav",
+  "sec": 2.809,
+  "text": "I lost... to a cube."
+ },
+ "n_prev5": {
+  "file": "voice/n_prev5.wav",
+  "sec": 5.494,
+  "text": "Previously... kli lost his best friend, his mansion, and his pigeon. To a cube."
+ },
+ "kli_new": {
+  "file": "voice/kli_new.wav",
+  "sec": 2.999,
+  "text": "I need a new best friend."
+ },
+ "n_aud": {
+  "file": "voice/n_aud.wav",
+  "sec": 2.208,
+  "text": "So kli held auditions."
+ },
+ "ham_retire": {
+  "file": "voice/ham_retire.wav",
+  "sec": 2.085,
+  "text": "Hi. I'm retired. I just want juice."
+ },
+ "kli_next": {
+  "file": "voice/kli_next.wav",
+  "sec": 1.074,
+  "text": "Next."
+ },
+ "n_bread": {
+  "file": "voice/n_bread.wav",
+  "sec": 2.315,
+  "text": "Then came... a piece of bread."
+ },
+ "kli_hired": {
+  "file": "voice/kli_hired.wav",
+  "sec": 2.583,
+  "text": "Perfect. You're hired."
+ },
+ "n_said": {
+  "file": "voice/n_said.wav",
+  "sec": 3.766,
+  "text": "The bread said nothing. It was the perfect best friend."
+ },
+ "n_date": {
+  "file": "voice/n_date.wav",
+  "sec": 3.638,
+  "text": "Meanwhile, the donut and the bagel were on a date."
+ },
+ "bagel_secret": {
+  "file": "voice/bagel_secret.wav",
+  "sec": 1.959,
+  "text": "Donut... I have to tell you something."
+ },
+ "donut_anything": {
+  "file": "voice/donut_anything.wav",
+  "sec": 1.805,
+  "text": "Anything, my love."
+ },
+ "bagel_reveal": {
+  "file": "voice/bagel_reveal.wav",
+  "sec": 1.095,
+  "text": "I'm not a bagel."
+ },
+ "pig_coo2": {
+  "file": "voice/pig_coo2.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "n_whole": {
+  "file": "voice/n_whole.wav",
+  "sec": 3.211,
+  "text": "The bagel... was the pigeon. The whole time."
+ },
+ "donut_bird": {
+  "file": "voice/donut_bird.wav",
+  "sec": 2.013,
+  "text": "I've been dating a BIRD?!"
+ },
+ "donut_sorry": {
+  "file": "voice/donut_sorry.wav",
+  "sec": 3.72,
+  "text": "kli... I'm sorry. Can we be best friends again?"
+ },
+ "kli_bread": {
+  "file": "voice/kli_bread.wav",
+  "sec": 3.243,
+  "text": "I have a new best friend now."
+ },
+ "donut_its": {
+  "file": "voice/donut_its.wav",
+  "sec": 1.707,
+  "text": "kli. It's BREAD."
+ },
+ "kli_never": {
+  "file": "voice/kli_never.wav",
+  "sec": 3.486,
+  "text": "And he never left me for a bagel."
+ },
+ "n_ate": {
+  "file": "voice/n_ate.wav",
+  "sec": 3.19,
+  "text": "Then the pigeon came back. And ate the bread."
+ },
+ "pig_coo3": {
+  "file": "voice/pig_coo3.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "kli_welcome": {
+  "file": "voice/kli_welcome.wav",
+  "sec": 2.86,
+  "text": "...Welcome back, partner."
+ },
+ "donut_partner": {
+  "file": "voice/donut_partner.wav",
+  "sec": 1.133,
+  "text": "PARTNER!"
+ },
+ "cube_still": {
+  "file": "voice/cube_still.wav",
+  "sec": 1.502,
+  "text": "I still have the mansion."
+ },
+ "pig_yes": {
+  "file": "voice/pig_yes.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ }
+}

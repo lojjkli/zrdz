@@ -1,0 +1,237 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 6.347,
+  "text": "Previously... Lia had sixty-seven kids, a windmill best friend, and zero normal days."
+ },
+ "lia_normal": {
+  "file": "voice/lia_normal.wav",
+  "sec": 2.042,
+  "text": "Okay. Today is gonna be SO normal."
+ },
+ "ade_lia": {
+  "file": "voice/ade_lia.wav",
+  "sec": 2.217,
+  "text": "LIA! David and I broke up!"
+ },
+ "lia_what": {
+  "file": "voice/lia_what.wav",
+  "sec": 0.89,
+  "text": "WHAT? Why?"
+ },
+ "ade_why": {
+  "file": "voice/ade_why.wav",
+  "sec": 2.216,
+  "text": "He said... pigeons aren't real."
+ },
+ "lia_thatsit": {
+  "file": "voice/lia_thatsit.wav",
+  "sec": 0.91,
+  "text": "...That's it?"
+ },
+ "ade_twice": {
+  "file": "voice/ade_twice.wav",
+  "sec": 2.29,
+  "text": "He said it TWICE, Lia. TWICE!"
+ },
+ "kids_gasp": {
+  "file": "voice/kids_gasp.wav",
+  "sec": 0.982,
+  "text": "*67 kids gasp*"
+ },
+ "n_meanwhile": {
+  "file": "voice/n_meanwhile.wav",
+  "sec": 3.19,
+  "text": "Meanwhile, David was handling it very well."
+ },
+ "dav_cry": {
+  "file": "voice/dav_cry.wav",
+  "sec": 3.01,
+  "text": "I just said pigeons are fake! Why is she so mad?"
+ },
+ "mill_there": {
+  "file": "voice/mill_there.wav",
+  "sec": 4.157,
+  "text": "There, there. Pigeons are very real."
+ },
+ "dav_prove": {
+  "file": "voice/dav_prove.wav",
+  "sec": 0.806,
+  "text": "Prove it!"
+ },
+ "pig_coo": {
+  "file": "voice/pig_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "dav_aah": {
+  "file": "voice/dav_aah.wav",
+  "sec": 1.409,
+  "text": "AAAAH! IT'S REAL!"
+ },
+ "donut_mother": {
+  "file": "voice/donut_mother.wav",
+  "sec": 2.664,
+  "text": "Hello, mother. I sense drama."
+ },
+ "lia_notnow": {
+  "file": "voice/lia_notnow.wav",
+  "sec": 1.151,
+  "text": "Not now, donut."
+ },
+ "ade_moving": {
+  "file": "voice/ade_moving.wav",
+  "sec": 2.64,
+  "text": "I'm moving on. I'm dating someone new."
+ },
+ "lia_who": {
+  "file": "voice/lia_who.wav",
+  "sec": 0.665,
+  "text": "Who?"
+ },
+ "ade_mill": {
+  "file": "voice/ade_mill.wav",
+  "sec": 1.285,
+  "text": "...The windmill."
+ },
+ "mill_hello": {
+  "file": "voice/mill_hello.wav",
+  "sec": 1.479,
+  "text": "Hello."
+ },
+ "lia_therapist": {
+  "file": "voice/lia_therapist.wav",
+  "sec": 1.953,
+  "text": "The windmill is David's THERAPIST!"
+ },
+ "n_notnormal": {
+  "file": "voice/n_notnormal.wav",
+  "sec": 2.4,
+  "text": "This was not a normal day."
+ },
+ "n_prev5": {
+  "file": "voice/n_prev5.wav",
+  "sec": 3.531,
+  "text": "Previously... Ade dumped David. For a windmill."
+ },
+ "dav_help": {
+  "file": "voice/dav_help.wav",
+  "sec": 1.928,
+  "text": "Lia, please. Help me win her back."
+ },
+ "lia_steps": {
+  "file": "voice/lia_steps.wav",
+  "sec": 4.035,
+  "text": "Okay. Step one, say sorry. Step two, admit pigeons are real."
+ },
+ "dav_three": {
+  "file": "voice/dav_three.wav",
+  "sec": 1.468,
+  "text": "Step three... I sing."
+ },
+ "lia_please": {
+  "file": "voice/lia_please.wav",
+  "sec": 0.932,
+  "text": "Please don't."
+ },
+ "n_date": {
+  "file": "voice/n_date.wav",
+  "sec": 3.83,
+  "text": "Meanwhile, Ade and the windmill were on their first date."
+ },
+ "mill_tulip": {
+  "file": "voice/mill_tulip.wav",
+  "sec": 3.678,
+  "text": "Would you like a tulip, my love?"
+ },
+ "ade_tall": {
+  "file": "voice/ade_tall.wav",
+  "sec": 1.532,
+  "text": "You're so tall."
+ },
+ "dav_sing": {
+  "file": "voice/dav_sing.wav",
+  "sec": 2.617,
+  "text": "🎶 Adeee~ I was wrooong~ Pigeons are reeeal~ 🎶"
+ },
+ "n_worst": {
+  "file": "voice/n_worst.wav",
+  "sec": 2.827,
+  "text": "It was the worst song ever recorded."
+ },
+ "mill_cringe": {
+  "file": "voice/mill_cringe.wav",
+  "sec": 4.373,
+  "text": "My blades... are spinning... from the cringe."
+ },
+ "dav_worth": {
+  "file": "voice/dav_worth.wav",
+  "sec": 1.055,
+  "text": "WORTH IIIIT!"
+ },
+ "ade_cute": {
+  "file": "voice/ade_cute.wav",
+  "sec": 2.324,
+  "text": "...He's kinda cute when he flies."
+ },
+ "ade_sorry": {
+  "file": "voice/ade_sorry.wav",
+  "sec": 2.283,
+  "text": "Windmill, I'm sorry. It's over."
+ },
+ "mill_sad": {
+  "file": "voice/mill_sad.wav",
+  "sec": 4.419,
+  "text": "I understand. I am just a windmill."
+ },
+ "n_landed": {
+  "file": "voice/n_landed.wav",
+  "sec": 3.275,
+  "text": "David landed right in Lia's front yard."
+ },
+ "ade_real": {
+  "file": "voice/ade_real.wav",
+  "sec": 2.181,
+  "text": "David! Are pigeons real?"
+ },
+ "dav_real": {
+  "file": "voice/dav_real.wav",
+  "sec": 1.446,
+  "text": "Pigeons... are real."
+ },
+ "kids_aww": {
+  "file": "voice/kids_aww.wav",
+  "sec": 1.098,
+  "text": "Awwwww!"
+ },
+ "n_together": {
+  "file": "voice/n_together.wav",
+  "sec": 2.848,
+  "text": "And just like that, they got back together."
+ },
+ "lia_onenormal": {
+  "file": "voice/lia_onenormal.wav",
+  "sec": 1.833,
+  "text": "Can I PLEASE have one normal day?"
+ },
+ "crowd_no": {
+  "file": "voice/crowd_no.wav",
+  "sec": 0.561,
+  "text": "NO!"
+ },
+ "n_post": {
+  "file": "voice/n_post.wav",
+  "sec": 3.51,
+  "text": "Meanwhile... two lonely exes met for the first time."
+ },
+ "mill_come": {
+  "file": "voice/mill_come.wav",
+  "sec": 3.289,
+  "text": "So... you come here often?"
+ },
+ "mach_free": {
+  "file": "voice/mach_free.wav",
+  "sec": 1.463,
+  "text": "...Free spin?"
+ }
+}

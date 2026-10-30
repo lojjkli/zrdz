@@ -1,0 +1,212 @@
+{
+ "n_prev": {
+  "file": "voice/n_prev.wav",
+  "sec": 3.488,
+  "text": "Previously... REQ quit gambling. Probably."
+ },
+ "n_miss": {
+  "file": "voice/n_miss.wav",
+  "sec": 2.912,
+  "text": "But the Lucky Spin missed him. A lot."
+ },
+ "mach_never": {
+  "file": "voice/mach_never.wav",
+  "sec": 2.743,
+  "text": "REQ... you never spin me anymore."
+ },
+ "req_bro": {
+  "file": "voice/req_bro.wav",
+  "sec": 1.367,
+  "text": "Bro. You're a slot machine."
+ },
+ "mach_special": {
+  "file": "voice/mach_special.wav",
+  "sec": 3.691,
+  "text": "We had something special! Four thousand spins!"
+ },
+ "req_notyou": {
+  "file": "voice/req_notyou.wav",
+  "sec": 1.93,
+  "text": "Listen. It's not you. It's me. I'm broke."
+ },
+ "mach_fine": {
+  "file": "voice/mach_fine.wav",
+  "sec": 2.932,
+  "text": "FINE! Then I'm keeping your diamonds!"
+ },
+ "req_mine": {
+  "file": "voice/req_mine.wav",
+  "sec": 1.245,
+  "text": "Those were MY diamonds!"
+ },
+ "n_cried": {
+  "file": "voice/n_cried.wav",
+  "sec": 3.659,
+  "text": "The Lucky Spin cried coins for three days straight."
+ },
+ "n_week": {
+  "file": "voice/n_week.wav",
+  "sec": 4.171,
+  "text": "One week later, REQ saw something he could not believe."
+ },
+ "n_new": {
+  "file": "voice/n_new.wav",
+  "sec": 2.848,
+  "text": "The Lucky Spin had a new boyfriend."
+ },
+ "pig_coo": {
+  "file": "voice/pig_coo.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ },
+ "req_pigeon": {
+  "file": "voice/req_pigeon.wav",
+  "sec": 0.872,
+  "text": "THE PIGEON?!"
+ },
+ "mach_gentle": {
+  "file": "voice/mach_gentle.wav",
+  "sec": 2.008,
+  "text": "He pecks me so gently."
+ },
+ "req_mything": {
+  "file": "voice/req_mything.wav",
+  "sec": 2.014,
+  "text": "He pecked me OUT of you! That was MY thing!"
+ },
+ "pig_mad": {
+  "file": "voice/pig_mad.wav",
+  "sec": 1.722,
+  "text": "Coo coo. (stay mad)"
+ },
+ "kli_dumb": {
+  "file": "voice/kli_dumb.wav",
+  "sec": 4.08,
+  "text": "This is the dumbest thing I have ever seen."
+ },
+ "ham_seen": {
+  "file": "voice/ham_seen.wav",
+  "sec": 1.896,
+  "text": "I've seen dumber. I used to work in there."
+ },
+ "n_choice": {
+  "file": "voice/n_choice.wav",
+  "sec": 2.699,
+  "text": "REQ had only one choice."
+ },
+ "req_back": {
+  "file": "voice/req_back.wav",
+  "sec": 1.125,
+  "text": "I'm gonna win her back."
+ },
+ "n_prev5": {
+  "file": "voice/n_prev5.wav",
+  "sec": 4.235,
+  "text": "Previously... the slot machine left REQ for a pigeon."
+ },
+ "n_married": {
+  "file": "voice/n_married.wav",
+  "sec": 2.144,
+  "text": "And now... they were getting married."
+ },
+ "ham_gathered": {
+  "file": "voice/ham_gathered.wav",
+  "sec": 2.75,
+  "text": "We are gathered here today. Honestly? I don't know why."
+ },
+ "ham_object": {
+  "file": "voice/ham_object.wav",
+  "sec": 1.661,
+  "text": "If anyone objects, speak now."
+ },
+ "req_object": {
+  "file": "voice/req_object.wav",
+  "sec": 0.87,
+  "text": "I OBJECT!"
+ },
+ "crowd_gasp": {
+  "file": "voice/crowd_gasp.wav",
+  "sec": 0.577,
+  "text": "*GASP*"
+ },
+ "req_spin": {
+  "file": "voice/req_spin.wav",
+  "sec": 3.603,
+  "text": "I'll spin you every day! I'll sell my house! I'll sell kli's house!"
+ },
+ "kli_house": {
+  "file": "voice/kli_house.wav",
+  "sec": 2.671,
+  "text": "Do not sell my house."
+ },
+ "mach_last": {
+  "file": "voice/mach_last.wav",
+  "sec": 4.236,
+  "text": "Oh, REQ. Spin me one last time. Let fate decide."
+ },
+ "n_lever": {
+  "file": "voice/n_lever.wav",
+  "sec": 3.958,
+  "text": "REQ pulled the lever. The whole world held its breath."
+ },
+ "n_dogs": {
+  "file": "voice/n_dogs.wav",
+  "sec": 2.891,
+  "text": "Three dogs. Nobody knew what that meant."
+ },
+ "mach_sign": {
+  "file": "voice/mach_sign.wav",
+  "sec": 2.766,
+  "text": "It means... I choose the pigeon."
+ },
+ "req_lost": {
+  "file": "voice/req_lost.wav",
+  "sec": 1.366,
+  "text": "I lost to a bird, bro."
+ },
+ "n_bread": {
+  "file": "voice/n_bread.wav",
+  "sec": 2.251,
+  "text": "But then... the pigeon saw bread."
+ },
+ "pig_coo2": {
+  "file": "voice/pig_coo2.wav",
+  "sec": 1.236,
+  "text": "Coo!"
+ },
+ "mach_bread": {
+  "file": "voice/mach_bread.wav",
+  "sec": 2.292,
+  "text": "He left me... for BREAD?!"
+ },
+ "req_friends": {
+  "file": "voice/req_friends.wav",
+  "sec": 1.346,
+  "text": "...Wanna just be friends?"
+ },
+ "mach_free": {
+  "file": "voice/mach_free.wav",
+  "sec": 1.463,
+  "text": "...Free spin?"
+ },
+ "req_no": {
+  "file": "voice/req_no.wav",
+  "sec": 0.601,
+  "text": "No."
+ },
+ "n_end": {
+  "file": "voice/n_end.wav",
+  "sec": 6.07,
+  "text": "REQ never gambled again. He just hangs out with his ex. Who is a slot machine."
+ },
+ "ham_peck": {
+  "file": "voice/ham_peck.wav",
+  "sec": 1.452,
+  "text": "You may now... peck the bride."
+ },
+ "pig_yes": {
+  "file": "voice/pig_yes.wav",
+  "sec": 1.306,
+  "text": "Coo."
+ }
+}
