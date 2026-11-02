@@ -273,7 +273,7 @@ class Model:
         return {"credit": "ACONITE cosmetics", "texture_size": [W, H],
                 "textures": {"0": texref, "particle": texref},
                 "elements": els,
-                "display": {"head": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
+                "display": {"head": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1.1, 1.1, 1.1]},
                             "gui": {"rotation": [30, 45, 0], "translation": [0, -1, 0], "scale": [0.5, 0.5, 0.5]},
                             "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375] * 3},
                             "firstperson_righthand": {"rotation": [0, 45, 0], "scale": [0.4] * 3},

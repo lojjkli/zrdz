@@ -11191,5 +11191,148 @@ def _(m):
         clean_wings(P, y, BEAT[k % 8])
     m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
 
+
+# ---------------- baby ender dragon v5: light (about 23 boxes a frame) so it stays smooth on servers ----------------
+def light_dragon(P, y, a):
+    """Low-box chibi dragon: body, head, eyes, horns, tail, legs and two clean 5-slice wings tilted by a."""
+    P.box(-1.4, y + 1.0, -0.6, 1.4, y + 3.3, 2.6, DR_B)                          # body
+    P.box(-1.2, y + 0.6, -0.2, 1.2, y + 1.0, 0.5, DR_B)                          # front legs
+    P.box(-1.2, y + 0.7, 1.7, 1.2, y + 1.0, 2.4, DR_B)                           # back legs
+    P.box(-0.15, y + 3.3, 0.1, 0.15, y + 3.7, 2.2, DR_S)                         # back ridge
+    tz, ty = 2.6, y + 1.7
+    for r, l in ((0.6, 1.2), (0.42, 1.1), (0.28, 1.0)):                         # tail
+        P.box(-r, ty - r, tz, r, ty + r, tz + l, DR_B)
+        tz += l; ty += 0.1
+    hy = y + 2.6
+    P.box(-1.8, hy, -3.6, 1.8, hy + 3.4, -0.2, DR_B)                             # head
+    P.box(-1.1, hy + 0.1, -4.6, 1.1, hy + 1.3, -3.6, DR_B)                       # snout
+    for sx in (-1, 1):
+        P.box(sx * 0.9 - 0.45, hy + 1.65, -3.65, sx * 0.9 + 0.45, hy + 2.6, -3.6, DR_E)   # eyes
+        P.box(sx * 1.0 - 0.2, hy + 3.4, -1.5, sx * 1.0 + 0.2, hy + 4.2, -1.1, DR_S)       # horns
+    L, root, n = 3.1, 1.3, 5
+    ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+    for sx in (-1, 1):                                                         # wings: one clean plate per side
+        for i in range(n):
+            d0, d1 = L * i / n, L * (i + 1) / n
+            xa, xb = sorted((sx * (root + d0 * ca), sx * (root + d1 * ca)))
+            ya, yb = min(d0 * sa, d1 * sa) - 0.08, max(d0 * sa, d1 * sa) + 0.08
+            ch = 2.4 - 1.3 * ((d0 + d1) / 2) / L
+            P.box(xa, y + 3.0 + ya, 0.15, xb, y + 3.0 + yb, 0.15 + ch, WG_SKIN)
+
+@redesign("baby_dragon")
+def _(m):
+    """Circles round your head with exact smooth headings, wings beating. 30 light frames, loops seamlessly."""
+    N = 30
+    BEAT = [28.0 * math.cos(2 * math.pi * j / 6) for j in range(6)]          # 6-frame beat, 5 per loop
+    def pos(t):
+        return 3.6 * math.cos(t), 3.6 * math.sin(t), 6.2
+    for k in range(N):
+        t = 2 * math.pi * k / N
+        x, z, y = pos(t)
+        x2, z2, _ = pos(t + 0.005)
+        A = math.degrees(math.atan2(-(x2 - x), -(z2 - z)))
+        q = int(round(-A / 90.0)); r = round(A + 90 * q, 2)
+        if r > 45: q += 1; r -= 90
+        if r < -45: q -= 1; r += 90
+        # turn pivot on the Pose's own turning axis, so swapping a quarter turn for a fine turn never jumps
+        P = _YRot(Pose(m, f"dr{k}", dx=x, dz=z, q=q), r, (0.0, y + 2.0, 0.0))
+        light_dragon(P, y, BEAT[k % 6])
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
+
+@redesign("wither_crown")
+def _(m):
+    """Same crown; the little wither now circles closer in small, even steps (24 frames) so it glides."""
+    K, KD, KL = '#2b2b2f', '#18181b', '#4a4a52'
+    crown2(m, K, KD, KL, '#8fd6ff', '#5b2a6e', r=4.7, y0=3.4, h=1.5, shape='spike', ph=1.9,
+           tip='#d9d9de', us=(-2.9, -1.45, 0.0, 1.45, 2.9), tall=1.4)
+    for side in 'NESW':
+        for u in (-1.3, 1.3):
+            _side(m, side, u - 0.35, u + 0.35, 4.05, 4.2, 4.7, 4.75, '#4a3a2a')
+    N, R, s = 24, 7.0, 0.3
+    for k in range(N):
+        phi = 2 * math.pi * k / N
+        mini_wither(m, R * math.cos(phi), 7.8, R * math.sin(phi), s, 180.0 - 15.0 * k, f"wo{k}")
+    m.animate(('show', 'wo', N), frames=N, frametime=2, interpolate=False)
+
+def _thin(m, step):
+    """Keep every `step`-th 'show' copy (and slow the frames to match): same motion, far fewer boxes."""
+    from mclib import Tex as _T
+    fx = list(m.anim['fx'])
+    i = next(i for i, f in enumerate(fx) if f[0] == 'show')
+    prefix, n = fx[i][1], fx[i][2]
+    keep, new = [], {}
+    for b in m.boxes:
+        c = b['c']
+        if id(c) in new:
+            keep.append(b); continue
+        nm = c.key[0] if isinstance(c, _T) and isinstance(c.key[0], str) else ''
+        if nm.startswith(prefix) and nm[len(prefix):].isdigit():
+            k = int(nm[len(prefix):])
+            if k % step:
+                continue
+            c.key = (f"{prefix}{k // step}",) + c.key[1:]
+            new[id(c)] = 1
+        keep.append(b)
+    m.boxes = keep
+    fx[i] = ('show', prefix, n // step)
+    m.anim.update(fx=tuple(fx), frames=m.anim['frames'] // step, frametime=m.anim['frametime'] * step)
+
+# ---------------- simple small cat ears ----------------
+def simple_cat_ears(m, o, i, y=4.6):
+    for sx in (-1, 1):
+        x = sx * 2.5
+        m.box(x - 1.2, y, -0.5, x + 1.2, y + 0.8, 0.5, o)                    # three-step pointed ear
+        m.box(x - 0.8, y + 0.8, -0.4, x + 0.8, y + 1.6, 0.4, o)
+        m.box(x - 0.4, y + 1.6, -0.3, x + 0.4, y + 2.2, 0.3, o)
+        m.box(x - 0.7, y, -0.6, x + 0.7, y + 0.8, -0.5, i)                    # inner ear
+        m.box(x - 0.35, y + 0.8, -0.5, x + 0.35, y + 1.4, -0.4, i)
+
+for _k, _o, _i in [("cat_ears_black", BLACK, PINK), ("cat_ears_white", WHITE, PINK),
+                   ("cat_ears_ginger", ORANGE, '#ffd2a8'), ("cat_ears_aconite", AC, AC_GLOW)]:
+    redesign(_k)(lambda m, o=_o, i=_i: simple_cat_ears(m, o, i))
+
+@redesign("cat_ears_bell")
+def _(m):
+    simple_cat_ears(m, '#3a3a40', PINK)
+    band(m, 3.2, 3.8, RED, 4.6)
+    m.box(-0.8, 2.0, -5.2, 0.8, 3.6, -4.6, GOLD); m.box(-0.3, 1.8, -5.3, 0.3, 2.3, -5.1, GOLD_D)
+
+# ---------------- fit pass: room for 3D skin layers, nothing floating, smaller froggies ----------------
+def _move(m, dy=0.0, s=1.0, pivot=(0.0, 4.6, 0.0)):
+    px, py, pz = pivot
+    f = lambda v: (px + (v[0] - px) * s, py + (v[1] - py) * s + dy, pz + (v[2] - pz) * s)
+    for b in m.boxes:
+        b['f'], b['t'] = f(b['f']), f(b['t'])
+        if b['rot']:
+            ax, ang, o = b['rot']
+            b['rot'] = (ax, ang, f(o))
+
+def _overhead_min(m):
+    ys = [b['f'][1] for b in m.boxes if b['f'][0] < 4.6 and b['t'][0] > -4.6 and b['f'][2] < 4.6 and b['t'][2] > -4.6]
+    return min(ys) if ys else None
+
+LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
+         "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
+SHRINK = {"frog_buddy": 0.7, "froggie_buddy": 0.7, "froggie_hat": 0.7, "froggie_strawberry": 0.7,
+          "froggie_mushroom": 0.7, "froggie_princess": 0.7, "froggie_flower_crown": 0.7}
+
+THIN = {"headband_flame": 3, "fire_hair": 2}                                   # flicker only: fewer copies, same look
+
+def _fit(name, fn):
+    def wrapped(m):
+        fn(m)
+        ymin = min(b['f'][1] for b in m.boxes)
+        if 3.9 <= ymin < 4.6:                                  # sat inside the hat layer: lift onto it
+            _move(m, dy=4.6 - ymin); ymin = 4.6
+        if name in LOWER:
+            _move(m, dy=4.6 - _overhead_min(m))
+        if name in SHRINK:
+            _move(m, s=SHRINK[name], pivot=(0.0, ymin, 0.0))
+        if name in THIN:
+            _thin(m, THIN[name])
+    return wrapped
+
 # removed on request
 D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy", "taggy_buddy")]
+D[:] = [(n, t, tier, _fit(n, fn)) for n, t, tier, fn in D]
