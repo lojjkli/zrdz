@@ -11071,5 +11071,89 @@ def _(m):
         flying_ender_dragon(_YRot(P, r, (0.0, y + 2.0, 0.5)), y, WING[k % 4], math.sin(phi * 2))
     m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
 
+
+# ---------------- baby ender dragon v3: real flapping two-joint wings + long varied flight ----------------
+WING_CYCLE = [(35.0, 20.0), (15.0, 25.0), (-15.0, 10.0), (-35.0, -10.0), (-30.0, -25.0), (-10.0, -30.0), (10.0, -15.0), (30.0, 5.0)]
+# (shoulder angle, elbow bend) per frame: fast downstroke, wing tip lags behind, folds a little on the way up
+
+def dragon_wings(P, y, a1, a2):
+    """Two-joint wings built from short overlapping slices so a tilted wing stays one solid piece
+    (no per-part rotation, so the whole dragon can still turn to any heading)."""
+    L1, L2, root = 1.6, 1.6, 1.3
+    def chord(dist):                                                           # wing depth tapers to the tip
+        return 2.2 - 1.3 * dist / (L1 + L2)
+    ca, sa = math.cos(math.radians(a1)), math.sin(math.radians(a1))
+    cb, sb = math.cos(math.radians(a1 + a2)), math.sin(math.radians(a1 + a2))
+    ex, ey = root + L1 * ca, L1 * sa                                           # elbow
+    def pt(d):
+        return (root + d * ca, d * sa) if d <= L1 else (ex + (d - L1) * cb, ey + (d - L1) * sb)
+    n = 8
+    for sx in (-1, 1):
+        for i in range(n):
+            d0, d1 = (L1 + L2) * i / n, (L1 + L2) * (i + 1) / n
+            (x0, y0), (x1, y1) = pt(d0), pt(d1)
+            xa, xb = sorted((sx * x0, sx * x1))
+            if xb - xa < 0.12:
+                xa, xb = (xa + xb) / 2 - 0.06, (xa + xb) / 2 + 0.06
+            ya, yb = min(y0, y1) - 0.07, max(y0, y1) + 0.07
+            P.box(xa, y + 3.0 + ya - 0.04, 0.12, xb, y + 3.0 + yb + 0.04, 0.45, DR_D)            # leading-edge bone
+            P.box(xa, y + 3.0 + ya, 0.45, xb, y + 3.0 + yb, 0.45 + chord((d0 + d1) / 2), DR_W)    # membrane
+        tx, ty = pt(L1 + L2)
+        xa, xb = sorted((sx * (tx - 0.1), sx * (tx + 0.25)))
+        P.box(xa, y + 3.0 + ty - 0.12, -0.05, xb, y + 3.0 + ty + 0.12, 0.25, DR_S)                # little wing claw
+
+def flying_dragon_body(P, y, sway):
+    for sx in (-1, 1):                                                         # legs tucked under while flying
+        P.box(sx * 0.55 - 0.35, y + 0.55, -0.1, sx * 0.55 + 0.35, y + 1.1, 0.6, DR_B)
+        P.box(sx * 0.55 - 0.35, y + 0.65, 1.9, sx * 0.55 + 0.35, y + 1.1, 2.6, DR_B)
+    P.box(-1.4, y + 1.0, -0.6, 1.4, y + 3.3, 2.6, DR_B)
+    P.box(-1.0, y + 0.95, -0.4, 1.0, y + 1.05, 2.2, DR_D)
+    for i, z in enumerate((0.1, 1.0, 1.9)):
+        P.box(-0.15, y + 3.3, z, 0.15, y + 3.75 - 0.1 * i, z + 0.4, DR_S)
+    tz, ty = 2.6, y + 1.7
+    for i, (r, l) in enumerate(((0.6, 1.2), (0.45, 1.0), (0.3, 0.9))):          # tail streams out behind, swinging into turns
+        tx = sway * (i + 1) ** 1.4 * 0.3
+        P.box(tx - r, ty - r, tz, tx + r, ty + r, tz + l, DR_B)
+        tz += l; ty += 0.1
+    tx = sway * 4 ** 1.4 * 0.3
+    P.box(tx - 0.15, ty - 0.05, tz - 0.5, tx + 0.15, ty + 0.45, tz - 0.1, DR_S)
+    hy = y + 2.6
+    P.box(-1.8, hy, -3.6, 1.8, hy + 3.4, -0.2, DR_B)
+    P.box(-1.1, hy + 0.1, -4.6, 1.1, hy + 1.3, -3.6, DR_B)
+    for sx in (-1, 1):
+        P.box(sx * 0.6 - 0.15, hy + 0.85, -4.65, sx * 0.6 + 0.15, hy + 1.1, -4.6, '#0c0a10')
+        P.box(sx * 0.9 - 0.45, hy + 1.65, -3.65, sx * 0.9 + 0.45, hy + 2.6, -3.6, DR_E)
+        P.box(sx * 0.9 - 0.4, hy + 2.25, -3.67, sx * 0.9 - 0.1, hy + 2.55, -3.65, DR_EL)
+        P.box(sx * 1.0 - 0.2, hy + 3.4, -1.5, sx * 1.0 + 0.2, hy + 4.2, -1.1, DR_S)
+
+@redesign("baby_dragon")
+def _(m):
+    """Flies a long figure-eight round and over your head, rising and dipping, turning into the
+    curves, wings really beating (shoulder + elbow, tip lagging). 40 frames, loops seamlessly."""
+    N = 40
+    def pos(t):
+        x = 4.8 * math.sin(t)
+        z = 3.9 * math.sin(t) * math.cos(t) * 2 * 0.9
+        y = 6.2 + 0.7 * math.cos(2 * t) + 0.3 * math.sin(3 * t)
+        return x, z, y
+    def heading(t):
+        x, z, _ = pos(t); x2, z2, _ = pos(t + 0.005)
+        return math.degrees(math.atan2(-(x2 - x), -(z2 - z)))
+    for k in range(N):
+        t = 2 * math.pi * k / N
+        x, z, y = pos(t)
+        A = heading(t)
+        turn = ((heading(t + 0.15) - heading(t - 0.15) + 180) % 360) - 180          # how hard it's turning
+        sway = max(-1.0, min(1.0, -turn / 40.0))
+        A = round(A / 22.5) * 22.5
+        q = int(round(-A / 90.0)); r = A + 90 * q
+        if r > 45: q += 1; r -= 90
+        if r < -45: q -= 1; r += 90
+        P = _YRot(Pose(m, f"dr{k}", dx=x, dz=z, q=q), r, (0.0, y + 2.0, 0.5))
+        a1, a2 = WING_CYCLE[k % len(WING_CYCLE)]
+        flying_dragon_body(P, y, sway)
+        dragon_wings(P, y, a1, a2)
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
 # removed on request
 D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy", "taggy_buddy")]
