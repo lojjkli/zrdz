@@ -58,6 +58,42 @@ class TexQ(Tex):
         return self.base.patch(src, pw, ph)
 
 
+class PTex(Tex):
+    """A plain painted colour wrapped as a Tex, so 'show' animations can hide it per frame."""
+    def __init__(self, color, name, w, h, d):
+        self.color, self.skip, self.a = color, set(), None
+        self.w, self.h, self.d, self.u, self.v = max(1, w), max(1, h), max(1, d), 0, 0
+        self.key = (name, 'ptex', color, self.w, self.h, self.d)
+
+    def patch(self, face, pw, ph):
+        seed = int(hashlib.md5(f'{self.color}{face}{pw}{ph}'.encode()).hexdigest()[:8], 16)
+        return paint(pw, ph, self.color, face, np.random.default_rng(seed))
+
+
+class FaceTex(Tex):
+    """Box whose faces are crops of images: faces = {face: (img, x, y, w, h)}; 'side' fills missing sides.
+    Pass `label` to keep the key unique per crop set."""
+    def __init__(self, faces, name, label, flipx=()):
+        self.faces, self.skip, self.flipx = faces, set(), set(flipx)
+        side = faces.get('side')
+        g = lambda f: faces.get(f) or (side if f not in ('up', 'down') else None)
+        n, e, u = g('north'), g('east'), g('up') or g('down')
+        self.w, self.h = (n[3], n[4]) if n else (u[3], 1)
+        self.d = e[3] if e else (u[4] if u else 1)
+        self.g, self.u, self.v, self.a = g, 0, 0, None
+        self.key = (name, 'face', label)
+
+    def patch(self, face, pw, ph):
+        f = self.g(face)
+        if f is None:
+            return np.zeros((ph, pw, 4), np.uint8)
+        img, x, y, w, h = f
+        p = np.ascontiguousarray(img[y:y + h, x:x + w])
+        if face in self.flipx:
+            p = np.ascontiguousarray(p[:, ::-1])
+        return np.array(Image.fromarray(p).resize((pw, ph), Image.NEAREST))
+
+
 class Model:
     def __init__(self, name, title, tier="basic"):
         self.name, self.title, self.tier = name, title, tier
@@ -136,7 +172,8 @@ class Model:
         if isinstance(bx['c'], Tex):   # textured faces keep their native pixels (crisp, 1:1 with the entity texture)
             t = bx['c']; w, h, dd = t.w, t.h, t.d
             fw, fh = {"north": (w, h), "south": (w, h), "east": (dd, h), "west": (dd, h), "up": (w, dd), "down": (w, dd)}[d]
-            return max(1, int(round(fw))), max(1, int(round(fh)))
+            k = getattr(t, 'px', 1.0)          # optional texel scale, to keep big entity textures small in the atlas
+            return max(1, int(round(fw * k))), max(1, int(round(fh * k)))
         dx, dy, dz = (bx['t'][i] - bx['f'][i] for i in range(3))
         w, h = {"north": (dx, dy), "south": (dx, dy), "east": (dz, dy), "west": (dz, dy),
                 "up": (dx, dz), "down": (dx, dz)}[d]
@@ -194,9 +231,12 @@ class Model:
         shows = [fx for fx in (self.anim or {}).get('fx', ()) if fx[0] == 'show']
         for i, (w, h, c, d) in enumerate(self._paint_order):
             if isinstance(c, Tex):
-                for _, prefix, n in shows:     # 'show': copy k of a textured group is only visible on frame k
+                for fx in shows:              # 'show': copy k of a textured group is only visible on its frame
+                    prefix, n = fx[1], fx[2]
+                    seq = fx[3] if len(fx) > 3 else None
+                    vis = seq[f % len(seq)] if seq else f % n
                     nm = c.key[0] if isinstance(c.key[0], str) else ''
-                    if nm.startswith(prefix) and nm[len(prefix):].isdigit() and int(nm[len(prefix):]) != f % n:
+                    if nm.startswith(prefix) and nm[len(prefix):].isdigit() and int(nm[len(prefix):]) != vis:
                         x, y = self._pos[i]
                         out[y:y + h, x:x + w] = 0
                 continue
@@ -249,7 +289,7 @@ class Model:
             f = [8 + S * v for v in bx['f']]
             t = [8 + S * v for v in bx['t']]
             out.append(dict(f=f, t=t, rot=bx['rot'] and (bx['rot'][0], bx['rot'][1], [8 + S * v for v in bx['rot'][2]]),
-                            faces={d: (arr, list(self.rects[fu[d]])) for d in DIRS}, glow=bx['c'] in GLOW))
+                            faces={d: (arr, list(self.rects[fu[d]])) for d in DIRS}, glow=getattr(bx['c'], 'color', bx['c']) in GLOW))
         return out
 
 DIRS = ("north", "east", "south", "west", "up", "down")

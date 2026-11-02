@@ -1059,6 +1059,11 @@ def _(m):
     m.box(-0.15, 7.6, -0.15, 2.8, 7.8, 0.15, GOLD)
     m.box(2.6, 4.6, -0.5, 3.0, 7.8, 0.5, GOLD); m.box(2.5, 4.2, -0.6, 3.1, 4.8, 0.6, GOLD_D)
 
+def disc(m, cx, y, cz, r, h, c):
+    """Round-looking flat disc from three overlapping boxes."""
+    for a, b in ((1.0, 0.55), (0.86, 0.86), (0.55, 1.0)):
+        m.box(cx - r * a, y, cz - r * b, cx + r * a, y + h, cz + r * b, c)
+
 @redesign("beret")
 def _(m):
     r = ('z', 22.5, (0, 4, 0))
@@ -2005,7 +2010,7 @@ TAGGY_P, TAGGY_BAR, TAGGY_EYE = '#a172d0', '#ffffff', '#f6edff'
 GLOW.update({TAGGY_BAR, TAGGY_EYE})
 TAGGY_HEAD_TOP = 0.952 + 0.06   # head made ~12% taller on top in the latest animation
 
-def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False):
+def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False, wave_ang=-22.5, arms=True):
     """Exact Taggy proportions. Blender units (Z up, face -Y) -> head pixels (Y up, face -Z, X mirrored).
     s = head pixels per Blender unit; the feet bottom (z=-0.136) sits at y."""
     def T(x1, y1, z1, x2, y2, z2, c, rot=None):
@@ -2017,8 +2022,8 @@ def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False):
         if wave and sd == -1:   # raised arm, swung up from the shoulder
             sx, sy = x - sd * 0.25 * s, y + (0.42 + 0.136) * s
             T(min(sd * 0.184, sd * 0.316), -0.066, 0.42, max(sd * 0.184, sd * 0.316), 0.066, 0.826, TAGGY_P,
-              rot=('z', -22.5, (sx, sy, z)))
-        else:
+              rot=('z', wave_ang, (sx, sy, z)))
+        elif arms:
             T(min(sd * 0.184, sd * 0.316), -0.066, 0.014, max(sd * 0.184, sd * 0.316), 0.066, 0.42, TAGGY_P)  # arms
     T(-0.133, -0.305, 0.52, 0.133, -0.281, 0.592, TAGGY_BAR)                  # smile bar
     for sd in (-1, 1):
@@ -2091,6 +2096,8 @@ def vanilla_frog(m, x0=0.0, y0=4.6, z0=0.0, s=0.8, girly=True, tongue=False, tex
         for cx in eyes:
             o = -1 if cx < 0 else 1                                       # outward along Java X
             J(cx - 1.35, top + 0.35, ez - 0.08, 2.7, eh - 0.4, 0.08, '#1d1222')          # big glossy pupil
+            J(cx - 1.1, top + 0.55, ez - 0.13, 0.75, 0.75, 0.05, '#ffffff')              # big sparkle (Froggie keeps her white eye shine)
+            J(cx + 0.45, top + 1.55, ez - 0.13, 0.4, 0.4, 0.05, '#ffffff')               # small sparkle
             outer = cx + o * ew / 2
             for k in range(2):                                                          # two lashes on the outer corner
                 lx = outer - o * (0.15 + 0.65 * k) - 0.15
@@ -8524,7 +8531,7 @@ WITHER_PARTS = [
     (24, 22, -6, 8.4, 0.0, 11, 2, 2),        # ribs
     (24, 22, -6, 10.9, 0.0, 11, 2, 2),
     (24, 22, -6, 13.4, 0.0, 11, 2, 2),
-    (12, 22, -2, 16.9, 1.5, 3, 6, 3),        # tail
+    (12, 22, -2, 16.9, -0.5, 3, 6, 3),       # tail, straight under the spine (no step)
 ]
 
 def mini_wither(m, cx, cy, cz, s, ang, name):
@@ -8573,3 +8580,1275 @@ def _(m):
         y = 7.8 + 0.8 * math.sin(2 * phi)
         mini_wither(m, x, y, z, s, 180.0 - 22.5 * k, f"wo{k}")
     m.animate(('show', 'wo', N), frames=N, frametime=3, interpolate=False)
+
+
+# ======================================================================
+# Nov 2 (2): Wither Crown without skulls, real Ender Dragon, textured
+# animated Tung Tung. Ids and names unchanged.
+# ======================================================================
+@redesign("wither_crown")
+def _(m):
+    K, KD, KL = '#2b2b2f', '#18181b', '#4a4a52'
+    crown2(m, K, KD, KL, '#8fd6ff', '#5b2a6e', r=4.7, y0=3.4, h=1.5, shape='spike', ph=1.9,
+           tip='#d9d9de', us=(-2.9, -1.45, 0.0, 1.45, 2.9), tall=1.4)                 # blackened iron, soul-blue eyes
+    for side in 'NESW':                                                                   # cracked soul-sand glow between gems
+        for u in (-1.3, 1.3):
+            _side(m, side, u - 0.35, u + 0.35, 4.05, 4.2, 4.7, 4.75, '#4a3a2a')
+    N, R, s = 16, 9.0, 0.3                                                                # the flying wither
+    for k in range(N):
+        phi = 2 * math.pi * k / N
+        mini_wither(m, R * math.cos(phi), 7.8 + 0.8 * math.sin(2 * phi), R * math.sin(phi), s, 180.0 - 22.5 * k, f"wo{k}")
+    m.animate(('show', 'wo', N), frames=N, frametime=3, interpolate=False)
+
+
+# ---------------- Ender Dragon (vanilla EnderDragonModel parts + texture) ----------------
+DRAGON_TEX = _os.path.join(_os.path.dirname(__file__), "textures", "ender_dragon.png")
+
+def _snap(deg):
+    return max(-45.0, min(45.0, round(deg / 22.5) * 22.5))
+
+def ender_dragon(m, x0, y0, z0, s, name, wing=0.0, tip=0.0, tail_phase=0.0, px=0.5):
+    """Vanilla ender dragon in a flying pose. Java units (Y down) -> head pixels at scale s.
+    wing / tip: wing-bone and wing-tip lift in degrees (multiples of 22.5, up is positive)."""
+    def T(u, v, w, h, d):
+        t = Tex(DRAGON_TEX, u, v, w, h, d, (), name); t.px = px; return t
+    def P(X, Y, Z):                                  # Java point -> head pixels
+        return _np.array([x0 - X * s, y0 - Y * s, z0 + Z * s])
+    def B(piv, X, Y, Z, w, h, d, uv, rot=None):
+        """Box at Java pivot `piv` (head px), local Java box (X, Y, Z, w, h, d)."""
+        x1, x2 = piv[0] - (X + w) * s, piv[0] - X * s
+        y1, y2 = piv[1] - (Y + h) * s, piv[1] - Y * s
+        z1, z2 = piv[2] + Z * s, piv[2] + (Z + d) * s
+        r = (rot[0], rot[1], tuple(piv)) if rot and rot[1] else None
+        m.box(x1, y1, z1, x2, y2, z2, T(uv[0], uv[1], w, h, d), rot=r)
+    def rx(v, deg):                                  # rotate a head-px offset about x
+        a = math.radians(deg); c, sn = math.cos(a), math.sin(a)
+        return _np.array([v[0], c * v[1] - sn * v[2], sn * v[1] + c * v[2]])
+    def rz(v, deg):
+        a = math.radians(deg); c, sn = math.cos(a), math.sin(a)
+        return _np.array([c * v[0] - sn * v[1], sn * v[0] + c * v[1], v[2]])
+    # body + back scales
+    bp = P(0, 4, 8)
+    B(bp, -12, 0, -16, 24, 24, 64, (0, 0))
+    for zz in (-10, 10, 30):
+        B(bp, -1, -6, zz, 2, 6, 12, (220, 53))
+    # neck: 5 segments rising toward the head
+    for i in range(5):
+        c = P(0, 10 - i * 2.2, -13 - i * 10)
+        B(c, -5, -5, -5, 10, 10, 10, (192, 104)); B(c, -1, -9, -3, 2, 4, 6, (48, 0))
+    hp = P(0, 0, -64)                                # head
+    B(hp, -6, -1, -24, 12, 5, 16, (176, 44))         # upper lip
+    B(hp, -8, -8, -10, 16, 16, 16, (112, 30))        # upper head
+    for sx in (-5, 3):
+        B(hp, sx, -12, -4, 2, 4, 6, (0, 0))          # head scales
+        B(hp, sx, -3, -22, 2, 2, 4, (112, 0))        # nostrils
+    B(hp + _np.array([0, -4 * s, -8 * s]), -6, 0, -16, 12, 4, 16, (176, 65))   # jaw, a little open
+    # tail: 12 segments, gently waving
+    for i in range(12):
+        sway = 1.6 * i * math.sin(tail_phase + i * 0.45)
+        c = P(sway, 14 + i * 1.2, 61 + i * 10)
+        B(c, -5, -5, -5, 10, 10, 10, (192, 104)); B(c, -1, -9, -3, 2, 4, 6, (48, 0))
+    # legs tucked back (x rotations add up along each leg)
+    for side in (-1, 1):
+        fl = P(12 * side, 20, 2)
+        B(fl, -4, -4, -4, 8, 24, 8, (112, 104), ('x', -45.0))
+        flt = fl + rx(_np.array([0, -20 * s, 1 * s]), -45.0)
+        B(flt, -3, -1, -3, 6, 24, 6, (226, 138))
+        flf = flt + _np.array([0, -23 * s, 0])
+        B(flf, -4, 0, -12, 8, 4, 16, (144, 104), ('x', -45.0))
+        hl = P(16 * side, 16, 42)
+        B(hl, -8, -4, -8, 16, 32, 16, (0, 0), ('x', -45.0))
+        hlt = hl + rx(_np.array([0, -32 * s, -4 * s]), -45.0)
+        B(hlt, -6, -2, 0, 12, 32, 12, (196, 0), ('x', -22.5))
+        hlf = hlt + rx(_np.array([0, -32 * s, 4 * s]), -22.5)
+        B(hlf, -9, 0, -20, 18, 6, 24, (112, 0), ('x', -45.0))
+    # wings: bone + membrane, then tip bone + membrane, flapping about the body axis
+    for side in (-1, 1):                              # side +1 = Java +X = head-px -x
+        wp = P(12 * side, 5, 2)
+        a1 = -wing * side                             # up is +y for both wings
+        if side > 0:
+            B(wp, 0, -4, -4, 56, 8, 8, (112, 88), ('z', a1)); B(wp, 0, 0, 2, 56, 0, 56, (-56, 88), ('z', a1))
+        else:
+            B(wp, -56, -4, -4, 56, 8, 8, (112, 88), ('z', a1)); B(wp, -56, 0, 2, 56, 0, 56, (-56, 88), ('z', a1))
+        tp = wp + rz(_np.array([-56 * s * side, 0, 0]), a1)
+        a2 = -tip * side
+        if side > 0:
+            B(tp, 0, -2, -2, 56, 4, 4, (112, 136), ('z', a2)); B(tp, 0, 0, 2, 56, 0, 56, (-56, 144), ('z', a2))
+        else:
+            B(tp, -56, -2, -2, 56, 4, 4, (112, 136), ('z', a2)); B(tp, -56, 0, 2, 56, 0, 56, (-56, 144), ('z', a2))
+
+@redesign("baby_dragon")
+def _(m):
+    WING = [45, 22.5, 0, -22.5, -45, -22.5, 0, 22.5]          # one flap, 8 frames
+    N = len(WING)
+    for k in range(N):
+        tip = WING[(k - 1) % N]                                # tips lag one frame behind: whip-like flap
+        bob = 0.35 * math.cos(2 * math.pi * k / N)
+        ender_dragon(m, 0.0, 9.4 + bob, -0.5, 0.055, f"dr{k}", wing=WING[k], tip=tip, tail_phase=2 * math.pi * k / N)
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
+
+# ---------------- Tung Tung Tung Sahur: painted wood texture + bat swing ----------------
+def _tung_texture():
+    rng = _np.random.default_rng(7)
+    img = _np.zeros((64, 64, 4), _np.uint8)
+    def put(x, y, c):
+        img[y, x] = list(hex2rgb(c)[:3]) + [255]
+    def wood(x0, y0, w, h, base, dark, light, vertical=True):
+        b = _np.array(hex2rgb(base)[:3], float)
+        for y in range(h):
+            for x in range(w):
+                k = 1 + rng.normal(0, 0.035)
+                k *= 0.93 + 0.07 * math.sin((x if vertical else y) * 1.7 + 0.6 * math.sin((y if vertical else x) * 0.35))
+                img[y0 + y, x0 + x] = list(_np.clip(b * k, 0, 255).astype(int)) + [255]
+        for _ in range(max(1, w * h // 40)):                      # dark grain streaks
+            gx, gy = rng.integers(0, w), rng.integers(0, h)
+            for t in range(rng.integers(2, 6)):
+                if vertical and gy + t < h:
+                    put(x0 + gx, y0 + gy + t, dark)
+                elif not vertical and gx + t < w:
+                    put(x0 + gx + t, y0 + gy, dark)
+        for _ in range(max(1, w * h // 90)):
+            put(x0 + rng.integers(0, w), y0 + rng.integers(0, h), light)
+    def box_uv(u, v, w, h, d, base, dark, light, top=None):
+        wood(u, v + d, 2 * d + 2 * w, h, base, dark, light)       # sides
+        if top:
+            top(u + d, v, w, d); top(u + d + w, v, w, d)
+        else:
+            wood(u + d, v, 2 * w, d, base, dark, light, vertical=False)
+    def rings(x0, y0, w, d):                                       # sawn end grain
+        cx, cy = (w - 1) / 2, (d - 1) / 2
+        for y in range(d):
+            for x in range(w):
+                r = math.hypot(x - cx, y - cy)
+                c = ('#e8c896', '#d4ab72', '#c49860')[int(r * 1.3) % 3] if r < min(w, d) / 2 - 0.3 else '#8a5a2b'
+                put(x0 + x, y0 + y, c)
+        put(x0 + int(cx), y0 + int(cy), '#7a4a22')
+    # body 12 x 24 x 12 at (0, 0)
+    box_uv(0, 0, 12, 24, 12, '#c79a62', '#8a5f32', '#e2c08c', top=rings)
+    fx, fy = 12, 12                                                # front face origin
+    for ex in (2, 7):                                              # big round eyes, black pupils
+        for y in range(6, 11):
+            for x in range(ex, ex + 4):
+                if not ((y in (6, 10)) and (x in (ex, ex + 3))):
+                    put(fx + x, fy + y, '#f4f2ee')
+        for y in range(7, 10):
+            for x in range(ex + 1, ex + 3):
+                put(fx + x, fy + y, '#16100c')
+        for x in range(ex - 1, ex + 4):                            # angry brows
+            put(fx + x, fy + 4 + (1 if (x - ex) * (1 if ex < 6 else -1) > 1 else 0), '#3a2410')
+    for x in range(4, 8):
+        put(fx + x, fy + 12, '#9a6a3a')                            # nose
+    for x in range(2, 10):                                         # wide grin
+        put(fx + x, fy + 15, '#3a1a10'); put(fx + x, fy + 16, '#4a1e14')
+    for x in range(3, 9):
+        put(fx + x, fy + 14, '#f4f2ee')                            # teeth
+    put(fx + 2, fy + 14, '#3a1a10'); put(fx + 9, fy + 14, '#3a1a10')
+    box_uv(48, 0, 2, 10, 2, '#9a6e3c', '#6b4a24', '#b88a50')       # arm
+    box_uv(48, 12, 3, 7, 3, '#9a6e3c', '#6b4a24', '#b88a50')       # leg
+    box_uv(0, 36, 2, 8, 2, '#6b4320', '#4a2c14', '#8a5a2b')        # bat handle
+    box_uv(8, 36, 3, 14, 3, '#9a6430', '#6b4320', '#b8803e')       # bat barrel
+    return img
+
+TUNG_TEX = _tung_texture()
+
+@redesign("tung_tung")
+def _(m):
+    SWING = [22.5, 22.5, 0.0, -22.5, -45.0, -45.0, -22.5, 0.0]      # wind up, then whack forward
+    N = len(SWING); y0 = 4.6
+    T = lambda u, v, w, h, d, k: Tex(TUNG_TEX, u, v, w, h, d, (), f"tt{k}")
+    for k in range(N):
+        b = 0.15 * abs(math.sin(math.pi * k / N * 2))               # little hop
+        for sd in (-1, 1):
+            m.box(sd * 0.7 - 0.38, y0 + b, -0.38, sd * 0.7 + 0.38, y0 + 1.75 + b, 0.38, T(48, 12, 3, 7, 3, k))   # legs
+        m.box(-1.5, y0 + 1.6 + b, -1.5, 1.5, y0 + 6.8 + b, 1.5, T(0, 0, 12, 24, 12, k))                     # log body
+        m.box(-2.0, y0 + 2.6 + b, -0.25, -1.5, y0 + 5.0 + b, 0.25, T(48, 0, 2, 10, 2, k))                   # left arm, hanging
+        sh = (1.75, y0 + 4.3 + b, 0.0)                                                                      # right shoulder
+        r = ('x', SWING[k], sh) if SWING[k] else None
+        m.box(1.5, sh[1] - 0.25, -0.25, 2.0, sh[1] + 2.25, 0.25, T(48, 0, 2, 10, 2, k), rot=r)              # right arm, raised
+        m.box(1.5, sh[1] + 1.6, -0.25, 2.0, sh[1] + 3.0, 0.25, T(0, 36, 2, 8, 2, k), rot=r)                 # bat handle
+        m.box(1.38, sh[1] + 3.0, -0.37, 2.12, sh[1] + 5.6, 0.37, T(8, 36, 3, 14, 3, k), rot=r)              # bat barrel
+    m.animate(('show', 'tt', N), frames=N, frametime=2, interpolate=False)
+
+
+def fit_height(m, top=15.0, base=4.6):
+    """Minecraft rejects model elements past 32 model units (15 head px up). Squash anything taller
+    than that toward the top of the head so the model still loads."""
+    hi = max(max(b['f'][1], b['t'][1]) for b in m.boxes)
+    if hi <= top:
+        return m
+    k = (top - base) / (hi - base)
+    sq = lambda y: base + (y - base) * k if y > base else y
+    for b in m.boxes:
+        b['f'] = (b['f'][0], sq(b['f'][1]), b['f'][2]); b['t'] = (b['t'][0], sq(b['t'][1]), b['t'][2])
+        if b['rot']:
+            o = b['rot'][2]; b['rot'] = (b['rot'][0], b['rot'][1], (o[0], sq(o[1]), o[2]))
+    return m
+
+def _fitted(fn):
+    def run(m):
+        fn(m); fit_height(m)
+    run.__wrapped__ = getattr(fn, '__wrapped__', fn)
+    return run
+
+D[:] = [(n, t, tier, _fitted(fn) if n in ("beacon_hat", "firework_hat") else fn) for (n, t, tier, fn) in D]
+
+
+# ======================================================================
+# Crown rework (Nov 2): one shared, detailed crown base. Every crown gets
+# a bevelled band, raised rims, set gems, corner posts and shaped points.
+# ======================================================================
+def _side(m, side, u1, u2, y1, y2, w1, w2, c, rot=None):
+    """Box on one side of the head. u runs along the side, w is the distance out from the centre."""
+    if side == 'N':
+        m.box(u1, y1, -w2, u2, y2, -w1, c, rot=rot)
+    elif side == 'S':
+        m.box(-u2, y1, w1, -u1, y2, w2, c, rot=rot)
+    elif side == 'E':
+        m.box(w1, y1, u1, w2, y2, u2, c, rot=rot)
+    else:
+        m.box(-w2, y1, -u2, -w1, y2, -u1, c, rot=rot)
+
+def crown_point(m, side, u, y, r, shape, c, ph, tip=None, t=0.45, cols=None):
+    """One ornament standing on the band top at position u of a side."""
+    w1, w2 = r - t, r
+    S = lambda a, b, y1, y2, col=c, ww1=w1, ww2=w2: _side(m, side, u + a, u + b, y1, y2, ww1, ww2, col)
+    if shape == 'spike':
+        for k, wd in enumerate((1.4, 1.0, 0.6, 0.3)):
+            S(-wd / 2, wd / 2, y + ph * k / 4, y + ph * (k + 1) / 4)
+        if tip:
+            S(-0.3, 0.3, y + ph, y + ph + 0.5, tip, w1 - 0.08, w2 + 0.08)
+    elif shape == 'fleur':
+        S(-0.8, 0.8, y, y + 0.4)                                              # base bar
+        S(-0.25, 0.25, y + 0.4, y + ph)                                       # centre petal
+        S(-0.45, 0.45, y + ph * 0.55, y + ph * 0.85)
+        for sd in (-1, 1):                                                    # curled side petals
+            S(sd * 0.3 - 0.2, sd * 0.3 + 0.2, y + 0.4, y + ph * 0.55) if sd < 0 else S(0.1, 0.5, y + 0.4, y + ph * 0.55)
+            a = sd * 0.75
+            S(a - 0.22, a + 0.22, y + ph * 0.35, y + ph * 0.7)
+        if tip:
+            S(-0.32, 0.32, y + ph, y + ph + 0.55, tip, w1 - 0.1, w2 + 0.1)
+    elif shape == 'orb':
+        S(-0.18, 0.18, y, y + ph * 0.7)
+        S(-0.45, 0.45, y + ph * 0.7, y + ph * 0.7 + 0.9, tip or c, w1 - 0.2, w2 + 0.2)
+    elif shape == 'crystal':
+        S(-0.45, 0.45, y, y + ph * 0.75, c, w1 - 0.1, w2 + 0.1)
+        S(-0.3, 0.3, y + ph * 0.75, y + ph, tip or c, w1 - 0.05, w2 + 0.05)
+        S(-0.12, 0.12, y + ph, y + ph + 0.25, tip or c, w1, w2)
+    elif shape == 'flame':
+        cols = cols or [c]
+        for k, wd in enumerate((1.2, 0.9, 0.6, 0.3)):
+            S(-wd / 2 + (0.1 if k % 2 else 0), wd / 2 + (0.1 if k % 2 else 0), y + ph * k / 4, y + ph * (k + 1) / 4, cols[k % len(cols)])
+    elif shape == 'trident':
+        S(-0.15, 0.15, y, y + ph)
+        S(-0.8, 0.8, y + ph * 0.45, y + ph * 0.6)
+        for a in (-0.7, 0.7):
+            S(a - 0.13, a + 0.13, y + ph * 0.6, y + ph * 0.9)
+        S(-0.25, 0.25, y + ph, y + ph + 0.35, tip or c)
+    elif shape == 'star':
+        S(-0.15, 0.15, y, y + ph * 0.55)
+        cy = y + ph * 0.55 + 0.6
+        S(-0.25, 0.25, cy - 0.7, cy + 0.7, tip or c); S(-0.7, 0.7, cy - 0.25, cy + 0.25, tip or c)
+        S(-0.45, 0.45, cy - 0.45, cy + 0.45, tip or c, w1 - 0.06, w2 + 0.06)
+
+def crown2(m, base, dark, light, gem, gem2=None, r=4.7, y0=3.4, h=1.5, shape='spike', ph=1.8,
+           tip=None, lining=None, corners=True, us=(-2.7, 0.0, 2.7), tall=1.35, sides='NESW', cols=None, gems=True):
+    band(m, y0 + 0.2, y0 + h - 0.2, base, r)                                  # band
+    band(m, y0, y0 + 0.32, dark, r + 0.12)                                    # bottom rim
+    band(m, y0 + h - 0.3, y0 + h, light, r + 0.08)                            # top rim
+    band(m, y0 + 0.32, y0 + 0.42, light, r + 0.03)                            # bead line
+    ym = y0 + h / 2 + 0.05
+    if gems:
+        for side in sides:
+            _side(m, side, -0.62, 0.62, ym - 0.5, ym + 0.5, r, r + 0.08, light)   # gem setting
+            _side(m, side, -0.42, 0.42, ym - 0.32, ym + 0.32, r + 0.08, r + 0.2, gem)
+            for u in (-2.5, 2.5):
+                _side(m, side, u - 0.26, u + 0.26, ym - 0.24, ym + 0.24, r, r + 0.12, gem2 or gem)
+    for side in sides:
+        for u in us:
+            hh = ph * (tall if abs(u) < 0.01 else 1.0)
+            crown_point(m, side, u, y0 + h, r, shape, base if shape not in ('crystal',) else gem, hh, tip=tip, cols=cols)
+    if corners:
+        for sx in (-1, 1):
+            for sz in (-1, 1):
+                x1, x2 = sorted((sx * (r - 0.75), sx * (r + 0.15))); z1, z2 = sorted((sz * (r - 0.75), sz * (r + 0.15)))
+                m.box(x1, y0, z1, x2, y0 + h + 0.35, z2, base)
+                m.box(x1 + 0.12, y0 + h + 0.35, z1 + 0.12, x2 - 0.12, y0 + h + 0.55, z2 - 0.12, light)
+                cx, cz = (x1 + x2) / 2, (z1 + z2) / 2
+                m.box(cx - 0.28, y0 + h + 0.55, cz - 0.28, cx + 0.28, y0 + h + 1.1, cz + 0.28, tip or gem)
+    if lining:
+        dome(m, y0 + 0.6, [(r - 0.6, h + 0.2), (r - 1.4, 0.45)], lining)
+
+def _crown_anim(m, *fx, **kw):
+    m.animate(*fx, **kw)
+
+# ---------------- the crowns ----------------
+GLD, GLD_D, GLD_L = GOLD, GOLD_D, '#ffe27a'
+SLV, SLV_D, SLV_L = '#c9ced8', '#8c8f99', '#eef1f6'
+GLOW.update({'#ff4b1f', '#f7dc3c', '#5fe3f0', '#b8fbff', '#c49bff', '#e8d8ff', '#ffe45c', '#fff4a0', '#7af08a', '#7ad8ff', '#d4ffff'})
+METAL.update({GLD_L, SLV_L}) if 'METAL' in globals() else None
+
+@redesign("gold_crown")
+def _(m):
+    crown2(m, GLD, GLD_D, GLD_L, '#d8202e', '#2f6fe0', shape='fleur', ph=2.0, tip='#f4f2ee', lining='#7a1730')
+    rbox(m, -0.55, 6.4, -0.55, 0.55, 7.4, 0.55, GLD, r=0.25)                             # orb on the velvet
+    m.box(-0.15, 7.4, -0.15, 0.15, 8.4, 0.15, GLD); m.box(-0.45, 7.75, -0.15, 0.45, 8.05, 0.15, GLD)
+
+@redesign("diamond_crown")
+def _(m):
+    crown2(m, SLV, SLV_D, SLV_L, '#5fe3f0', '#d4ffff', shape='crystal', ph=2.2, tip='#d4ffff', lining='#1f3a6a')
+
+@redesign("emerald_crown")
+def _(m):
+    crown2(m, GLD, GLD_D, GLD_L, '#2fd06a', '#7af08a', shape='crystal', ph=2.0, tip='#7af08a', lining='#14502a')
+
+@redesign("netherite_crown")
+def _(m):
+    N, ND, NL, LAVA = '#4a4248', '#2e292e', '#6a6068', '#ff6a1f'
+    GLOW.add(LAVA)
+    crown2(m, N, ND, NL, LAVA, '#ffb03a', shape='spike', ph=2.0, tip=GLD, lining='#1a1418')
+    for side in 'NESW':                                                                  # glowing lava cracks
+        for u in (-1.4, 1.4):
+            _side(m, side, u - 0.08, u + 0.08, 3.7, 4.6, 4.7, 4.76, LAVA)
+
+@redesign("bone_crown")
+def _(m):
+    B, BD, BL = '#e9e1cf', '#bfb59c', '#f6f1e4'
+    crown2(m, B, BD, BL, '#2a2420', BD, shape='orb', ph=1.8, tip=BL, gems=False)
+    for side in 'NESW':
+        for u in (-1.35, 1.35):                                                          # rib bones between the knobs
+            _side(m, side, u - 0.15, u + 0.15, 4.9, 6.0, 4.3, 4.7, B)
+            _side(m, side, u - 0.3, u + 0.3, 5.9, 6.25, 4.25, 4.75, BL)
+    m.box(-1.1, 3.5, -5.1, 1.1, 5.4, -4.7, B)                                            # little skull on the front
+    m.box(-0.75, 4.4, -5.16, -0.2, 4.95, -5.1, '#1d1b22'); m.box(0.2, 4.4, -5.16, 0.75, 4.95, -5.1, '#1d1b22')
+    m.box(-0.12, 4.1, -5.16, 0.12, 4.3, -5.1, '#1d1b22'); m.box(-0.7, 3.6, -5.16, 0.7, 3.8, -5.1, BD)
+
+@redesign("ice_crown")
+def _(m):
+    I, ID, IL = '#9ad9ff', '#5aa8d8', '#dff4ff'
+    crown2(m, I, ID, IL, '#eaf9ff', '#cdefff', shape='crystal', ph=2.4, tip='#ffffff', lining=None)
+    for side in 'NESW':                                                                  # icicles under the band
+        for u, ln in ((-3.4, 0.9), (-1.8, 0.5), (-0.6, 1.2), (1.0, 0.7), (2.6, 1.0)):
+            _side(m, side, u - 0.18, u + 0.18, 3.4 - ln, 3.4, 4.6, 4.82, IL)
+
+@redesign("fire_crown")
+def _(m):
+    F1, F2, F3 = '#ff4b1f', '#e97a24', '#f7dc3c'
+    crown2(m, '#3a2a24', '#241a16', '#ffc21f', F1, F3, shape='flame', ph=2.4, cols=[F1, F2, F3], corners=True, tip=F3)
+    m.animate(('cycle', [F1, F2, F3], 1), frames=3, frametime=4)
+
+@redesign("soul_crown")
+def _(m):
+    S1, S2, S3 = '#38c8d8', '#5fe3f0', '#b8fbff'
+    crown2(m, '#3a4450', '#252c36', '#5a6878', S2, S3, shape='flame', ph=2.4, cols=[S1, S2, S3], tip=S3)
+    m.animate(('pulse', [S1, S2, S3], 0.4), frames=16, frametime=2)
+
+@redesign("void_crown")
+def _(m):
+    crown2(m, '#1a1028', '#0e0818', '#4a2a70', '#c49bff', '#e8d8ff', shape='crystal', ph=2.6, tip='#e8d8ff', lining='#0e0818')
+    for x, y, z in ((-3.6, 9.4, 0), (3.0, 10.0, 0), (0.4, 10.8, 0)):
+        m.box(x - 0.2, y, z - 0.2, x + 0.2, y + 0.4, z + 0.2, '#c49bff80')
+    m.animate(('pulse', ['#c49bff', '#e8d8ff'], 0.4), frames=16, frametime=2)
+
+@redesign("imperial_crown")
+def _(m):
+    VEL, FUR, SPOT = '#8a1a2a', '#f4f2ee', '#1d1b22'
+    crown2(m, GLD, GLD_D, GLD_L, '#d8202e', '#2f6fe0', shape='fleur', ph=1.6, tip='#f4f2ee', lining=VEL, y0=3.8, h=1.3)
+    band(m, 2.7, 3.8, FUR, 4.95)                                                         # ermine trim
+    for side in 'NESW':
+        for u in (-3.2, -1.6, 0.0, 1.6, 3.2):
+            _side(m, side, u - 0.15, u + 0.15, 3.0, 3.5, 4.95, 5.0, SPOT)
+    for ax in ('x', 'z'):                                                                # two crossing arches
+        for k, (y1, ext) in enumerate(((5.1, 4.2), (6.5, 3.5), (7.6, 2.4))):
+            hh = 1.4 if k < 2 else 0.9
+            if ax == 'x':
+                m.box(-0.35, y1, -ext, 0.35, y1 + hh, -ext + 0.6, GLD); m.box(-0.35, y1, ext - 0.6, 0.35, y1 + hh, ext, GLD)
+            else:
+                m.box(-ext, y1, -0.35, -ext + 0.6, y1 + hh, 0.35, GLD); m.box(ext - 0.6, y1, -0.35, ext, y1 + hh, 0.35, GLD)
+    m.box(-1.9, 8.5, -0.35, 1.9, 8.95, 0.35, GLD); m.box(-0.35, 8.5, -1.9, 0.35, 8.95, 1.9, GLD)
+    rbox(m, -0.75, 8.95, -0.75, 0.75, 10.3, 0.75, GLD, r=0.3)                            # orb + cross
+    m.box(-0.18, 10.3, -0.18, 0.18, 11.7, 0.18, GLD); m.box(-0.65, 10.8, -0.18, 0.65, 11.15, 0.18, GLD)
+    m.box(-0.12, 9.4, -0.82, 0.12, 9.8, -0.75, '#d8202e')
+
+@redesign("tilted_crown")
+def _(m):
+    n0 = len(m.boxes)
+    crown2(m, GLD, GLD_D, GLD_L, '#d8202e', '#2f6fe0', r=3.2, y0=4.3, h=1.1, shape='spike', ph=1.3, tip='#f4f2ee',
+           us=(-1.6, 0.0, 1.6), corners=False, lining='#7a1730')
+    for b in m.boxes[n0:]:                                                               # worn at a cheeky angle
+        b['rot'] = ('z', 22.5, (-1.5, 4.6, 0.0))
+        b['f'] = (b['f'][0] - 1.4, b['f'][1], b['f'][2]); b['t'] = (b['t'][0] - 1.4, b['t'][1], b['t'][2])
+
+@redesign("trident_crown")
+def _(m):
+    P, PD, PL = '#4aa89a', '#2f7a6e', '#7ad8c8'
+    crown2(m, P, PD, PL, '#5fe3f0', '#b8fbff', shape='trident', ph=2.6, tip='#b8fbff', lining='#1a4a48')
+
+@redesign("star_crown")
+def _(m):
+    crown2(m, GLD, GLD_D, GLD_L, '#ffe45c', '#fff4a0', shape='star', ph=2.0, tip='#ffe45c', lining='#2a2470')
+    m.animate(('twinkle', ['#ffe45c', '#fff4a0'], 0.5), frames=16, frametime=2)
+
+@redesign("moon_crown")
+def _(m):
+    crown2(m, SLV, SLV_D, SLV_L, '#9ad0ff', '#e8f0ff', shape='orb', ph=1.6, tip='#f4f6ff', lining='#1a2050')
+    MN = '#fff6c8'; GLOW.add(MN)
+    relief(m, ["...MMM", "..MM..", ".MM...", ".MM...", ".MM...", "..MM..", "...MMM"], -4.85, {'M': (MN, 0.35)},
+           cell=0.42, top=8.3, cx=0.0)                                                   # crescent moon over the front
+
+@redesign("sun_crown")
+def _(m):
+    crown2(m, GLD, GLD_D, GLD_L, '#ff8a1f', '#ffe45c', shape='spike', ph=2.2, tip='#ffe45c', lining='#7a3a10')
+    rbox(m, -1.3, 5.2, -5.15, 1.3, 7.8, -4.8, '#ffe45c', r=0.4)                          # sun disc on the front
+    m.box(-0.8, 5.7, -5.22, 0.8, 7.3, -5.15, '#ff8a1f')
+    m.animate(('pulse', ['#ffe45c', '#ff8a1f'], 0.4), frames=16, frametime=2)
+
+@redesign("ice_queen_crown")
+def _(m):
+    I, ID, IL = '#bfe6ff', '#7ab8e0', '#f2fbff'
+    crown2(m, I, ID, IL, '#7ad8ff', '#ffffff', shape='crystal', ph=3.0, tall=1.6, tip='#ffffff', us=(-3.0, -1.5, 0.0, 1.5, 3.0))
+    for x, y in ((-4.4, 7.6), (3.8, 8.4), (0.0, 11.2)):
+        star(m, x, y, -4.9, 0.3, '#ffffff')
+
+@redesign("snowflake_crown")
+def _(m):
+    crown2(m, '#cfe8ff', '#8ab8e0', '#ffffff', '#7ad8ff', '#c8f4ff', shape='spike', ph=1.6, tip='#ffffff')
+    for side in 'NESW':                                                                  # snowflakes on the band
+        for u in (-1.35, 1.35):
+            _side(m, side, u - 0.08, u + 0.08, 3.65, 4.65, 4.8, 4.86, '#ffffff')
+            _side(m, side, u - 0.5, u + 0.5, 4.11, 4.19, 4.8, 4.86, '#ffffff')
+    m.animate(('twinkle', ['#7ad8ff', '#c8f4ff', '#ffffff'], 0.5), frames=16, frametime=2)
+
+@redesign("shamrock_crown")
+def _(m):
+    G, GD, GL = '#3aa04a', '#256a30', '#7ad06a'
+    crown2(m, GLD, GLD_D, GLD_L, '#3ad06a', GL, shape='orb', ph=1.0, tip=GL, gems=True)
+    for side in 'NESW':                                                                  # three-leaf clovers
+        for u in (-1.35, 1.35):
+            cy = 6.1
+            for dx, dy in ((-0.38, 0.0), (0.38, 0.0), (0.0, 0.42)):
+                _side(m, side, u + dx - 0.32, u + dx + 0.32, cy + dy - 0.32, cy + dy + 0.32, 4.3, 4.6, G)
+            _side(m, side, u - 0.08, u + 0.08, 4.9, cy, 4.35, 4.55, GD)
+
+@redesign("birthday_crown")
+def _(m):
+    P, PD, PL, F = '#ff9fc8', '#e06a9a', '#fff0f6', '#ff8a1f'
+    crown2(m, P, PD, PL, '#5ab8ff', '#3ad06a', shape='spike', ph=0.01, corners=False, us=())   # frosting band
+    for side in 'NESW':
+        for u in (-2.6, 0.0, 2.6):
+            c = {-2.6: '#5ab8ff', 0.0: '#ff7ab0', 2.6: '#3ad06a'}[u]
+            _side(m, side, u - 0.22, u + 0.22, 4.9, 6.4, 4.3, 4.74, c)                   # candles
+            _side(m, side, u - 0.16, u + 0.16, 6.4, 6.95, 4.36, 4.68, F)                 # flames
+        for u in (-3.7, -1.3, 1.3, 3.7):                                                 # frosting drips
+            _side(m, side, u - 0.3, u + 0.3, 3.0, 3.5, 4.7, 4.85, PL)
+    GLOW.add(F)
+    m.animate(('flicker', [F], 0.4), ('cycle', ['#ff7ab0', '#5ab8ff', '#3ad06a'], 4), frames=12, frametime=3, interpolate=False)
+
+@redesign("marquee_crown")
+def _(m):
+    R, RD, GD = '#c8202e', '#8a1420', '#e8b84a'
+    crown2(m, R, RD, GD, '#ffe45c', '#ffe45c', shape='spike', ph=2.2, tip=GD, gems=False, lining='#4a0a12')
+    bulb_ring(m, 4.15, 4.86, BULB, s=0.36)
+    m.animate(('cycle', BULB, 1), frames=12, frametime=2, interpolate=False)
+
+@redesign("glitch_crown")
+def _(m):
+    C, M, K = '#29dfeb', '#ff2bd6', '#14141c'
+    crown2(m, K, '#2a2a33', '#3a3a46', C, M, shape='spike', ph=2.2, tip=C, lining='#0a0a10')
+    n0 = len(m.boxes)
+    for side, col, off in (('N', M, -0.25), ('N', C, 0.25)):                             # RGB-split ghost spikes
+        for u in (-2.7, 0.0, 2.7):
+            hh = 2.2 * (1.35 if u == 0 else 1)
+            _side(m, side, u + off - 0.15, u + off + 0.15, 4.9 + hh * 0.2, 4.9 + hh * 0.9, 4.75, 4.82, col)
+    for (x, y, c) in ((-3.8, 4.2, M), (2.9, 3.9, C), (-0.8, 6.9, C), (3.9, 6.2, M), (-2.2, 7.4, M)):
+        m.box(x - 0.3, y - 0.15, -4.92, x + 0.3, y + 0.15, -4.8, c)                         # stray pixels
+    m.animate(('flicker', [C, M], 0.7), ('cycle', [C, M], 3), frames=12, frametime=1, interpolate=False)
+
+@redesign("candle_crown")
+def _(m):
+    W, F1, F2 = '#f4ecd8', '#ff8a1f', '#ffe45c'
+    crown2(m, GLD, GLD_D, GLD_L, '#d8202e', GLD_L, shape='orb', ph=0.4, tip=GLD_D, corners=True)
+    for side in 'NESW':
+        for u in (-2.7, 0.0, 2.7):
+            hh = 1.9 if u == 0 else 1.4
+            _side(m, side, u - 0.32, u + 0.32, 5.3, 5.3 + hh, 4.3, 4.7, W)                 # candles
+            _side(m, side, u - 0.4, u + 0.4, 5.3, 5.5, 4.2, 4.8, W)                        # wax drip ring
+            _side(m, side, u - 0.17, u + 0.17, 5.3 + hh, 5.3 + hh + 0.45, 4.36, 4.64, F1)
+            _side(m, side, u - 0.09, u + 0.09, 5.3 + hh + 0.2, 5.3 + hh + 0.7, 4.42, 4.58, F2)
+    m.animate(('flicker', [F1, F2], 0.45), frames=10, frametime=2)
+
+@redesign("coral_crown")
+def _(m):
+    P, PD, PL = '#4ad0c0', '#2a9a8e', '#9af0e6'
+    crown2(m, P, PD, PL, '#ff7a9a', '#ffd23a', shape='orb', ph=0.3, tip='#f4f2ee', corners=True)   # pearls on the rim
+    cols = ['#ff7a9a', '#ff9a5a', '#5ab8ff', '#ffd23a']
+    for i, side in enumerate('NESW'):
+        for j, u in enumerate((-2.6, 0.0, 2.6)):
+            c = cols[(i + j) % 4]; y = 5.2; hh = 1.8 if u == 0 else 1.3
+            _side(m, side, u - 0.17, u + 0.17, y, y + hh, 4.35, 4.65, c)                  # branching coral
+            _side(m, side, u - 0.65, u - 0.35, y + hh * 0.35, y + hh * 0.8, 4.35, 4.65, c)
+            _side(m, side, u + 0.35, u + 0.65, y + hh * 0.5, y + hh * 0.95, 4.35, 4.65, c)
+            _side(m, side, u - 0.65, u + 0.65, y + hh * 0.3, y + hh * 0.45, 4.35, 4.65, c)
+
+@redesign("end_portal_hat")
+def _(m):
+    E, ED, EL, TOP, EYE = '#dcdca8', '#a8a878', '#f0f0c8', '#3a6a5a', '#2fbf8a'
+    crown2(m, E, ED, EL, '#0e1a1a', TOP, shape='orb', ph=0.6, tip=EYE, gems=True, lining='#05080c')
+    for side in 'NESW':                                                                  # eyes of ender set in the frame
+        for u in (-2.7, 0.0, 2.7):
+            _side(m, side, u - 0.42, u + 0.42, 5.55, 5.75, 4.3, 4.75, '#1a3a30')
+
+@redesign("tiara")
+def _(m):
+    S, SD, SL, G = SLV, SLV_D, SLV_L, '#ff7ab0'
+    band(m, 3.6, 4.1, S, 4.68); band(m, 3.6, 3.75, SD, 4.75)
+    arch = [(-3.2, 0.5), (-2.4, 0.9), (-1.6, 1.4), (-0.8, 1.9), (0.0, 2.4), (0.8, 1.9), (1.6, 1.4), (2.4, 0.9), (3.2, 0.5)]
+    for x, hh in arch:                                                                   # filigree arch on the front
+        m.box(x - 0.4, 4.1, -4.75, x + 0.4, 4.1 + hh, -4.55, S)
+        m.box(x - 0.15, 4.1 + hh, -4.78, x + 0.15, 4.1 + hh + 0.3, -4.52, SL)
+    for x in (-2.4, -0.8, 0.8, 2.4):
+        m.box(x - 0.18, 4.4, -4.82, x + 0.18, 4.75, -4.75, '#9ad0ff')
+    rbox(m, -0.55, 5.0, -4.9, 0.55, 6.2, -4.6, G, r=0.2)                                 # pink centre stone
+    m.box(-0.3, 6.6, -4.82, 0.3, 7.0, -4.6, '#f4f2ee')
+
+@redesign("mermaid_tiara")
+def _(m):
+    P, PD, PL, SH = '#7ad8c8', '#4aa89a', '#c8fff4', '#ffc2d6'
+    band(m, 3.6, 4.1, P, 4.68); band(m, 3.6, 3.75, PD, 4.75)
+    for x in (-3.4, -2.6, -1.8, 1.8, 2.6, 3.4):                                          # pearl strand
+        m.box(x - 0.25, 4.1, -4.82, x + 0.25, 4.6, -4.6, '#f4f2ee')
+    for k, (wd, hh) in enumerate(((2.6, 0.5), (2.2, 0.5), (1.7, 0.5), (1.1, 0.45), (0.5, 0.35))):   # scallop shell
+        m.box(-wd / 2, 4.1 + k * 0.45, -4.85, wd / 2, 4.1 + k * 0.45 + hh, -4.55, SH if k % 2 == 0 else '#ffd8e4')
+    for x in (-0.7, 0.0, 0.7):
+        m.box(x - 0.06, 4.2, -4.88, x + 0.06, 6.1, -4.85, '#e8a0b8')
+    m.box(-0.3, 4.15, -4.95, 0.3, 4.55, -4.85, '#f4f2ee')
+
+@redesign("new_year_tiara")
+def _(m):
+    crown2(m, GLD, GLD_D, GLD_L, '#5ce1ff', '#ff5cb8', shape='star', ph=1.4, tip='#ffe45c', sides='N',
+           us=(-2.6, 0.0, 2.6), corners=False, gems=True)
+    band(m, 3.4, 4.9, GLD, 4.7) if False else None
+    for x, y, c in ((-4.4, 7.4, '#ff5cb8'), (4.0, 8.2, '#e6e9f0'), (-2.2, 8.6, '#5ce1ff'), (2.4, 9.0, '#ffe45c')):
+        m.box(x - 0.3, y, -2.6, x + 0.3, y + 0.4, -2.5, c)                                # confetti
+
+@redesign("flower_crown")
+def _(m):
+    V, VD = '#4cae3a', '#2f7a2a'
+    band(m, 3.7, 4.3, V, 4.68); band(m, 3.7, 3.85, VD, 4.75)
+    cols = ['#ff6b9a', '#ffe14f', '#9ad0ff', '#ffffff', '#c49bff']
+    k = 0
+    for side in 'NESW':
+        for u in (-3.0, -1.0, 1.0, 3.0):
+            c = cols[k % len(cols)]; k += 1
+            _side(m, side, u - 0.3, u + 0.3, 4.0, 4.6, 4.68, 5.0, '#ffd23a' if c != '#ffe14f' else '#ff8a1f')   # centre
+            for du, dy in ((-0.55, 0), (0.55, 0), (0, 0.55), (0, -0.55)):
+                _side(m, side, u + du - 0.33, u + du + 0.33, 4.3 + dy - 0.33, 4.3 + dy + 0.33, 4.68, 4.92, c)
+        for u in (-2.0, 0.0, 2.0):
+            _side(m, side, u - 0.5, u + 0.5, 4.2, 4.45, 4.6, 4.9, VD)                       # leaves
+
+@redesign("cherry_blossom_crown")
+def _(m):
+    BR, BRD, P, PL = '#6b4326', '#4a2c18', '#ffb3cf', '#ffd1e6'
+    band(m, 3.7, 4.25, BR, 4.68); band(m, 3.7, 3.85, BRD, 4.75)
+    for side in 'NESW':
+        for u in (-2.8, -0.6, 1.6, 3.6):
+            _side(m, side, u - 0.12, u + 0.12, 4.25, 5.2, 4.4, 4.6, BR)                    # twigs
+            for du, dy, c in ((0, 5.4, P), (-0.45, 5.0, PL), (0.45, 5.05, P), (0, 4.75, PL)):
+                _side(m, side, u + du - 0.3, u + du + 0.3, dy - 0.25, dy + 0.25, 4.35, 4.65, c)
+            _side(m, side, u - 0.1, u + 0.1, 5.0, 5.2, 4.32, 4.68, '#ff6a9a')
+    for x, y, z in ((-3.6, 6.4, -1.8), (2.9, 7.2, -2.8), (0.5, 6.8, 1.2)):
+        m.box(x - 0.25, y, z - 0.25, x + 0.25, y + 0.1, z + 0.25, PL)                      # drifting petals
+
+
+# ======================================================================
+# ROUND 3 REWORKS (Nov 2): posed 'show' animations, vanilla textures
+# ======================================================================
+from mclib import PTex, FaceTex
+from PIL import Image as _Image
+
+def _tex(name):
+    return _np.array(_Image.open(_os.path.join(_os.path.dirname(__file__), "textures", name)).convert('RGBA'))
+
+class Pose:
+    """Proxy model: plain colours become PTex named `name` (one 'show' frame copy), optionally moved
+    and turned q quarter turns about y through (cx, cz)."""
+    def __init__(self, m, name, dx=0.0, dy=0.0, dz=0.0, q=0, cx=0.0, cz=0.0):
+        self.m, self.name, self.dx, self.dy, self.dz, self.q, self.cx, self.cz = m, name, dx, dy, dz, q % 4, cx, cz
+
+    def _pt(self, x, y, z):
+        x, z = x - self.cx, z - self.cz
+        for _ in range(self.q):
+            x, z = -z, x
+        return x + self.cx + self.dx, y + self.dy, z + self.cz + self.dz
+
+    def box(self, x1, y1, z1, x2, y2, z2, c, rot=None, flat=False):
+        a, b = self._pt(x1, y1, z1), self._pt(x2, y2, z2)
+        if rot:
+            ax, ang, o = rot
+            for _ in range(self.q):
+                if ax == 'x':
+                    ax = 'z'
+                elif ax == 'z':
+                    ax, ang = 'x', -ang
+            rot = (ax, ang, self._pt(*o))
+        if isinstance(c, str):
+            w, h, d = (max(1, round(abs(b[i] - a[i]) * 2)) for i in range(3))
+            c = PTex(c, self.name, w, h, d)
+        self.m.box(a[0], a[1], a[2], b[0], b[1], b[2], c, rot=rot)
+        return self
+
+def octo_ring(m, y, r, c, t=0.6, h=0.5):
+    """Round-looking ring: 4 straight sides + 4 diagonal sides turned 45 degrees."""
+    e = r * 0.4142
+    for s in (-1, 1):
+        m.box(-e, y, s * r - t / 2, e, y + h, s * r + t / 2, c)
+        m.box(s * r - t / 2, y, -e, s * r + t / 2, y + h, e, c)
+    d = r * 0.7071
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            cx, cz = sx * d * 0.92, sz * d * 0.92
+            m.box(cx - e, y, cz - t / 2, cx + e, y + h, cz + t / 2, c, rot=('y', 45.0 * sx * sz, (cx, y, cz)))
+
+# ---------------- Blaze Halo: vanilla blaze head + spinning rods ----------------
+BLAZE_IMG = _tex("blaze.png")
+
+@redesign("blaze_halo")
+def _(m):
+    N = 8
+    for k in range(N):
+        nm = f"bz{k}"
+        T = lambda u, v, w, h, d: Tex(BLAZE_IMG, u, v, w, h, d, (), nm)
+        bob = 0.35 * math.sin(2 * math.pi * k / N)
+        m.box(-1.8, 9.0 + bob, -1.8, 1.8, 12.6 + bob, 1.8, T(0, 0, 8, 8, 8))                    # blaze head
+        for i in range(8):                                                                    # outer ring: 8 rods round the head
+            a = 2 * math.pi * i / 8 + (math.pi / 4) * k / N
+            x, z = 6.3 * math.cos(a), 6.3 * math.sin(a)
+            yy = 4.4 + 0.5 * math.sin(a * 2 + 2 * math.pi * k / N)
+            m.box(x - 0.45, yy, z - 0.45, x + 0.45, yy + 3.6, z + 0.45, T(0, 16, 2, 8, 2))
+        for i in range(4):                                                                    # inner ring round the blaze head
+            a = 2 * math.pi * i / 4 - (math.pi / 2) * k / N + math.pi / 4
+            x, z = 3.3 * math.cos(a), 3.3 * math.sin(a)
+            m.box(x - 0.4, 8.2 + bob, z - 0.4, x + 0.4, 11.4 + bob, z + 0.4, T(0, 16, 2, 8, 2))
+        P = Pose(m, nm)
+        for j in range(5):                                                                    # rising smoke
+            t = ((k + j * 1.6) % N) / N
+            a = j * 2.1
+            x, z = 2.2 * math.cos(a), 2.2 * math.sin(a)
+            sz = 0.55 - 0.3 * t
+            P.box(x - sz, 12.0 + 1.6 * t, z - sz, x + sz, 12.0 + 1.6 * t + 2 * sz, z + sz, '#5a5560' if j % 2 else '#7a7480')
+    m.animate(('show', 'bz', N), frames=N, frametime=2, interpolate=False)
+
+# ---------------- Enchanting Table Hat: vanilla block + flipping book ----------------
+ET_TOP, ET_SIDE, ET_BOT = _tex("enchanting_table_top.png"), _tex("enchanting_table_side.png"), _tex("enchanting_table_bottom.png")
+
+@redesign("enchant_table_hat")
+def _(m):
+    tbl = FaceTex({'up': (ET_TOP, 0, 0, 16, 16), 'down': (ET_BOT, 0, 0, 16, 16), 'side': (ET_SIDE, 0, 4, 16, 12)}, "table", "et")
+    m.box(-4.6, 4.0, -4.6, 4.6, 10.9, 4.6, tbl)
+    COV, COVD, PG, PGD, GL = '#7a3f1e', '#5a2c14', '#f1e6c8', '#d8c9a2', '#e0a833'
+    FLIP = [(1, 22.5), (1, 45.0), (-1, -45.0), (-1, -22.5), (1, 22.5), (1, 22.5), (1, 22.5), (1, 22.5)]
+    N = len(FLIP)
+    for k in range(N):
+        P = Pose(m, f"bk{k}")
+        yb = 12.6 + 0.35 * math.sin(2 * math.pi * k / N)
+        for s, ang in ((-1, -22.5), (1, 22.5)):                                               # open book, V shape
+            x1, x2 = sorted((0.0, s * 2.7))
+            P.box(x1, yb - 0.18, -1.9, x2, yb, 1.9, COV, rot=('z', ang, (0, yb, 0)))
+            px1, px2 = sorted((s * 0.12, s * 2.45))
+            P.box(px1, yb, -1.7, px2, yb + 0.4, 1.7, PG, rot=('z', ang, (0, yb, 0)))
+            for zz in (-1.0, 0.0, 1.0):
+                P.box(px1 + 0.3 * (s > 0), yb + 0.4, zz - 0.04, px2 - 0.3 * (s < 0), yb + 0.42, zz + 0.04, PGD, rot=('z', ang, (0, yb, 0)))
+            gx1, gx2 = sorted((s * 2.4, s * 2.75))
+            for zz in (-1.9, 1.6):
+                P.box(gx1, yb - 0.2, zz, gx2, yb + 0.02, zz + 0.3, GL, rot=('z', ang, (0, yb, 0)))
+        P.box(-0.2, yb - 0.35, -1.9, 0.2, yb, 1.9, COVD)                                       # spine
+        s, ang = FLIP[k]                                                                       # the turning page
+        x1, x2 = sorted((0.0, s * 2.35))
+        P.box(x1, yb + 0.42, -1.6, x2, yb + 0.5, 1.6, '#fbf4de', rot=('z', ang, (0, yb + 0.42, 0)))
+        for j in range(7):                                                                     # glyphs drifting to the book
+            t = ((k + j * 1.15) % N) / N
+            a = j * 0.9
+            r0 = 4.8 * (1 - t) + 0.8 * t
+            x, z = r0 * math.cos(a), r0 * math.sin(a)
+            y = 11.0 + 1.6 * t
+            c = '#c49bff' if j % 2 else '#e8d8ff'
+            P.box(x - 0.22, y, z - 0.22, x + 0.22, y + 0.44, z + 0.22, c)
+    m.animate(('show', 'bk', N), frames=N, frametime=3, interpolate=False)
+
+# ---------------- Angel Halo + Wings ----------------
+def angel_wing(P, s, ang):
+    """Feathered wing on the back of the head, side s, swept back by ang degrees about y at the root."""
+    W1, W2, W3, W4 = '#fbfcff', '#e9eef9', '#d3dcef', '#bccbe6'
+    rx, rz = s * 1.4, 4.75
+    rot = ('y', -s * ang, (rx, 1.0, rz)) if ang else None
+    def F(u1, u2, y1, y2, z1, z2, c):
+        x1, x2 = sorted((rx + s * u1, rx + s * u2))
+        P.box(x1, y1, z1, x2, y2, z2, c, rot=rot)
+    F(0.0, 2.2, 1.0, 4.2, rz, rz + 0.6, W1)                      # shoulder of the wing
+    F(2.2, 4.6, 1.6, 5.0, rz, rz + 0.55, W1)
+    F(4.6, 6.6, 2.4, 5.8, rz, rz + 0.5, W1)
+    F(6.6, 7.8, 3.6, 6.2, rz, rz + 0.45, W2)
+    F(0.3, 6.4, 0.2, 2.0, rz + 0.1, rz + 0.65, W2)               # covert row
+    for i in range(7):                                           # long primaries, longer outward
+        u = 0.5 + i * 1.05
+        F(u, u + 0.95, -0.6 - 0.55 * i + (0.3 if i % 2 else 0), 1.6 + 0.25 * i, rz + 0.2, rz + 0.6, W3 if i % 2 else W2)
+        F(u + 0.15, u + 0.8, -1.0 - 0.55 * i, -0.6 - 0.55 * i + (0.3 if i % 2 else 0), rz + 0.25, rz + 0.55, W4)
+    F(6.6, 7.6, 1.2, 3.6, rz + 0.2, rz + 0.55, W3)
+
+@redesign("angel_set")
+def _(m):
+    H, HL = '#fff1a0', '#fffbe0'
+    GLOW.update({H, HL})
+    SWEEP = [0.0, 22.5, 45.0, 45.0, 22.5, 0.0]
+    N = len(SWEEP)
+    for k in range(N):
+        P = Pose(m, f"ag{k}")
+        y = 7.2 + 0.3 * math.sin(2 * math.pi * k / N)
+        octo_ring(P, y, 3.5, H, t=0.7, h=0.45)
+        octo_ring(P, y + 0.45, 3.5, HL, t=0.35, h=0.12)
+        for s in (-1, 1):
+            angel_wing(P, s, SWEEP[k])
+    m.animate(('show', 'ag', N), frames=N, frametime=3, interpolate=False)
+
+# ---------------- Loading Halo: spinner with a fading tail ----------------
+@redesign("loading_halo")
+def _(m):
+    n = 12
+    TAIL = ['#ffffff', '#e4ebff', '#bccaef', '#93a4d4', '#6f7fae']
+    DIM = '#4a5478'
+    frame = lambda f, i: TAIL[(f - i) % n] if (f - i) % n < len(TAIL) else DIM
+    base = []
+    for i in range(n):                                   # unique keys that still look like frame 0
+        r, g, b = hex2rgb(frame(0, i))[:3]
+        base.append('#%02x%02x%02x' % (r, g, max(0, b - 1 - i)))
+    seq = {}
+    for i, c in enumerate(base):
+        seq[c] = [frame(f, i) for f in range(n)]
+        a = 2 * math.pi * i / n
+        x, z = 5.0 * math.cos(a), 5.0 * math.sin(a)
+        m.box(x - 0.5, 7.0, z - 0.5, x + 0.5, 7.7, z + 0.5, c)
+    GLOW.update(base)
+    m.animate(('seq', seq), frames=n, frametime=1, interpolate=False)
+
+# ---------------- Allay Buddy: vanilla allay model + texture ----------------
+ALLAY_IMG = _tex("allay.png")
+
+@redesign("allay_buddy")
+def _(m):
+    s = 0.55
+    WINGS = [0.0, 22.5, 45.0, 22.5, 0.0, 22.5, 45.0, 22.5]
+    N = len(WINGS)
+    for k in range(N):
+        nm = f"al{k}"
+        T = lambda u, v, w, h, d: Tex(ALLAY_IMG, u, v, w, h, d, (), nm)
+        y0 = 5.6 + 0.4 * math.sin(2 * math.pi * k / N)              # Java y 24.5 (cloak hem) sits here
+        J = lambda X, Y, Z: (-X * s, y0 + (24.5 - Y) * s, Z * s)
+        def B(piv, X, Y, Z, w, h, d, tex, rot=None):
+            px, py, pz = J(*piv)
+            x1, x2 = px - (X + w) * s, px - X * s
+            y1, y2 = py - (Y + h) * s, py - Y * s
+            z1, z2 = pz + Z * s, pz + (Z + d) * s
+            m.box(x1, y1, z1, x2, y2, z2, tex, rot=(rot[0], rot[1], (px, py, pz)) if rot else None)
+        B((0, 19.51, 0), -2.5, -5, -2.5, 5, 5, 5, T(0, 0, 5, 5, 5))                 # head
+        B((0, 19.5, 0), -1.5, 0, -1, 3, 4, 2, T(0, 10, 3, 4, 2))                    # body
+        B((0, 19.5, 0), -1.3, 0.2, -0.8, 2.6, 4.6, 1.6, T(0, 16, 3, 5, 2))          # cloak
+        B((-1.75, 20.0, 0), -0.75, -0.5, -1, 1, 4, 2, T(23, 0, 1, 4, 2), ('x', -22.5))
+        B((1.75, 20.0, 0), -0.25, -0.5, -1, 1, 4, 2, T(23, 6, 1, 4, 2), ('x', -22.5))
+        for sd in (-1, 1):                                                          # wings, flapping open
+            wt = FaceTex({'east': (ALLAY_IMG, 16, 22, 8, 5), 'west': (ALLAY_IMG, 16, 22, 8, 5),
+                          'north': (ALLAY_IMG, 16, 22, 1, 5)}, nm, f"wing{sd}", flipx=('west',))
+            wt.d = 8
+            px, py, pz = J(sd * 0.5, 19.5, 0.6)
+            ang = WINGS[k] * (1 if sd > 0 else -1)
+            m.box(px - 0.04, py - 6 * s, pz, px + 0.04, py - 1 * s, pz + 8 * s, wt,
+                  rot=('y', -ang, (px, py, pz)) if ang else None)
+        for j in range(2):                                                          # sparkles trailing
+            t = ((k + j * 4) % N) / N
+            P = Pose(m, nm)
+            x, z = (1.8 - 3.6 * j) * (1 - t * 0.3), 2.0 + 1.6 * t
+            P.box(x - 0.18, 6.4 - 1.0 * t, z - 0.18, x + 0.18, 6.76 - 1.0 * t, z + 0.18, '#b8fbff')
+    m.animate(('show', 'al', N), frames=N, frametime=2, interpolate=False)
+
+# ---------------- Enderman Buddy: teleports around the top of the head ----------------
+def chibi_enderman(m, y0=4.6):
+    K, K2, P, PL = '#141218', '#22202a', '#d77bff', '#f4c8ff'
+    for sd in (-1, 1):
+        m.box(sd * 0.5 - 0.2, y0, -0.2, sd * 0.5 + 0.2, y0 + 2.6, 0.2, K)                    # long legs
+    m.box(-0.8, y0 + 2.5, -0.4, 0.8, y0 + 3.9, 0.4, K2)                                     # body
+    for sd in (-1, 1):
+        m.box(sd * 0.8 - (0.4 if sd > 0 else 0), y0 + 1.6, -0.2, sd * 0.8 + (0.4 if sd < 0 else 0), y0 + 3.9, 0.2, K)
+    rbox(m, -0.9, y0 + 1.4, -1.6, 0.9, y0 + 2.6, -0.4, '#5fae46', r=0.1)                     # grass block
+    m.box(-0.92, y0 + 1.4, -1.62, 0.92, y0 + 2.2, -0.38, '#7a4a26')
+    rbox(m, -1.4, y0 + 3.8, -1.4, 1.4, y0 + 6.4, 1.4, K, r=0.2)                              # head
+    for sd in (-1, 1):
+        m.box(sd * 0.7 - 0.45, y0 + 4.6, -1.48, sd * 0.7 + 0.45, y0 + 5.05, -1.4, P)        # glowing eyes
+        m.box(sd * 0.7 - 0.15, y0 + 4.6, -1.5, sd * 0.7 + 0.15, y0 + 5.05, -1.48, '#7a2aa8')
+
+@redesign("enderman_buddy")
+def _(m):
+    GLOW.update({'#d77bff', '#f4c8ff', '#c45cff'})
+    SPOTS = [(-2.0, -1.6, 0), (2.0, -1.2, 3), (1.9, 1.9, 2), (-1.9, 1.6, 1)]   # (x, z, quarter turns)
+    HOLD = 6
+    seq = []
+    for i, (x, z, q) in enumerate(SPOTS):
+        chibi_enderman(Pose(m, f"en{i}", dx=x, dz=z, q=q))
+        for j, (px, py, pz) in enumerate(((-1.6, 9.0, 0.4), (1.4, 10.4, -0.6), (0.2, 11.6, 1.0))):
+            if (i + j) % 2 == 0:
+                Pose(m, f"en{i}").box(x + px - 0.15, py, z + pz - 0.15, x + px + 0.15, py + 0.3, z + pz + 0.15, '#f4c8ff')
+        nx, _, nz = SPOTS[(i + 1) % 4][0], 0, SPOTS[(i + 1) % 4][1]
+        P = Pose(m, f"en{4 + i}")                                         # teleport puff: both spots sparkle
+        for j in range(16):
+            t = j / 16
+            a = j * 2.4
+            for (cx, cz, sc) in ((x, z, 1.0), (nx, nz, 0.6)):
+                r = (0.6 + 1.2 * ((j * 7) % 5) / 5) * sc
+                yy = 4.8 + 5.5 * ((j * 3) % 8) / 8
+                sz = 0.22 if j % 3 else 0.32
+                P.box(cx + r * math.cos(a) - sz, yy, cz + r * math.sin(a) - sz, cx + r * math.cos(a) + sz, yy + 2 * sz,
+                      cz + r * math.sin(a) + sz, ('#c45cff', '#d77bff', '#f4c8ff')[j % 3])
+        seq += [i] * HOLD + [4 + i]
+    m.animate(('show', 'en', 8, seq), frames=len(seq), frametime=2, interpolate=False)
+
+# ---------------- Laser Eyes: charge, fire, crackle ----------------
+@redesign("laser_eyes")
+def _(m):
+    E, EC, BO, BC, BG = '#ff2b2b', '#fff0f0', '#ff3b30', '#fff4f0', '#ff6a5a70'
+    GLOW.update({E, EC, BO, BC, '#ffb0a0', '#ffe14f'})
+    for sd in (-1, 1):                                                 # glowing eyes (always on)
+        m.box(sd * 2.0 - 0.8, -0.6, -4.72, sd * 2.0 + 0.8, 0.5, -4.6, E)
+        m.box(sd * 2.0 - 0.35, -0.3, -4.78, sd * 2.0 + 0.35, 0.2, -4.72, EC)
+    LEN = [10.0, 10.0, 10.0, 10.0, 6.0, 0.0, 3.5, 7.5]
+    WID = [0.75, 0.6, 0.8, 0.65, 0.4, 0, 0.55, 0.6]
+    N = len(LEN)
+    for k in range(N):
+        P = Pose(m, f"lz{k}")
+        L, w = LEN[k], WID[k]
+        for sd in (-1, 1):
+            cx, cy, z0 = sd * 2.0, -0.05, -4.78
+            if L == 0:                                                 # charging sparks
+                for j in range(4):
+                    a = j * math.pi / 2 + 0.6
+                    P.box(cx + 1.1 * math.cos(a) - 0.12, cy + 1.1 * math.sin(a) - 0.12, z0 - 0.3, cx + 1.1 * math.cos(a) + 0.12,
+                          cy + 1.1 * math.sin(a) + 0.12, z0 - 0.1, '#ffb0a0')
+                continue
+            P.box(cx - w, cy - w, z0 - L, cx + w, cy + w, z0, BG)                         # soft outer glow
+            P.box(cx - w * 0.55, cy - w * 0.55, z0 - L, cx + w * 0.55, cy + w * 0.55, z0, BO)
+            P.box(cx - 0.12, cy - 0.12, z0 - L - 0.05, cx + 0.12, cy + 0.12, z0, BC)       # white-hot core
+            if L >= 9.9:                                                                 # impact burst
+                ze = z0 - L
+                for j in range(6):
+                    a = j * math.pi / 3 + k * 0.7
+                    rr = 0.7 + 0.35 * ((j + k) % 3)
+                    c = ('#ffe14f', '#ffb0a0', BC)[(j + k) % 3]
+                    P.box(cx + rr * math.cos(a) - 0.15, cy + rr * math.sin(a) - 0.15, ze - 0.2, cx + rr * math.cos(a) + 0.15,
+                          cy + rr * math.sin(a) + 0.15, ze + 0.1, c)
+    m.animate(('show', 'lz', N), ('pulse', [E], 0.4), frames=N, frametime=1, interpolate=False)
+
+# ---------------- flame tongues (fire hair, flame headband) ----------------
+FLAME = ['#d8260f', '#ff5a1f', '#ff9a1f', '#ffd23a', '#fff2a8']
+GLOW.update(FLAME[1:])
+
+def tongue(P, x, y, z, h, w, lean=0.0, d=None):
+    """A flame tongue: stacked layers that narrow and lean, red at the root to white at the tip."""
+    n = max(2, int(round(h / 0.45)))
+    d = w if d is None else d
+    for i in range(n):
+        t = i / n
+        ww, dd = max(0.25, w * (1 - 0.8 * t)), max(0.25, d * (1 - 0.8 * t))
+        c = FLAME[min(4, 1 + int(t * 4))] if i else FLAME[1]
+        ox = lean * t * t
+        P.box(x + ox - ww / 2, y + i * h / n, z - dd / 2, x + ox + ww / 2, y + (i + 1) * h / n, z + dd / 2, c)
+
+@redesign("fire_hair")
+def _(m):
+    R1, R2, R3 = '#9e1c0c', '#c72a12', '#e8461a'
+    dome(m, 4.0, [(4.7, 0.9), (4.4, 0.6)], R2)                                           # hair cap
+    m.box(-4.7, -1.6, 4.0, 4.7, 4.6, 4.7, R1)                                            # back
+    for i in range(9):                                                                   # flame-cut ends at the back
+        x = -4.2 + i * 1.05
+        h = (0.9, 1.6, 1.1, 2.0, 1.2, 1.7, 0.8, 1.5, 1.0)[i]
+        m.box(x - 0.42, -1.6 - h, 4.05, x + 0.42, -1.6, 4.6, R1 if i % 2 else R2)
+    for sd in (-1, 1):                                                                   # sideburns
+        x1, x2 = sorted((sd * 4.0, sd * 4.7))
+        m.box(x1, 0.6, -3.4, x2, 4.6, 4.7, R1)
+        for j, (z, h) in enumerate(((-3.0, 1.4), (-1.6, 0.8), (-0.2, 1.6), (1.2, 1.0), (2.6, 1.8), (3.9, 1.2))):
+            m.box(x1, 0.6 - h, z - 0.5, x2, 0.6, z + 0.5, R2 if j % 2 else R1)
+    for i in range(8):                                                                   # fringe licking up the forehead
+        x = -3.85 + i * 1.1
+        h = (1.5, 2.2, 1.2, 2.6, 1.6, 2.4, 1.1, 1.9)[i]
+        m.box(x - 0.5, 4.6 - h, -4.75, x + 0.5, 4.6, -4.0, R3 if i % 2 else R2)
+        m.box(x - 0.25, 4.6 - h - 0.5, -4.75, x + 0.25, 4.6 - h, -4.0, R2)
+    SPOTS = [(-3.0, -3.0), (-0.6, -3.4), (1.9, -3.1), (3.4, -1.2), (-3.5, -0.6), (-1.4, -1.2), (1.0, -1.0),
+             (3.3, 1.4), (-3.2, 1.9), (-0.6, 1.4), (1.6, 2.0), (-1.8, 3.4), (0.6, 3.6), (3.0, 3.4)]
+    N = 8
+    for k in range(N):
+        P = Pose(m, f"fh{k}")
+        for j, (x, z) in enumerate(SPOTS):
+            ph = 2 * math.pi * k / N + j * 1.7
+            h = 2.2 + 1.3 * ((j * 5) % 4) / 3 + 0.9 * math.sin(ph)
+            lean = 0.6 * math.sin(ph * 0.5 + j)
+            tongue(P, x, 5.3, z, h, 1.5, lean)
+        for j in range(3):                                                               # embers drifting up
+            t = ((k + j * 2.7) % N) / N
+            x, z = (-2.0, 1.2, 2.8)[j], (0.6, -2.0, 2.2)[j]
+            P.box(x - 0.15, 8.2 + 3.0 * t, z - 0.15, x + 0.15, 8.5 + 3.0 * t, z + 0.15, FLAME[3 if j % 2 else 2])
+    m.animate(('show', 'fh', N), ('pulse', [R3], 0.25), frames=N, frametime=2, interpolate=False)
+
+# ---------------- Flame Headband ----------------
+@redesign("headband_flame")
+def _(m):
+    BD, BL, BK = '#1d1b22', '#2e2a35', '#121016'
+    band(m, 2.0, 3.8, BD, 4.65); band(m, 3.6, 3.8, BL, 4.7); band(m, 2.0, 2.2, BK, 4.7)
+    F1, F2, F3 = '#ff5a1f', '#ff9a1f', '#ffd23a'
+    for side in 'NESW':                                                   # flame print rising from the lower edge
+        for i in range(8):
+            u = -3.6 + i * 1.03
+            h = (1.0, 1.4, 0.8, 1.5, 1.1, 1.3, 0.9, 1.45)[(i + 'NESW'.index(side)) % 8]
+            _side(m, side, u - 0.45, u + 0.45, 2.2, 2.2 + h * 0.55, 4.65, 4.72, F1)
+            _side(m, side, u - 0.3, u + 0.3, 2.2 + h * 0.55, 2.2 + h * 0.9, 4.65, 4.72, F2)
+            _side(m, side, u - 0.12, u + 0.12, 2.2 + h * 0.9, 2.2 + h * 1.15, 4.65, 4.72, F3)
+    m.box(-0.7, 2.2, 4.65, 0.7, 3.6, 5.3, BD)                                # knot at the back
+    TAIL = [22.5, 45.0, 22.5, 0.0]
+    N = 12
+    for k in range(N):
+        P = Pose(m, f"hf{k}")
+        a = TAIL[k % 4]
+        for sd, off in ((-1, 0.0), (1, 22.5)):                                  # ribbon tails flutter
+            ang = min(45.0, a + off) if sd > 0 else a
+            x1, x2 = sorted((sd * 0.15, sd * 0.85))
+            P.box(x1, -0.8, 5.0, x2, 2.6, 5.3, BD, rot=('x', ang, (0, 2.6, 5.15)) if ang else None)
+            P.box(x1, -1.3, 5.0, x2, -0.8, 5.3, F1, rot=('x', ang, (0, 2.6, 5.15)) if ang else None)
+        for side in 'NESW':                                                   # little flames on the top edge
+            for i in range(5):
+                u = -3.4 + i * 1.7 + (0.3 if side in 'EW' else 0)
+                h = 0.9 + 0.6 * math.sin(2 * math.pi * k / N * 2 + i * 1.9 + 'NESW'.index(side))
+                tongue(Pose(m, f"hf{k}"), 0, 0, 0, 0, 0) if False else None
+                w = 0.7
+                for j, (c, f0, f1) in enumerate(((F1, 0.0, 0.45), (F2, 0.45, 0.8), (F3, 0.8, 1.0))):
+                    ww = w * (1 - 0.6 * f0)
+                    _side(P, side, u - ww / 2, u + ww / 2, 3.8 + h * f0, 3.8 + h * f1, 4.4, 4.72, c)
+    m.animate(('show', 'hf', N), ('cycle', [F1, F2, F3], 4), frames=N, frametime=2, interpolate=False)
+
+# ---------------- Hypno Glasses: spirals that pull you in ----------------
+@redesign("hypno_glasses")
+def _(m):
+    FR, FRL = '#121016', '#2a2433'
+    RINGS = ['#2a0a3a', '#b04aff', '#ffffff', '#ff5ce1', '#6a1ad0']
+    GLOW.update({'#b04aff', '#ff5ce1'})
+    for sd in (-1, 1):
+        cx, cy = sd * 2.2, 0.3
+        rbox_z = lambda hs, z1, z2, c: (m.box(cx - hs, cy - hs * 0.7, z1, cx + hs, cy + hs * 0.7, z2, c),
+                                         m.box(cx - hs * 0.7, cy - hs, z1, cx + hs * 0.7, cy + hs, z2, c))
+        rbox_z(2.05, -4.85, -4.6, FR)                                                 # thick round frame
+        for i, c in enumerate(RINGS):                                                 # concentric lens rings
+            hs = 1.65 - i * 0.33
+            rbox_z(hs, -4.87 - 0.02 * i, -4.85, c)
+        m.box(cx - 0.12, cy - 0.12, -4.99, cx + 0.12, cy + 0.12, -4.96, '#000000')
+        x1, x2 = sorted((sd * 4.6, sd * 4.75))
+        m.box(x1, 0.9, -4.85, x2, 1.3, 2.6, FR)                                       # arms to the ears
+        m.box(x1, 0.4, 2.2, x2, 1.3, 2.6, FR)
+    m.box(-0.5, 0.9, -4.82, 0.5, 1.4, -4.6, FRL)                                      # bridge
+    m.animate(('cycle', RINGS, 1), frames=len(RINGS), frametime=2, interpolate=False)
+
+# ---------------- Rainbow Afro ----------------
+@redesign("afro_rainbow")
+def _(m):
+    R, cy, cz = 7.2, 4.2, 0.7
+    BANDS = RAINBOW6
+    layers, yb = 16, -1.2
+    for i in range(layers):
+        y1 = yb + i * (cy + R - 0.4 - yb) / layers
+        y2 = y1 + (cy + R - 0.4 - yb) / layers
+        ym = (y1 + y2) / 2
+        r = math.sqrt(max(0.5, R * R - (ym - cy) ** 2))
+        c = BANDS[min(5, int((cy + R - ym) / (2 * R) * 6.5))]
+        z1 = cz - r if ym > 3.6 else max(cz - r, -2.6)
+        rbox(m, -r, y1, z1, r, y2, cz + r, c, r=min(1.6, r / 3), top=False)
+    rng = __import__('random').Random(5)
+    for _ in range(60):                                                                # curls on the surface
+        th, ph = rng.uniform(0, 2 * math.pi), rng.uniform(-0.9, 1.45)
+        x, y, z = R * math.cos(ph) * math.cos(th), cy + R * math.sin(ph), cz + R * math.cos(ph) * math.sin(th)
+        if y < 3.6 and z < -2.0 or y < yb + 0.4:
+            continue
+        c = BANDS[min(5, max(0, int((cy + R - y) / (2 * R) * 6.5)))]
+        m.box(x - 0.45, y - 0.45, z - 0.45, x + 0.45, y + 0.45, z + 0.45, c)
+    m.box(3.6, 7.0, -3.4, 4.0, 11.6, -3.0, '#1d1b22', rot=('z', -22.5, (3.8, 9.0, -3.2)))   # afro pick
+    for j in range(4):
+        m.box(3.2 + j * 0.3 - 0.1, 10.6, -3.35, 3.2 + j * 0.3 + 0.1, 12.8, -3.05, '#1d1b22', rot=('z', -22.5, (3.8, 9.0, -3.2)))
+    m.animate(('hue', BANDS), frames=12, frametime=3, interpolate=True)
+
+# ---------------- Rainbow Hair ----------------
+@redesign("rainbow_hair")
+def _(m):
+    C = RAINBOW6
+    col = lambda x: C[min(5, max(0, int((x + 4.7) / 9.4 * 6)))]
+    for i in range(8):                                                           # cap in rainbow stripes, rounded
+        x1 = -4.7 + i * 9.4 / 8; x2 = x1 + 9.4 / 8
+        top = 5.2 + 0.5 * math.cos((x1 + x2) / 2 / 4.7 * 1.3)
+        m.box(x1, 4.0, -4.7, x2, top, 4.7, col((x1 + x2) / 2))
+        m.box(x1, -2.8 + (0.6 if i % 2 else 0), 4.0, x2, 4.0, 4.75, col((x1 + x2) / 2))   # back, uneven ends
+        m.box(x1 + 0.2, -3.4 + (0.6 if i % 2 else 0), 4.05, x2 - 0.2, -2.8 + (0.6 if i % 2 else 0), 4.7, col((x1 + x2) / 2))
+    for i in range(9):                                                           # swept fringe, longer to one side
+        x = -4.2 + i * 1.05
+        yb = 1.4 + i * 0.22
+        c = col(x)
+        m.box(x - 0.55, yb, -4.8, x + 0.55, 4.8, -4.0, c, rot=('z', -22.5, (x, 4.8, -4.4)) if i < 5 else None)
+        m.box(x - 0.3, yb - 0.6, -4.78, x + 0.3, yb, -4.05, c, rot=('z', -22.5, (x, 4.8, -4.4)) if i < 5 else None)
+    for sd in (-1, 1):                                                           # side locks to the jaw
+        x1, x2 = sorted((sd * 4.0, sd * 4.75))
+        for j in range(6):
+            z = -3.6 + j * 1.4
+            yb = -1.8 + (0.8 if j % 2 else 0) - (1.0 if j == 0 else 0)
+            m.box(x1, yb, z - 0.7, x2, 4.6, z + 0.7, C[j % 6] if sd > 0 else C[5 - j % 6])
+    m.animate(('hue', C), frames=12, frametime=4, interpolate=True)
+
+# ---------------- Eye Patch ----------------
+@redesign("eye_patch")
+def _(m):
+    L, LD, ST, GD = '#1d1b22', '#141217', '#4a4452', '#d9b44a'
+    cx, cy = 2.0, -0.4
+    for hw, hh, z1 in ((1.45, 1.05, -4.82), (1.15, 1.35, -4.82), (1.2, 0.85, -4.92)):   # padded, rounded patch
+        m.box(cx - hw, cy - hh, z1, cx + hw, cy + hh, -4.6, L)
+    for x in (-1.0, -0.4, 0.2, 0.8):                                                    # stitching round the edge
+        m.box(cx + x, cy + 1.1, -4.86, cx + x + 0.3, cy + 1.2, -4.8, ST)
+        m.box(cx + x, cy - 1.2, -4.86, cx + x + 0.3, cy - 1.1, -4.8, ST)
+    m.box(cx - 0.35, cy - 0.15, -4.96, cx + 0.35, cy + 0.45, -4.92, '#e8e4dc')          # tiny skull
+    m.box(cx - 0.2, cy - 0.35, -4.96, cx + 0.2, cy - 0.15, -4.92, '#e8e4dc')
+    for x in (-0.15, 0.15):
+        m.box(cx + x - 0.08, cy + 0.08, -4.97, cx + x + 0.08, cy + 0.24, -4.96, LD)
+    m.box(-5.4, 0.55, -4.76, 2.3, 0.85, -4.62, L, rot=('z', -22.5, (2.0, 0.7, -4.69)))  # strap up over the forehead
+    m.box(cx + 1.3, -0.3, -4.74, 4.7, 0.0, -4.62, L)                                    # strap out to the ear
+    m.box(-4.75, 2.9, -4.6, -4.62, 3.2, 4.7, L)                                         # round the side,
+    m.box(-4.7, 0.0, 4.62, 4.7, 0.3, 4.75, L, rot=('z', -22.5, (0.0, 0.15, 4.68)))     # the back,
+    m.box(4.62, -0.3, -4.6, 4.75, 0.0, 4.6, L)                                          # and the other side
+    m.box(4.6, -0.5, -4.7, 4.8, 0.2, -4.4, GD)                                          # brass buckle
+
+# ---------------- Red Bandana Mask ----------------
+def bandana2(m, B, BD, P, PK):
+    for i, (y1, y2, hw) in enumerate(((-1.4, -0.9, 4.72), (-2.6, -1.4, 4.75), (-3.8, -2.6, 4.78), (-4.6, -3.8, 4.8))):
+        m.box(-hw, y1, -hw, hw, y2, -4.0, B if i % 2 == 0 else BD)                      # draped folds over nose + mouth
+    for i in range(6):                                                                  # V point under the chin
+        w = 8.8 - i * 1.5
+        m.box(-w / 2, -4.6 - (i + 1) * 0.45, -4.85 + i * 0.05, w / 2, -4.6 - i * 0.45, -4.2, B if i % 2 else BD)
+    for sd in (-1, 1):                                                                  # wrapping round to the knot
+        x1, x2 = sorted((sd * 4.0, sd * 4.75))
+        m.box(x1, -3.2, -4.6, x2, -0.9, 4.6, B)
+    m.box(-4.75, -3.2, 4.0, 4.75, -0.9, 4.75, B)
+    rbox(m, -0.75, -2.9, 4.7, 0.75, -1.2, 5.5, BD, r=0.25)                              # knot
+    m.box(-0.9, -5.0, 4.9, -0.1, -2.8, 5.2, B, rot=('z', 22.5, (-0.5, -2.8, 5.05)))      # two tails
+    m.box(0.1, -4.6, 4.9, 0.9, -2.8, 5.2, BD, rot=('z', -22.5, (0.5, -2.8, 5.05)))
+    for (x, y) in ((-3.2, -1.9), (-0.9, -1.6), (1.4, -2.0), (3.3, -1.7), (-2.1, -3.2), (0.3, -3.4), (2.6, -3.1),
+                   (-1.0, -4.9), (1.0, -5.0), (0.0, -6.1)):                              # paisley: teardrops + dots
+        z = -4.86 if y > -4.6 else -4.92 + 0.0
+        m.box(x - 0.3, y - 0.3, z, x + 0.3, y + 0.3, z + 0.06, P)
+        m.box(x + 0.15, y + 0.3, z, x + 0.45, y + 0.6, z + 0.06, P)
+        m.box(x - 0.1, y - 0.1, z - 0.02, x + 0.1, y + 0.1, z, PK)
+    for (x, y) in ((-4.0, -1.2), (-2.2, -2.4), (2.0, -1.1), (4.0, -2.5), (-3.6, -4.0), (3.4, -4.1), (-0.2, -2.2)):
+        m.box(x - 0.12, y - 0.12, -4.86, x + 0.12, y + 0.12, -4.8, P)
+
+@redesign("bandana_mask_red")
+def _(m):
+    bandana2(m, '#c8312d', '#a82522', '#f4f2ee', '#1d1b22')
+
+# ---------------- Shades: wayfarers with a glint sweep ----------------
+@redesign("sunglasses")
+def _(m):
+    FR, FRT = '#121016', '#1f1b24'
+    STRIPS = 6
+    base = [('#26203a', '#2b2442', '#30284a', '#352d52', '#3a315a', '#3f3662')[i] for i in range(STRIPS)]
+    seq = {}
+    for sd in (-1, 1):
+        cx = sd * 2.3
+        m.box(cx - 2.0, 1.4, -4.86, cx + 2.0, 2.2, -4.6, FRT)                           # thick top bar
+        m.box(cx - 2.0, -0.6, -4.82, cx - 1.7, 1.4, -4.6, FR); m.box(cx + 1.7, -0.6, -4.82, cx + 2.0, 1.4, -4.6, FR)
+        m.box(cx - 1.7, -0.9, -4.82, cx + 1.7, -0.6, -4.6, FR)
+        for i in range(STRIPS):                                                         # lens in diagonal strips
+            c = base[i] if sd < 0 else base[i][:-1] + chr(ord(base[i][-1]) + 1)
+            w = 3.4 / STRIPS
+            x1 = cx - 1.7 + i * w
+            m.box(x1, -0.6, -4.8, x1 + w, 1.4, -4.66, c)
+            k0 = i + (0 if sd < 0 else STRIPS)
+            seq[c] = [('#ffffff' if f == k0 else '#b9b0e0' if abs(f - k0) == 1 else c) for f in range(24)]
+        m.box(cx - 1.5, 1.1, -4.83, cx - 0.9, 1.3, -4.8, '#8a80c0')                     # fixed small highlight
+        for y in (1.6, 1.9):
+            m.box(sd * 4.1 - 0.12, y - 0.1, -4.9, sd * 4.1 + 0.12, y + 0.1, -4.86, '#c9ced8')   # rivets
+        x1, x2 = sorted((sd * 4.6, sd * 4.78))
+        m.box(x1, 1.4, -4.86, x2, 2.0, 2.6, FR)                                         # arms
+        m.box(x1, 0.6, 2.2, x2, 2.0, 2.6, FR)
+    m.box(-0.35, 1.0, -4.82, 0.35, 1.8, -4.6, FR)                                       # bridge
+    m.animate(('seq', seq), frames=24, frametime=1, interpolate=False)
+
+# ---------------- Beret ----------------
+def disc(m, cx, y, cz, r, h, c):
+    """Round-looking flat disc from three overlapping boxes."""
+    for a, b in ((1.0, 0.55), (0.86, 0.86), (0.55, 1.0)):
+        m.box(cx - r * a, y, cz - r * b, cx + r * a, y + h, cz + r * b, c)
+
+@redesign("beret")
+def _(m):
+    C, CD, CL, BAND = '#2c2a4a', '#211f3a', '#3a3760', '#17152a'
+    band(m, 3.5, 4.3, BAND, 4.66)                                                       # leather band
+    ox = 0.9                                                                            # slouched toward one side
+    for y1, y2, hw, c in ((4.3, 4.8, 5.2, C), (4.8, 5.4, 5.9, C), (5.4, 5.9, 6.0, CL), (5.9, 6.3, 5.5, C), (6.3, 6.6, 4.6, C), (6.6, 6.8, 3.2, CD)):
+        disc(m, ox, y1, 0.0, hw, y2 - y1, c)
+    rbox(m, 4.7, 2.6, -4.4, 6.9, 5.4, 4.4, C, r=1.4, top=False)                          # soft droop over the side
+    rbox(m, 4.9, 1.8, -3.4, 6.6, 2.6, 3.4, C, r=1.1, top=False)
+    rbox(m, 5.1, 1.4, -2.2, 6.2, 1.8, 2.2, CD, r=0.7, top=False)
+    m.box(0.75, 6.8, -0.15, 1.05, 7.4, 0.15, CD)                                      # stalk on top
+
+# ---------------- Wizard Beard ----------------
+@redesign("wizard_beard")
+def _(m):
+    W1, W2, W3 = '#f4f5f8', '#e3e6ee', '#c4c8d3'
+    for sd in (-1, 1):                                                                  # sideburns into the hair line
+        x1, x2 = sorted((sd * 4.0, sd * 4.7))
+        m.box(x1, -4.0, -4.6, x2, 1.2, -1.2, W2)
+    m.box(-4.7, -4.4, -4.8, 4.7, -2.6, -4.0, W1)                                       # chin + jaw
+    n = 12
+    for i in range(n):                                                                  # long flowing beard: wide, then a point
+        y2 = -2.6 - i * 0.85
+        w = max(0.9, 9.2 * (1 - (i / n) ** 1.7))
+        ox = 0.5 * math.sin(i * 0.7)
+        zf = -5.0 + 0.25 * math.sin(i * 0.9)
+        rbox(m, ox - w / 2, y2 - 0.85, zf, ox + w / 2, y2, zf + 1.7, W1 if i % 3 else W2, r=min(0.6, w / 4), top=False)
+        for j in range(int(w // 1.6)):                                                  # strand lines
+            x = ox - w / 2 + 0.8 + j * 1.6
+            m.box(x - 0.1, y2 - 0.85, zf - 0.06, x + 0.1, y2, zf, W3)
+    yb = -10.0
+    rbox(m, -1.0 + 0.5 * math.sin(6.3), yb - 0.6, -5.2, 1.0 + 0.5 * math.sin(6.3), yb + 0.1, -3.2, '#9ea2ad', r=0.3)   # silver ring
+    for sd in (-1, 1):                                                                  # curled moustache
+        m.box(min(0, sd * 3.0), -1.75, -5.05, max(0, sd * 3.0), -1.05, -4.6, W1)
+        x1, x2 = sorted((sd * 2.6, sd * 3.4))
+        m.box(x1, -1.75, -5.05, x2, -0.4, -4.65, W2)
+        x1, x2 = sorted((sd * 3.4, sd * 3.9))
+        m.box(x1, -0.8, -5.05, x2, -0.1, -4.65, W1)
+
+# ---------------- Viking Beard ----------------
+@redesign("viking_beard")
+def _(m):
+    G1, G2, G3, RING, RINGD = '#c4601e', '#a14c16', '#df7a2c', '#c9ced8', '#8c8f99'
+    for sd in (-1, 1):
+        x1, x2 = sorted((sd * 4.0, sd * 4.72))
+        m.box(x1, -4.2, -4.6, x2, 1.0, -0.6, G2)                                       # thick sideburns
+    for i, (y1, y2, hw, c) in enumerate(((-2.6, -1.4, 4.72, G1), (-3.8, -2.6, 4.7, G2), (-4.8, -3.8, 4.6, G1),
+                                          (-5.8, -4.8, 4.0, G3), (-6.6, -5.8, 3.2, G1))):
+        m.box(-hw, y1, -4.9 - 0.08 * i, hw, y2, -3.6 + 0.2 * i, c)                     # full beard, layered
+    for x in (-3.0, -1.0, 1.0, 3.0):                                                    # combed texture lines
+        m.box(x - 0.1, -5.4, -5.3, x + 0.1, -2.0, -5.22, G2)
+    for sd in (-1, 1):                                                                  # two braids with rings
+        cx = sd * 1.3
+        for j in range(6):
+            y = -6.6 - j * 0.75
+            w = 0.75 - j * 0.04
+            off = 0.12 * (1 if j % 2 else -1)
+            m.box(cx + off - w, y - 0.75, -5.1, cx + off + w, y, -4.0, G1 if j % 2 else G3)
+        for y in (-7.6, -9.6):
+            m.box(cx - 0.85, y - 0.4, -5.2, cx + 0.85, y, -3.9, RING)
+            m.box(cx - 0.85, y - 0.4, -5.22, cx + 0.85, y - 0.3, -3.88, RINGD)
+        m.box(cx - 0.4, -11.6, -4.9, cx + 0.4, -11.1, -4.2, G3)
+    for sd in (-1, 1):                                                                  # drooping moustache
+        x1, x2 = sorted((sd * 0.2, sd * 2.6))
+        m.box(x1, -1.7, -5.0, x2, -0.9, -4.6, G3)
+        x1, x2 = sorted((sd * 2.2, sd * 2.9))
+        m.box(x1, -3.4, -5.05, x2, -1.6, -4.7, G3)
+
+# ---------------- Emo Fringe ----------------
+@redesign("emo_fringe")
+def _(m):
+    K, K2, KH, PUR = '#141218', '#1f1c26', '#3a3446', '#7a2aa8'
+    dome(m, 4.0, [(4.72, 0.7), (4.45, 0.55), (3.8, 0.35)], K)                       # cap
+    m.box(-2.6, 5.2, -2.0, 1.6, 5.65, 1.4, KH)                                        # shine
+    m.box(-4.72, -2.0, 4.0, 4.72, 4.7, 4.75, K)                                       # back
+    for i in range(8):                                                                # choppy ends at the nape
+        x = -4.2 + i * 1.2
+        h = (1.2, 0.6, 1.5, 0.8, 1.3, 0.5, 1.4, 0.9)[i]
+        m.box(x - 0.5, -2.0 - h, 4.05, x + 0.5, -2.0, 4.7, K2 if i % 2 else K)
+    for sd in (-1, 1):                                                                # side pieces, spiky
+        x1, x2 = sorted((sd * 4.0, sd * 4.75))
+        m.box(x1, -0.4, -3.8, x2, 4.7, 4.7, K)
+        for j, z in enumerate((-3.2, -1.8, -0.4, 1.0, 2.4, 3.8)):
+            m.box(x1, -0.4 - (1.2 if j % 2 else 0.6), z - 0.55, x2, -0.4, z + 0.55, K2)
+    for i in range(10):                                                               # long side-swept fringe over one eye
+        x = -4.25 + i * 0.95
+        yb = 2.9 - max(0, i - 2) * 0.62
+        c = PUR if i in (5, 8) else (K2 if i % 2 else K)
+        m.box(x - 0.5, yb, -4.85 - 0.02 * i, x + 0.5, 4.75, -4.0, c)
+        m.box(x - 0.25, yb - 0.55, -4.83 - 0.02 * i, x + 0.35, yb, -4.05, c)
+    m.box(4.1, -2.6, -4.85, 4.75, 1.2, -3.0, K)                                       # lock down past the eye
+
+# ---------------- Taggy: same exact model, now animated and better staged ----------------
+HOP = [0.0, 0.0, 0.25, 0.7, 0.95, 0.7, 0.25, 0.0]
+
+@redesign("taggy_buddy")
+def _(m):
+    for k, h in enumerate(HOP):                                          # little hop on the head
+        taggy(Pose(m, f"tb{k}"), 0, 4.0 + h, 0.6, s=5.8)
+    name_tag(m, -2.6, 4.6, 2.6)
+    m.animate(('show', 'tb', len(HOP)), frames=len(HOP), frametime=2, interpolate=False)
+
+WAVE = [-22.5, -45.0, -22.5, -45.0]
+
+@redesign("taggy_wave")
+def _(m):
+    for k, a in enumerate(WAVE):
+        taggy(Pose(m, f"tw{k}"), 0, 4.0, 0.6, s=6.2, wave=True, wave_ang=a)
+    m.animate(('show', 'tw', len(WAVE)), frames=len(WAVE), frametime=4, interpolate=False)
+
+@redesign("taggy_froggie_duo")
+def _(m):
+    vanilla_frog(m, 2.0, 4.6, 0.2, s=0.55)                              # Froggie, same as the Froggie items
+    for k, a in enumerate(WAVE):
+        taggy(Pose(m, f"td{k}"), -2.1, 4.0, 0.6, s=4.6, wave=True, wave_ang=a)
+    m.animate(('show', 'td', len(WAVE)), frames=len(WAVE), frametime=4, interpolate=False)
+
+@redesign("taggy_rides_froggie")
+def _(m):
+    vanilla_frog(m, 0, 4.6, 0.0, s=0.75, girly=True)
+    seq = [(0.0, -22.5), (0.15, -45.0), (0.3, -22.5), (0.15, -45.0)]
+    for k, (h, a) in enumerate(seq):
+        taggy(Pose(m, f"tr{k}"), 0, 4.6 + 6.0 * 0.75 + h, 2.6, s=4.4, wave=True, wave_ang=a)
+    m.animate(('show', 'tr', len(seq)), frames=len(seq), frametime=4, interpolate=False)
+
+@redesign("taggy_peek")
+def _(m):
+    PEEK = [1.5, 1.5, 1.5, 1.1, 0.5, 0.0, 0.0, 0.5, 1.1, 1.5]
+    for k, h in enumerate(PEEK):                                         # Taggy behind the head, peeking over the top
+        taggy(Pose(m, f"tp{k}"), 0, -0.2 + h, 5.9, s=5.8, arms=False)
+    for sd in (-1, 1):                                                   # hands gripping the top of the head
+        m.box(sd * 1.5 - 0.45, 4.0, 2.4, sd * 1.5 + 0.45, 4.85, 4.7, TAGGY_P)
+    m.animate(('show', 'tp', len(PEEK)), frames=len(PEEK), frametime=2, interpolate=False)
+
+@redesign("taggy_headphones")
+def _(m):
+    BD, BL, PAD = '#2b2340', '#3d3159', '#4b3a6a'
+    m.box(-3.6, 5.5, -0.55, 3.6, 6.1, 0.55, BD)                           # padded band
+    m.box(-3.3, 5.25, -0.5, 3.3, 5.5, 0.5, PAD)
+    for sd in (-1, 1):
+        x1, x2 = sorted((sd * 3.4, sd * 4.9))
+        m.box(x1, 4.4, -0.55, x2, 5.6, 0.55, BD, rot=('z', -45.0 * sd, (sd * 3.6, 5.8, 0)))   # corners
+        x1, x2 = sorted((sd * 4.7, sd * 5.2))
+        m.box(x1, 1.0, -0.45, x2, 4.8, 0.45, BL)                         # sliders
+        x1, x2 = sorted((sd * 4.6, sd * 5.3))
+        rbox(m, x1, -1.6, -1.7, x2, 1.6, 1.7, PAD, r=0.5)                # ear cushion
+        # cup = Taggy's head (0.624 x 0.56 x 0.56) turned to face outward
+        sc = 4.6; w, hgt, d = 0.624 * sc, 0.56 * sc, 0.562 * sc
+        x1, x2 = sorted((sd * 5.3, sd * (5.3 + d)))
+        m.box(x1, -hgt / 2, -w / 2, x2, hgt / 2, w / 2, TAGGY_P)
+        f = sd * (5.3 + d)
+        o1, o2 = sorted((f, f + sd * 0.08))
+        F = lambda u1, v1, u2, v2, c: m.box(o1, -hgt / 2 + (v1 - 0.452) * sc, -sd * u2 * sc, o2,
+                                           -hgt / 2 + (v2 - 0.452) * sc, -sd * u1 * sc, c) if sd > 0 else \
+                                     m.box(o1, -hgt / 2 + (v1 - 0.452) * sc, u1 * sc, o2, -hgt / 2 + (v2 - 0.452) * sc, u2 * sc, c)
+        F(-0.133, 0.52, 0.133, 0.592, TAGGY_BAR)
+        for e in (-1, 1):
+            F(min(e * 0.133, e * 0.205), 0.592, max(e * 0.133, e * 0.205), 0.664, TAGGY_EYE)
+    N = 8
+    for k in range(N):                                                   # music notes floating up
+        P = Pose(m, f"th{k}")
+        for j, (sd, z) in enumerate(((1, -1.0), (-1, 0.8))):
+            t = ((k + j * 4) % N) / N
+            x, y = sd * (7.4 + 0.6 * t), 1.6 + 4.0 * t
+            P.box(x - 0.1, y, z - 0.1, x + 0.1, y + 1.2, z + 0.1, TAGGY_P)
+            P.box(x - 0.1, y - 0.15, z - 0.55, x + 0.1, y + 0.3, z + 0.1, TAGGY_P)
+            P.box(x - 0.1, y + 0.9, z + 0.1, x + 0.1, y + 1.2, z + 0.5, TAGGY_P)
+    m.animate(('show', 'th', N), frames=N, frametime=3, interpolate=False)
