@@ -3,6 +3,7 @@ package com.lojjkli.aconite;
 import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -40,9 +41,8 @@ public final class AconitePlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        if (!packFile().exists()) {
-            saveResource(PACK, false);
-        }
+        updateFromJar(PACK);
+        updateFromJar("cosmetics.yml");
         cosmetics = new Cosmetics(this);
         cosmetics.load();
         menu = new CosmeticMenu(this);
@@ -66,6 +66,26 @@ public final class AconitePlugin extends JavaPlugin implements Listener {
 
     public Cosmetics cosmetics() {
         return cosmetics;
+    }
+
+    private void updateFromJar(String name) {
+        try (InputStream in = getResource(name)) {
+            if (in == null) {
+                return;
+            }
+            byte[] bytes = in.readAllBytes();
+            String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-1").digest(bytes));
+            File file = new File(getDataFolder(), name);
+            File stamp = new File(getDataFolder(), "." + name + ".sha1");
+            if (file.exists() && stamp.exists() && Files.readString(stamp.toPath()).trim().equals(hash)) {
+                return;
+            }
+            getDataFolder().mkdirs();
+            Files.write(file.toPath(), bytes);
+            Files.writeString(stamp.toPath(), hash);
+        } catch (Exception e) {
+            getLogger().warning("Could not update " + name + ": " + e.getMessage());
+        }
     }
 
     public File packFile() {

@@ -32,7 +32,9 @@ my_new_hat:
   category: "Hats & Caps"
 ```
 
-New models without an entry go in the "New" topic. Topics and their icons are set in `config.yml`.
+New models without an entry go in the "New" topic. Cosmetics whose model is no longer in the pack are left out.
+
+A new plugin jar replaces `cosmetics.yml` and the pack in the plugin folder with its own copies, so the server always matches the jar. Topics and their icons are set in `config.yml`.
 
 **Animated cosmetics** work two ways:
 - Animated texture: add a `.png.mcmeta` next to the texture in the pack. Nothing to change in the plugin.

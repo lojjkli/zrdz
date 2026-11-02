@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,9 +54,7 @@ public final class Cosmetics {
     public void load() {
         byId.clear();
         File file = new File(plugin.getDataFolder(), "cosmetics.yml");
-        if (!file.exists()) {
-            plugin.saveResource("cosmetics.yml", false);
-        }
+        Set<String> packItems = packItems(plugin.packFile());
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
         for (String id : yml.getKeys(false)) {
             ConfigurationSection s = yml.getConfigurationSection(id);
@@ -66,11 +65,18 @@ public final class Cosmetics {
             if (frames.isEmpty()) {
                 frames.add(s.getString("model", "aconite:" + id));
             }
+            if (packItems != null && !inPack(frames, packItems)) {
+                continue;
+            }
             add(id, s.getString("name", prettyName(id)), s.getString("category", NEW_CATEGORY),
                     frames, s.getInt("frame-ticks", 4));
         }
-        if (plugin.getConfig().getBoolean("auto-add-from-pack", true)) {
-            addFromPack(plugin.packFile());
+        if (packItems != null && plugin.getConfig().getBoolean("auto-add-from-pack", true)) {
+            for (String id : packItems) {
+                if (!FLOWER_MODELS.contains(id) && !byId.containsKey(id)) {
+                    add(id, prettyName(id), NEW_CATEGORY, List.of("aconite:" + id), 4);
+                }
+            }
         }
         anyAnimated = byId.values().stream().anyMatch(Cosmetic::animated);
         plugin.getLogger().info("Loaded " + byId.size() + " cosmetics.");
@@ -89,21 +95,33 @@ public final class Cosmetics {
         byId.put(id, new Cosmetic(id, name, category, List.copyOf(keys), Math.max(1, frameTicks)));
     }
 
-    private void addFromPack(File pack) {
+    private Set<String> packItems(File pack) {
         if (!pack.isFile()) {
-            return;
+            return null;
         }
+        Set<String> items = new LinkedHashSet<>();
         try (ZipFile zip = new ZipFile(pack)) {
             for (ZipEntry entry : zip.stream().toList()) {
                 Matcher m = PACK_ITEM.matcher(entry.getName());
-                if (m.matches() && !FLOWER_MODELS.contains(m.group(1)) && !byId.containsKey(m.group(1))) {
-                    String id = m.group(1);
-                    add(id, prettyName(id), NEW_CATEGORY, List.of("aconite:" + id), 4);
+                if (m.matches()) {
+                    items.add(m.group(1));
                 }
             }
         } catch (IOException e) {
             plugin.getLogger().warning("Could not read pack: " + e.getMessage());
+            return null;
         }
+        return items;
+    }
+
+    private static boolean inPack(List<String> frames, Set<String> packItems) {
+        for (String frame : frames) {
+            NamespacedKey key = NamespacedKey.fromString(frame.toLowerCase(Locale.ROOT));
+            if (key != null && key.getNamespace().equals("aconite") && !packItems.contains(key.getKey())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String prettyName(String id) {
