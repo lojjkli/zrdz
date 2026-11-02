@@ -11128,14 +11128,10 @@ def flying_dragon_body(P, y, sway):
 
 @redesign("baby_dragon")
 def _(m):
-    """Flies a long figure-eight round and over your head, rising and dipping, turning into the
-    curves, wings really beating (shoulder + elbow, tip lagging). 40 frames, loops seamlessly."""
+    """Circles round your head, turning smoothly, wings really beating (shoulder + elbow, tip lagging). 40 frames, loops seamlessly."""
     N = 40
-    def pos(t):
-        x = 4.8 * math.sin(t)
-        z = 3.9 * math.sin(t) * math.cos(t) * 2 * 0.9
-        y = 6.2 + 0.7 * math.cos(2 * t) + 0.3 * math.sin(3 * t)
-        return x, z, y
+    def pos(t):                                                                # simple circle round the head
+        return 3.6 * math.cos(t), 3.6 * math.sin(t), 6.6 + 0.2 * math.sin(2 * t)
     def heading(t):
         x, z, _ = pos(t); x2, z2, _ = pos(t + 0.005)
         return math.degrees(math.atan2(-(x2 - x), -(z2 - z)))
@@ -11153,6 +11149,46 @@ def _(m):
         a1, a2 = WING_CYCLE[k % len(WING_CYCLE)]
         flying_dragon_body(P, y, sway)
         dragon_wings(P, y, a1, a2)
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
+
+WG_BONE, WG_SKIN = '#3a3348', '#55476b'                                       # flat wing colours: no shading seams
+import mclib as _mcl
+_mcl.FLAT.update({WG_BONE, WG_SKIN}) if isinstance(_mcl.FLAT, set) else None
+
+def clean_wings(P, y, a):
+    """One straight wing per side tilted by a: thin overlapping slices so it reads as one clean plate."""
+    L, root, n = 3.1, 1.3, 12
+    ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+    for sx in (-1, 1):
+        for i in range(n):
+            d0, d1 = L * i / n, L * (i + 1) / n
+            x0, x1 = root + d0 * ca, root + d1 * ca
+            y0, y1 = d0 * sa, d1 * sa
+            xa, xb = sorted((sx * x0, sx * x1))
+            ya, yb = min(y0, y1) - 0.06, max(y0, y1) + 0.06
+            ch = 2.2 - 1.2 * ((d0 + d1) / 2) / L                               # wing narrows to the tip
+            P.box(xa, y + 3.0 + ya - 0.03, 0.15, xb, y + 3.0 + yb + 0.03, 0.45, WG_BONE)
+            P.box(xa, y + 3.0 + ya, 0.45, xb, y + 3.0 + yb, 0.45 + ch, WG_SKIN)
+
+@redesign("baby_dragon")
+def _(m):
+    """Circles round your head, turning smoothly, clean wings beating up and down. 32 frames, seamless."""
+    N = 32
+    BEAT = [30.0 * math.cos(2 * math.pi * j / 8) for j in range(8)]          # 8-frame beat, 4 per loop
+    def pos(t):
+        return 3.6 * math.cos(t), 3.6 * math.sin(t), 6.6 + 0.2 * math.sin(2 * t)
+    for k in range(N):
+        t = 2 * math.pi * k / N
+        x, z, y = pos(t)
+        x2, z2, _ = pos(t + 0.005)
+        A = round(math.degrees(math.atan2(-(x2 - x), -(z2 - z))) / 22.5) * 22.5
+        q = int(round(-A / 90.0)); r = A + 90 * q
+        if r > 45: q += 1; r -= 90
+        if r < -45: q -= 1; r += 90
+        P = _YRot(Pose(m, f"dr{k}", dx=x, dz=z, q=q), r, (0.0, y + 2.0, 0.5))
+        flying_dragon_body(P, y, -0.4)
+        clean_wings(P, y, BEAT[k % 8])
     m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
 
 # removed on request
