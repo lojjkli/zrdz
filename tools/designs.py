@@ -10696,7 +10696,7 @@ def _(m):
 
 @redesign("chick_buddy")
 def _(m):
-    bmob(m, "baby_chicken", BABY['chick'], 1.1, z0=0.0, pose={'body': ('z', -22.5), 'wing0': ('z', -45.0), 'wing1': ('z', 45.0)})
+    bmob(m, "baby_chicken", BABY['chick'], 0.55, z0=0.0, pose={'body': ('z', -22.5), 'wing0': ('z', -45.0), 'wing1': ('z', 45.0)})
 
 @redesign("wolf_pup")
 def _(m):
@@ -10748,3 +10748,97 @@ def _(m):
              pose={'rightwing_bone': ('z', -flap), 'leftwing_bone': ('z', flap)})
     m.animate(('show', 'be', N), frames=N, frametime=1, interpolate=False)
 
+
+# removed on request
+D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy")]
+
+# ---------------- round 5: cuter baby dragon, Tung Tung's bat raised, Taggy dangling his feet ----------------
+DR_B, DR_D, DR_S, DR_W, DR_E, DR_EL = '#24202c', '#3a3446', '#a59cb2', '#4b3f5e', '#c860ff', '#f6e8ff'
+
+def baby_ender_dragon(P, y0, wing, sway, bob):
+    """Chibi ender dragon in the new baby-mob style: big head, tiny body, stubby legs, small wings."""
+    y = y0 + bob
+    for sx in (-1, 1):                                                         # stubby legs
+        for z1 in (-0.3, 1.7):
+            P.box(sx * 0.55 - 0.4, y0, z1, sx * 0.55 + 0.4, y + 1.1, z1 + 0.8, DR_B)
+    P.box(-1.4, y + 1.0, -0.6, 1.4, y + 3.3, 2.6, DR_B)                        # body
+    P.box(-1.0, y + 0.95, -0.4, 1.0, y + 1.05, 2.2, DR_D)                      # belly plate
+    for i, z in enumerate((0.1, 1.0, 1.9)):                                    # back spikes
+        P.box(-0.15, y + 3.3, z, 0.15, y + 3.75 - 0.1 * i, z + 0.4, DR_S)
+    tz, ty = 2.6, y + 1.5                                                      # tail, swaying
+    for i, (r, l) in enumerate(((0.6, 1.2), (0.45, 1.0), (0.3, 0.9))):
+        tx = sway * (i + 1) * 0.35
+        P.box(tx - r, ty - r, tz, tx + r, ty + r, tz + l, DR_B)
+        tz += l; ty += 0.25
+    P.box(sway * 1.05 - 0.15, ty + 0.05, tz - 0.6, sway * 1.05 + 0.15, ty + 0.55, tz - 0.2, DR_S)
+    hy = y + 2.6                                                               # big head
+    P.box(-1.8, hy, -3.6, 1.8, hy + 3.4, -0.2, DR_B)
+    P.box(-1.1, hy + 0.1, -4.6, 1.1, hy + 1.3, -3.6, DR_B)                     # short snout
+    for sx in (-1, 1):
+        P.box(sx * 0.6 - 0.15, hy + 0.85, -4.65, sx * 0.6 + 0.15, hy + 1.1, -4.6, '#0c0a10')   # nostrils
+        P.box(sx * 0.9 - 0.45, hy + 1.65, -3.65, sx * 0.9 + 0.45, hy + 2.6, -3.6, DR_E)       # big purple eyes
+        P.box(sx * 0.9 - 0.4, hy + 2.25, -3.67, sx * 0.9 - 0.1, hy + 2.55, -3.65, DR_EL)      # sparkle
+        P.box(sx * 1.0 - 0.2, hy + 3.4, -1.6, sx * 1.0 + 0.2, hy + 4.3, -1.2, DR_S,           # little horns
+              rot=('x', 22.5, (sx * 1.0, hy + 3.4, -1.4)))
+    for sx in (-1, 1):                                                         # wings
+        sp = (sx * 1.4, y + 3.0, 0.3)
+        r = ('z', sx * wing, sp) if wing else None
+        x1, x2 = sorted((sx * 1.4, sx * 4.4))
+        P.box(x1, y + 2.85, 0.15, x2, y + 3.15, 0.45, DR_D, rot=r)             # wing bone
+        P.box(x1, y + 2.95, 0.45, x2, y + 3.05, 2.4, DR_W, rot=r)              # membrane
+        x1, x2 = sorted((sx * 3.6, sx * 4.4))
+        P.box(x1, y + 2.95, 2.4, x2, y + 3.05, 2.9, DR_W, rot=r)              # wing tip
+
+@redesign("baby_dragon")
+def _(m):
+    WING = [22.5, 45.0, 22.5, 0.0, -22.5, 0.0]
+    N = len(WING)
+    for k in range(N):
+        baby_ender_dragon(Pose(m, f"dr{k}"), 4.6, WING[k], math.sin(2 * math.pi * k / N), 0.12 * math.cos(2 * math.pi * k / N))
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
+@redesign("tung_tung")
+def _(m):
+    """Bat held up in his fist like the real Tung Tung Tung Sahur, swung forward: tung, tung, tung."""
+    ARM = [22.5, 22.5, 0.0, -22.5, -45.0, -45.0, -22.5, 0.0]      # + = wound back, - = whacking forward
+    N = len(ARM); y0 = 4.6
+    T = lambda u, v, w, h, d, k: Tex(TUNG_TEX2, u, v, w, h, d, (), f"tt{k}")
+    for k in range(N):
+        b = 0.12 if ARM[k] == -45.0 else 0.0
+        for sd in (-1, 1):
+            m.box(sd * 0.65 - 0.25, y0 + 0.25 + b, -0.25, sd * 0.65 + 0.25, y0 + 2.2 + b, 0.25, T(48, 12, 2, 8, 2, k))
+            m.box(sd * 0.65 - 0.38, y0 + b, -0.75, sd * 0.65 + 0.38, y0 + 0.25 + b, 0.25, T(48, 22, 3, 1, 4, k))
+        m.box(-1.75, y0 + 2.1 + b, -1.25, 1.75, y0 + 8.1 + b, 1.25, T(0, 0, 14, 24, 10, k))
+        m.box(-1.5, y0 + 2.1 + b, -1.5, 1.5, y0 + 8.1 + b, 1.5, T(0, 34, 12, 24, 12, k))
+        m.box(-2.25, y0 + 3.4 + b, -0.25, -1.75, y0 + 5.9 + b, 0.25, T(48, 0, 2, 10, 2, k), rot=('z', -22.5, (-1.75, y0 + 5.9 + b, 0)))
+        sh = (2.0, y0 + 5.2 + b, 0.0)                              # shoulder
+        a = ARM[k]
+        r = ('x', a, sh) if a else None
+        L = 1.6
+        m.box(1.75, sh[1] - 0.2, -0.25, 2.25, sh[1] + L, 0.25, T(48, 0, 2, 10, 2, k), rot=r)            # arm raised up
+        fy = sh[1] + L                                                                                # fist at the top
+        m.box(1.65, fy - 0.3, -0.35, 2.35, fy + 0.3, 0.35, T(48, 22, 3, 1, 4, k), rot=r)
+        m.box(1.8, fy - 0.6, -0.2, 2.2, fy - 0.3, 0.2, T(48, 58, 3, 1, 3, k), rot=r)                   # knob under the fist
+        m.box(1.82, fy + 0.3, -0.18, 2.18, fy + 1.1, 0.18, T(48, 30, 2, 7, 2, k), rot=r)               # handle
+        m.box(1.55, fy + 1.1, -0.45, 2.45, fy + 3.3, 0.45, T(48, 40, 4, 12, 4, k), rot=r)              # barrel
+    m.animate(('show', 'tt', N), frames=N, frametime=2, interpolate=False)
+
+@redesign("taggy_buddy")
+def _(m):
+    """Taggy sat on the front edge, his little feet sticking out over the edge and dangling, swinging."""
+    s = 5.8
+    zb = -3.9                                                      # body front right at the edge
+    zc = zb + 0.125 * s
+    taggy(m, 0, 4.6 - (0.032 + 0.136) * s, zc, s=s, feet=False)
+    fx = (0.031 * s, 0.256 * s)
+    fh = 0.212 * s
+    SWING = [(-22.5, -45.0), (-45.0, -22.5)]
+    N = 4
+    for k in range(N):
+        P = Pose(m, f"tb{k}")
+        for sd, a in zip((-1, 1), SWING[(k // 2) % 2]):
+            x1, x2 = sorted((sd * fx[0], sd * fx[1]))
+            # foot sticks forward over the edge from under the body, tipped down so it hangs over the face
+            P.box(x1, 4.6, -5.6, x2, 4.6 + fh, zb + 0.4, TAGGY_P, rot=('x', a, (0, 4.6 + fh / 2, -4.0)))
+    name_tag(m, -2.6, 4.6, 0.6)
+    m.animate(('show', 'tb', N), frames=N, frametime=4, interpolate=False)
