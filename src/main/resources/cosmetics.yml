@@ -83,7 +83,7 @@ halo:
   category: "Animated"
 angel_set:
   name: "Angel Halo + Wings"
-  category: "Crowns & Halos"
+  category: "Animated"
 ender_halo:
   name: "Ender Halo"
   category: "Animated"
@@ -239,7 +239,7 @@ pumpkin_head:
   category: "Holiday"
 sunglasses:
   name: "Shades"
-  category: "Face"
+  category: "Animated"
 3d_glasses:
   name: "3D Glasses"
   category: "Face"
@@ -341,7 +341,7 @@ heart_halo:
   category: "Animated"
 allay_buddy:
   name: "Allay Buddy"
-  category: "Buddies"
+  category: "Animated"
 sniffer_buddy:
   name: "Sniffer Buddy"
   category: "Buddies"
@@ -393,33 +393,18 @@ herobrine_eyes:
 watermelon_helmet:
   name: "Watermelon Helmet"
   category: "Food"
-taggy_buddy:
-  name: "Taggy Buddy"
-  category: "Aconite & Froggie"
-taggy_wave:
-  name: "Taggy Waving"
-  category: "Aconite & Froggie"
 froggie_buddy:
   name: "Froggie Buddy"
   category: "Aconite & Froggie"
 froglight_crown:
   name: "Froglight Crown"
   category: "Aconite & Froggie"
-taggy_froggie_duo:
-  name: "Taggy & Froggie Duo"
-  category: "Aconite & Froggie"
 froggie_hat:
   name: "Froggie Hat"
   category: "Aconite & Froggie"
-taggy_rides_froggie:
-  name: "Taggy Rides Froggie"
-  category: "Aconite & Froggie"
-taggy_peek:
-  name: "Taggy Peekaboo"
-  category: "Aconite & Froggie"
 taggy_headphones:
   name: "Taggy Headphones"
-  category: "Aconite & Froggie"
+  category: "Animated"
 six_seven:
   name: "6-7"
   category: "Memes"
@@ -431,7 +416,7 @@ tralalero:
   category: "Memes"
 tung_tung:
   name: "Tung Tung Buddy"
-  category: "Memes"
+  category: "Animated"
 ballerina_cappuccina:
   name: "Ballerina Cappuccina"
   category: "Memes"
@@ -500,7 +485,7 @@ axolotl_buddy:
   category: "Buddies"
 bee_buddy:
   name: "Bee Buddy"
-  category: "Buddies"
+  category: "Animated"
 sleepy_fox:
   name: "Sleepy Fox"
   category: "Buddies"
@@ -530,13 +515,13 @@ end_crystal_hat:
   category: "Fantasy"
 wither_crown:
   name: "Wither Crown"
-  category: "Crowns & Halos"
+  category: "Animated"
 blaze_halo:
   name: "Blaze Halo"
   category: "Animated"
 baby_dragon:
   name: "Baby Ender Dragon"
-  category: "Buddies"
+  category: "Animated"
 turtle_helmet:
   name: "Turtle Shell Helmet"
   category: "Blocks & Items"
@@ -713,16 +698,13 @@ emerald_crown:
   category: "Crowns & Halos"
 soul_crown:
   name: "Soul Fire Crown"
-  category: "Crowns & Halos"
+  category: "Animated"
 imperial_crown:
   name: "Imperial Crown"
   category: "Crowns & Halos"
 void_crown:
   name: "Void Crown"
-  category: "Crowns & Halos"
-tilted_crown:
-  name: "Tilted Crown"
-  category: "Crowns & Halos"
+  category: "Animated"
 medal_gold:
   name: "Gold Medal"
   category: "Crowns & Halos"
@@ -743,7 +725,7 @@ creeper_buddy:
   category: "Buddies"
 enderman_buddy:
   name: "Enderman Buddy"
-  category: "Buddies"
+  category: "Animated"
 pig_buddy:
   name: "Pig Buddy"
   category: "Buddies"
@@ -756,15 +738,12 @@ mooshroom_buddy:
 sheep_buddy:
   name: "Sheep Buddy"
   category: "Buddies"
-hen_buddy:
-  name: "Hen Buddy"
-  category: "Buddies"
 wolf_pup:
   name: "Wolf Pup"
   category: "Buddies"
 parrot_buddy:
   name: "Parrot Buddy"
-  category: "Buddies"
+  category: "Animated"
 bat_buddy:
   name: "Bat Buddy"
   category: "Buddies"
@@ -779,13 +758,13 @@ camel_buddy:
   category: "Buddies"
 panda_buddy:
   name: "Panda Buddy"
-  category: "Animated"
+  category: "Buddies"
 polar_bear_cub:
   name: "Polar Bear Cub"
   category: "Buddies"
 glow_squid_buddy:
   name: "Glow Squid Buddy"
-  category: "Animated"
+  category: "Buddies"
 dolphin_buddy:
   name: "Dolphin Buddy"
   category: "Buddies"
@@ -863,7 +842,7 @@ portal_halo:
   category: "Animated"
 end_portal_hat:
   name: "End Portal Crown"
-  category: "Animated"
+  category: "Fantasy"
 conduit_hat:
   name: "Conduit Hat"
   category: "Animated"
