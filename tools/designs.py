@@ -11043,33 +11043,32 @@ def flying_ender_dragon(P, y, wing, sway):
         P.box(sx * 0.9 - 0.45, hy + 1.65, -3.65, sx * 0.9 + 0.45, hy + 2.6, -3.6, DR_E)
         P.box(sx * 0.9 - 0.4, hy + 2.25, -3.67, sx * 0.9 - 0.1, hy + 2.55, -3.65, DR_EL)
         P.box(sx * 1.0 - 0.2, hy + 3.4, -1.5, sx * 1.0 + 0.2, hy + 4.2, -1.1, DR_S)
-    k = math.sin(math.radians(wing))
-    for sx in (-1, 1):                                                         # wings in 3 stepped segments
-        for i in range(3):
-            d0, d1 = 1.4 + i, 2.4 + i
-            dy = k * (d0 + 0.5 - 1.4)
-            x1, x2 = sorted((sx * d0, sx * d1))
-            P.box(x1, y + 2.85 + dy, 0.15, x2, y + 3.15 + dy, 0.45, DR_D)
-            P.box(x1, y + 2.95 + dy, 0.45, x2, y + 3.05 + dy, 2.4 - 0.3 * i, DR_W)
-        x1, x2 = sorted((sx * 3.6, sx * 4.4))
-        P.box(x1, y + 2.95 + k * 2.6, 1.8, x2, y + 3.05 + k * 2.6, 2.9, DR_W)
+    for sx in (-1, 1):                                                         # flat wings, beating up and down
+        x1, x2 = sorted((sx * 1.3, sx * 4.2))
+        P.box(x1, y + 2.85 + wing, 0.15, x2, y + 3.1 + wing, 0.45, DR_D)                 # wing bone
+        P.box(x1, y + 2.92 + wing, 0.45, x2, y + 3.03 + wing, 2.3, DR_W)                 # membrane
+        x1, x2 = sorted((sx * 3.4, sx * 4.2))
+        P.box(x1, y + 2.92 + wing, 2.3, x2, y + 3.03 + wing, 2.9, DR_W)                  # wing tip
 
 @redesign("baby_dragon")
 def _(m):
-    """Flies smooth circles round your head: turns 22.5 degrees a frame, wings flapping."""
-    WING = [22.5, 45.0, 22.5, 0.0, -22.5, 0.0]
-    N, R = 16, 3.2
+    """Flies a wide, wavy loop round your head (24 frames, seamless), turning smoothly, wings beating."""
+    WING = [0.45, 0.0, -0.45, 0.0]                                             # 4-frame beat, divides 24: loops cleanly
+    N = 24
+    def pos(phi):
+        R = 3.8 + 0.9 * math.sin(2 * phi)
+        return R * math.cos(phi), R * math.sin(phi), 6.4 + 0.9 * math.sin(phi) + 0.3 * math.sin(3 * phi)
     for k in range(N):
         phi = 2 * math.pi * k / N
-        x, z = R * math.cos(phi), R * math.sin(phi)
-        vx, vz = -math.sin(phi), math.cos(phi)
+        x, z, y = pos(phi)
+        x2, z2, _ = pos(phi + 0.01)
+        vx, vz = x2 - x, z2 - z
         A = round(math.degrees(math.atan2(-vx, -vz)) / 22.5) * 22.5             # heading as a y rotation
         q = int(round(-A / 90.0)); r = A + 90 * q
         if r > 45: q += 1; r -= 90
         if r < -45: q -= 1; r += 90
-        y = 6.6 + 0.5 * math.sin(2 * phi)
         P = Pose(m, f"dr{k}", dx=x, dz=z, q=q)
-        flying_ender_dragon(_YRot(P, r, (0.0, y + 2.0, 0.5)), y, WING[k % len(WING)], math.sin(phi * 2))
+        flying_ender_dragon(_YRot(P, r, (0.0, y + 2.0, 0.5)), y, WING[k % 4], math.sin(phi * 2))
     m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
 
 # removed on request
