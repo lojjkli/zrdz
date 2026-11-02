@@ -9958,9 +9958,32 @@ def _(m):
     m.animate(('show', 'tb', len(KICK)), frames=len(KICK), frametime=2, interpolate=False)
 
 # ---------------- Baby Dragon: cuter, chibi proportions on the vanilla texture ----------------
+def _cute_dragon_tex():
+    a = _tex("ender_dragon.png").copy()
+    rng = _np.random.default_rng(3)
+    base = _np.array([30, 30, 34], float)
+    for y in range(47, 62):                                     # repaint the face: no angry slits, no glowing mouth
+        for x in range(129, 143):
+            a[y, x, :3] = _np.clip(base * (1 + rng.normal(0, 0.06)), 0, 255).astype(_np.uint8); a[y, x, 3] = 255
+    for ex in (130, 138):                                       # big round friendly eyes
+        for y in range(49, 54):
+            for x in range(ex, ex + 4):
+                if (y in (49, 53)) and (x in (ex, ex + 3)):
+                    continue
+                a[y, x, :3] = (214, 112, 255)
+        for y in (51, 52):
+            for x in (ex + 1, ex + 2):
+                a[y, x, :3] = (96, 24, 150)
+    for x in (134, 135, 136, 137):                              # tiny smile
+        a[57, x, :3] = (150, 70, 200)
+    a[56, 133, :3] = (150, 70, 200); a[56, 138, :3] = (150, 70, 200)
+    return a
+
+DRAGON_CUTE = _cute_dragon_tex()
+
 def chibi_dragon(m, x0, y0, z0, s, name, wing=0.0, tip=0.0, tail_phase=0.0, px=0.5):
     def T(u, v, w, h, d):
-        t = Tex(DRAGON_TEX, u, v, w, h, d, (), name); t.px = px; return t
+        t = Tex(DRAGON_CUTE, u, v, w, h, d, (), name); t.px = px; return t
     def P(X, Y, Z):
         return _np.array([x0 - X * s, y0 - Y * s, z0 + Z * s])
     def B(piv, X, Y, Z, w, h, d, uv, rot=None, k=1.0):
@@ -9993,9 +10016,13 @@ def chibi_dragon(m, x0, y0, z0, s, name, wing=0.0, tip=0.0, tail_phase=0.0, px=0
         c = P(sway, 12 + i * 0.6, zt)
         zt += 9.0 * kk
         B(c, -5, -5, -5, 10, 10, 10, (192, 104), k=kk)
-    for side in (-1, 1):                                                   # tucked stubby legs
-        B(P(9 * side, 14, 4), -4, -4, -4, 8, 12, 8, (112, 104), ('x', -45.0), k=0.75)
-        B(P(10 * side, 14, 20), -6, -4, -6, 12, 14, 12, (0, 0), ('x', -45.0), k=0.75)
+    for side in (-1, 1):                                                   # stubby legs hanging down, little feet
+        fl = P(13 * side, 20, 2)
+        B(fl, -4, -2, -4, 8, 14, 8, (112, 104), k=(0.8, 0.8, 0.8))
+        B(fl + _np.array([0, -11 * 0.8 * s, 0]), -4, 0, -7, 8, 4, 12, (144, 104), k=(0.8, 0.8, 0.8))
+        hl = P(13.5 * side, 20, 22)
+        B(hl, -6, -2, -6, 12, 16, 12, (0, 0), k=(0.7, 0.8, 0.7))
+        B(hl + _np.array([0, -13 * 0.8 * s, 0]), -6, 0, -9, 12, 4, 14, (112, 0), k=(0.7, 0.8, 0.7))
     WK = 0.52
     for side in (-1, 1):                                                   # small flapping wings
         wp = P(9 * side, 4, 2)
@@ -10025,10 +10052,12 @@ def _(m):
 # ======================================================================
 from mclib import TexX90
 
-def mob(m, img, parts, s, x0=0.0, y0=4.6, z0=0.0, name="mob", hk=1.0, ground=24.0):
+def mob(m, img, parts, s, x0=0.0, y0=4.6, z0=0.0, name="mob", hk=1.0, ground=24.0, head_rot=None, pose=None):
     """parts: dicts with piv (Java X,Y,Z), box (X,Y,Z,w,h,d), uv (u,v); optional x90, rot (axis, deg),
     head (scaled by hk about the head pivot), inf (inflate), tex (w,h,d override), mirror, img."""
     hp = next((p['piv'] for p in parts if p.get('head')), None)
+    for i, (key, r) in enumerate((pose or {}).items()):
+        parts[key] = dict(parts[key], rot=r)
     for p in parts:
         px, py, pz = p['piv']
         X, Y, Z, w, h, d = p['box']
@@ -10047,7 +10076,9 @@ def mob(m, img, parts, s, x0=0.0, y0=4.6, z0=0.0, name="mob", hk=1.0, ground=24.
         rot = None
         if p.get('rot'):
             ax, ang = p['rot']
-            rot = (ax, ang, J(px, py, pz))
+            rot = (ax, ang, J(*p['rotp']) if p.get('rotp') else J(px, py, pz))
+        elif p.get('head') and head_rot:
+            rot = (head_rot[0], head_rot[1], J(*hp))
         m.box(min(q1[0], q2[0]), min(q1[1], q2[1]), min(q1[2], q2[2]), max(q1[0], q2[0]), max(q1[1], q2[1]), max(q1[2], q2[2]), t, rot=rot)
 
 def quad_legs(uv, w, h, d, pos, legy):
@@ -10290,3 +10321,430 @@ def _(m):
              dict(piv=(1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18)), dict(piv=(-1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18))]
         mob(m, MOBTX['parrot'], P, 0.55, z0=0.4, name=nm)
     m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=3, interpolate=False)
+
+# ---------------- poses for the vanilla animals ----------------
+def walk(first_leg, a=22.5):
+    """Mid-step: diagonal leg pairs swing opposite ways (legs listed back-right, back-left, front-right, front-left)."""
+    i = first_leg
+    return {i: ('x', a), i + 1: ('x', -a), i + 2: ('x', -a), i + 3: ('x', a)}
+
+@redesign("pig_buddy")
+def _(m):
+    mob(m, MOBTX['pig'], pig_parts(), 0.3, z0=0.3, hk=1.35, head_rot=('y', 22.5), pose=walk(3))
+
+@redesign("cow_buddy")
+def _(m):
+    mob(m, MOBTX['cow'], cow_parts(), 0.25, z0=0.4, hk=1.45, head_rot=('x', -22.5), pose=walk(5))
+    for x, z in ((-1.2, -2.6), (-0.7, -2.9), (1.0, -2.7)):                      # grass tufts it's grazing on
+        m.box(x - 0.08, 4.6, z - 0.08, x + 0.08, 5.3, z + 0.08, '#5fae46')
+
+@redesign("mooshroom_buddy")
+def _(m):
+    mob(m, MOBTX['moo'], cow_parts(), 0.25, z0=0.4, hk=1.45, head_rot=('y', -22.5), pose=walk(5))
+    for x, z in ((-0.6, 0.9), (0.7, 2.3)):
+        red_mushroom(m, x, 4.6 + 22 * 0.25 - 0.05, z, 0.8)
+
+@redesign("sheep_buddy")
+def _(m):
+    L = [(-3, 7), (3, 7), (-3, -5), (3, -5)]
+    P = [dict(piv=(0, 6, -8), box=(-3, -4, -6, 6, 6, 8), uv=(0, 0), head=True),
+         dict(piv=(0, 5, 2), box=(-4, -10, -7, 8, 16, 6), uv=(28, 8), x90=True)] + quad_legs((0, 16), 4, 12, 4, L, 12)
+    F = [dict(piv=(0, 6, -8), box=(-3, -4, -4, 6, 6, 6), uv=(0, 0), head=True, inf=0.6, img=MOBTX['fur']),
+         dict(piv=(0, 5, 2), box=(-4, -10, -7, 8, 16, 6), uv=(28, 8), x90=True, inf=1.75, img=MOBTX['fur'])] + \
+        [dict(d, inf=0.5, img=MOBTX['fur'], box=(-2, 0, -2, 4, 6, 4)) for d in quad_legs((0, 16), 4, 6, 4, L, 12)]
+    pose = walk(2); pose.update({k + 6: v for k, v in walk(2).items()})
+    mob(m, MOBTX['sheep'], P + F, 0.22, z0=0.4, hk=1.45, head_rot=('z', 22.5), pose=pose)
+
+@redesign("hen_buddy")
+def _(m):
+    mob(m, MOBTX['chicken'], chicken_parts(), 0.42, z0=0.2, hk=1.2, head_rot=('y', 22.5),
+        pose={4: ('x', 22.5), 5: ('x', -22.5), 6: ('z', 45.0), 7: ('z', -45.0)})
+
+@redesign("chick_buddy")
+def _(m):
+    mob(m, MOBTX['chicken'], chicken_parts(), 0.3, z0=0.0, hk=1.7, head_rot=('z', -22.5),
+        pose={4: ('x', -22.5), 6: ('z', 22.5), 7: ('z', -22.5)})
+
+def _sit_quad(head, body, mane, tail, hind, front, s, hk, tex, x0=0.0, z0=0.0, head_rot=None):
+    P = [dict(p, head=True) for p in head] + body + mane + tail + hind + front
+    return P
+
+@redesign("wolf_pup")
+def _(m):
+    """Sitting like a tamed wolf, head tilted."""
+    P = [dict(piv=(-1, 13.5, -7), box=(-2, -3, -2, 6, 6, 4), uv=(0, 0), head=True),
+         dict(piv=(-1, 13.5, -7), box=(-2, -5, 0, 2, 2, 1), uv=(16, 14), head=True),
+         dict(piv=(-1, 13.5, -7), box=(2, -5, 0, 2, 2, 1), uv=(16, 14), head=True),
+         dict(piv=(-1, 13.5, -7), box=(-0.5, -0.02, -5, 3, 3, 4), uv=(0, 10), head=True),
+         dict(piv=(0, 18, 0), box=(-3, -2, -3, 6, 9, 6), uv=(18, 14), x90=True, rot=('x', 45.0)),
+         dict(piv=(-1, 16, -3), box=(-3, -3, -3, 8, 6, 7), uv=(21, 0), x90=True, rot=('x', 45.0)),
+         dict(piv=(-1, 21, 6), box=(0, 0, -1, 2, 8, 2), uv=(9, 18), rot=('x', 45.0)),
+         dict(piv=(-2.5, 22.7, 2), box=(0, -2, -1, 2, 8, 2), uv=(0, 18), x90=True),
+         dict(piv=(0.5, 22.7, 2), box=(0, -2, -1, 2, 8, 2), uv=(0, 18), x90=True),
+         dict(piv=(-2.49, 17, -4), box=(0, 0, -1, 2, 8, 2), uv=(0, 18), rot=('x', -22.5)),
+         dict(piv=(0.51, 17, -4), box=(0, 0, -1, 2, 8, 2), uv=(0, 18), rot=('x', -22.5))]
+    mob(m, MOBTX['wolf'], P, 0.3, x0=-0.15, z0=0.6, hk=1.45, head_rot=('z', 22.5))
+
+@redesign("ocelot_buddy")
+def _(m):
+    """Prowling mid-step, tail up, head turned to look at you."""
+    P = [dict(piv=(0, 15, -9), box=(-2.5, -2, -3, 5, 4, 5), uv=(0, 0), head=True),
+         dict(piv=(0, 15, -9), box=(-1.5, 0, -4, 3, 2, 2), uv=(0, 24), head=True),
+         dict(piv=(0, 15, -9), box=(-2, -3, 0, 1, 1, 2), uv=(0, 10), head=True),
+         dict(piv=(0, 15, -9), box=(1, -3, 0, 1, 1, 2), uv=(6, 10), head=True),
+         dict(piv=(0, 12, -10), box=(-2, 3, -8, 4, 16, 6), uv=(20, 0), x90=True),
+         dict(piv=(0, 15, 8), box=(-0.5, 0, 0, 1, 8, 1), uv=(0, 15), rot=('x', 45.0)),
+         dict(piv=(1.1, 18, 5), box=(-1, 0, 1, 2, 6, 2), uv=(8, 13), rot=('x', 22.5)),
+         dict(piv=(-1.1, 18, 5), box=(-1, 0, 1, 2, 6, 2), uv=(8, 13), rot=('x', -22.5)),
+         dict(piv=(1.2, 14.1, -5), box=(-1, 0, 0, 2, 10, 2), uv=(40, 0), rot=('x', -22.5)),
+         dict(piv=(-1.2, 14.1, -5), box=(-1, 0, 0, 2, 10, 2), uv=(40, 0), rot=('x', 22.5))]
+    mob(m, MOBTX['ocelot'], P, 0.4, z0=0.0, hk=1.4, head_rot=('y', -45.0))
+
+@redesign("panda_buddy")
+def _(m):
+    P = [dict(piv=(0, 11.5, -17), box=(-6.5, -5, -4, 13, 10, 9), uv=(0, 6), head=True),
+         dict(piv=(0, 11.5, -17), box=(-3.5, 0, -6, 7, 5, 2), uv=(45, 16), head=True),
+         dict(piv=(0, 11.5, -17), box=(-8.5, -8, -1, 5, 4, 1), uv=(52, 25), head=True),
+         dict(piv=(0, 11.5, -17), box=(3.5, -8, -1, 5, 4, 1), uv=(52, 25), head=True),
+         dict(piv=(0, 10, 0), box=(-9.5, -13, -6.5, 19, 26, 13), uv=(0, 25), x90=True)] + \
+        quad_legs((40, 0), 6, 9, 6, [(-5.5, 9), (5.5, 9), (-5.5, -9), (5.5, -9)], 15)
+    mob(m, MOBTX['panda'], P, 0.2, z0=1.2, hk=1.35, head_rot=('z', 22.5), pose={7: ('x', 45.0), 5: ('x', -22.5)})
+    for i in range(4):                                                      # bamboo stalk in its paw
+        m.box(-0.75, 5.0 + i * 0.75, -3.9 - i * 0.3, -0.45, 5.7 + i * 0.75, -3.6 - i * 0.3, '#6fb43a' if i % 2 else '#5a9a2e')
+    m.box(-0.95, 7.9, -5.0, -0.25, 8.05, -4.6, '#7ac64a')
+
+@redesign("polar_bear_cub")
+def _(m):
+    P = [dict(piv=(0, 10, -16), box=(-3.5, -3, -3, 7, 7, 7), uv=(0, 0), head=True),
+         dict(piv=(0, 10, -16), box=(-2.5, 1, -6, 5, 3, 3), uv=(0, 44), head=True),
+         dict(piv=(0, 10, -16), box=(-4.5, -4, -1, 2, 2, 1), uv=(26, 0), head=True),
+         dict(piv=(0, 10, -16), box=(2.5, -4, -1, 2, 2, 1), uv=(26, 0), head=True),
+         dict(piv=(-2, 9, 12), box=(-5, -13, -7, 14, 14, 11), uv=(0, 19), x90=True),
+         dict(piv=(-2, 9, 12), box=(-4, -25, -7, 12, 12, 10), uv=(39, 0), x90=True),
+         dict(piv=(-4.5, 14, 6), box=(-2, 0, -2, 4, 10, 8), uv=(50, 22)), dict(piv=(4.5, 14, 6), box=(-2, 0, -2, 4, 10, 8), uv=(50, 22)),
+         dict(piv=(-3.5, 14, -8), box=(-2, 0, -2, 4, 10, 6), uv=(50, 40)), dict(piv=(3.5, 14, -8), box=(-2, 0, -2, 4, 10, 6), uv=(50, 40))]
+    mob(m, MOBTX['bear'], P, 0.2, z0=0.6, hk=1.45, head_rot=('y', -22.5), pose=walk(6))
+
+@redesign("creeper_buddy")
+def _(m):
+    P = [dict(piv=(0, 6, 0), box=(-4, -8, -4, 8, 8, 8), uv=(0, 0), head=True),
+         dict(piv=(0, 6, 0), box=(-4, 0, -2, 8, 12, 4), uv=(16, 16))] + \
+        quad_legs((0, 16), 4, 6, 4, [(-2, 4), (2, 4), (-2, -4), (2, -4)], 18)
+    mob(m, MOBTX['creeper'], P, 0.24, z0=0.0, hk=1.35, head_rot=('y', 22.5), pose=walk(2))
+
+@redesign("snow_golem_buddy")
+def _(m):
+    s = 0.2
+    P = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
+         dict(piv=(0, 24, 0), box=(-6, -12, -6, 12, 12, 12), uv=(0, 36), inf=-0.5),
+         dict(piv=(5, 6, 1), box=(-1, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 45.0)),       # waving arm up
+         dict(piv=(-5, 6, 1), box=(-11, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 22.5))]
+    mob(m, MOBTX['snow'], P, s)
+    pk = FaceTex({'north': (PUMPKIN_F, 0, 0, 16, 16), 'side': (PUMPKIN_S, 0, 0, 16, 16), 'up': (PUMPKIN_T, 0, 0, 16, 16),
+                  'down': (PUMPKIN_T, 0, 0, 16, 16)}, "pumpkin", "pk")
+    hy = 4.6 + (24 - 4) * s
+    r = 3.75 * s * 2.2
+    m.box(-r, hy, -r, r, hy + 2 * r, r, pk, rot=('y', 22.5, (0, hy, 0)))
+
+@redesign("iron_golem_buddy")
+def _(m):
+    P = [dict(piv=(0, -7, -2), box=(-4, -12, -5.5, 8, 10, 8), uv=(0, 0), head=True),
+         dict(piv=(0, -7, -2), box=(-1, -5, -7.5, 2, 4, 2), uv=(24, 0), head=True),
+         dict(piv=(0, -7, 0), box=(-9, -2, -6, 18, 12, 11), uv=(0, 40)),
+         dict(piv=(0, -7, 0), box=(-4.5, 10, -3, 9, 5, 6), uv=(0, 70), inf=0.5),
+         dict(piv=(0, -7, 0), box=(-13, -2.5, -3, 4, 30, 6), uv=(60, 21), rot=('x', 45.0), rotp=(-11, -7, 0)),   # offering arm
+         dict(piv=(0, -7, 0), box=(9, -2.5, -3, 4, 30, 6), uv=(60, 58)),
+         dict(piv=(-4, 11, 0), box=(-3.5, -3, -3, 6, 16, 5), uv=(37, 0)),
+         dict(piv=(5, 11, 0), box=(-3.5, -3, -3, 6, 16, 5), uv=(60, 0))]
+    G = 0.15
+    mob(m, MOBTX['golem'], P, G, z0=0.2, hk=1.3, head_rot=('x', -22.5))
+    hx, hy, hz = 11 * G, 4.6 + (24 - (-7 + 27.5 * 0.7071)) * G, 0.2 - 27.5 * 0.7071 * G
+    m.box(hx - 0.05, hy, hz - 0.05, hx + 0.05, hy + 0.9, hz + 0.05, '#3f8a2a')                 # a poppy, held out
+    m.box(hx - 0.3, hy + 0.9, hz - 0.3, hx + 0.3, hy + 1.3, hz + 0.3, '#c8312d')
+    m.box(hx - 0.1, hy + 1.3, hz - 0.1, hx + 0.1, hy + 1.38, hz + 0.1, '#2a1a10')
+
+@redesign("villager_buddy")
+def _(m):
+    P = [dict(piv=(0, 0, 0), box=(-4, -10, -4, 8, 10, 8), uv=(0, 0), head=True),
+         dict(piv=(0, -2, 0), box=(-1, -1, -6, 2, 4, 2), uv=(24, 0), head=True),
+         dict(piv=(0, 0, 0), box=(-4, 0, -3, 8, 12, 6), uv=(16, 20)),
+         dict(piv=(0, 0, 0), box=(-4, 0, -3, 8, 18, 6), uv=(0, 38), inf=0.5),
+         dict(piv=(0, 3, -1), box=(-8, -2, -3, 4, 8, 4), uv=(44, 22), rot=('x', 45.0)),
+         dict(piv=(0, 3, -1), box=(4, -2, -3, 4, 8, 4), uv=(44, 22), rot=('x', 45.0)),
+         dict(piv=(0, 3, -1), box=(-4, 2, -3, 8, 4, 4), uv=(40, 38), rot=('x', 45.0)),
+         dict(piv=(-2, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(0, 22)), dict(piv=(2, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(0, 22))]
+    mob(m, MOBTX['villager'], P, 0.2, z0=0.0, hk=1.35, head_rot=('z', -22.5), pose={7: ('x', 22.5), 8: ('x', -22.5)})
+    m.box(-0.35, 4.6 + 13.2 * 0.2, -2.1, 0.35, 4.6 + 14.0 * 0.2, -1.6, '#2fbf5a')                  # emerald in its hands
+
+@redesign("piglin_buddy")
+def _(m):
+    P = [dict(piv=(0, 0, 0), box=(-5, -8, -4, 10, 8, 8), uv=(0, 0), head=True),
+         dict(piv=(0, 0, 0), box=(-2, -4, -5, 4, 4, 1), uv=(31, 1), head=True),
+         dict(piv=(0, 0, 0), box=(2, -2, -5, 1, 2, 1), uv=(2, 4), head=True),
+         dict(piv=(0, 0, 0), box=(-3, -2, -5, 1, 2, 1), uv=(2, 0), head=True),
+         dict(piv=(4.5, -6, 0), box=(0, 0, -2, 1, 5, 4), uv=(51, 6), head=True, rot=('z', 22.5)),
+         dict(piv=(-4.5, -6, 0), box=(-1, 0, -2, 1, 5, 4), uv=(39, 6), head=True, rot=('z', -22.5)),
+         dict(piv=(0, 0, 0), box=(-4, 0, -2, 8, 12, 4), uv=(16, 16)),
+         dict(piv=(-5, 2, 0), box=(-3, -2, -2, 4, 12, 4), uv=(40, 16), rot=('x', 45.0)),
+         dict(piv=(5, 2, 0), box=(-1, -2, -2, 4, 12, 4), uv=(32, 48), rot=('z', -22.5)),
+         dict(piv=(-1.9, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(0, 16), rot=('x', -22.5)),
+         dict(piv=(1.9, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(16, 48), rot=('x', 22.5))]
+    s = 0.2
+    mob(m, MOBTX['piglin'], P, s, z0=0.0, hk=1.3, head_rot=('y', -22.5))
+    hx, hy, hz = 5 * s + 0.2, 4.6 + (24 - 2 - 9 * 0.7071) * s, -9 * 0.7071 * s
+    m.box(hx - 0.3, hy - 0.15, hz - 0.3, hx + 0.3, hy + 0.15, hz + 0.3, '#f2c33a')               # gold ingot it's admiring
+
+@redesign("glow_squid_buddy")
+def _(m):
+    P = [dict(piv=(0, 8, 0), box=(-6, -8, -6, 12, 16, 12), uv=(0, 0))]
+    for i in range(8):
+        a = 2 * math.pi * i / 8
+        c, sn = math.cos(a), math.sin(a)
+        r = ('z', 22.5 * (1 if c < 0 else -1)) if abs(c) > abs(sn) + 0.01 else ('x', 22.5 * (1 if sn < 0 else -1)) if abs(sn) > abs(c) + 0.01 else \
+            ('x', 22.5 * (1 if sn < 0 else -1))
+        P.append(dict(piv=(5 * c, 15, 5 * sn), box=(-1, 0, -1, 2, 18, 2), uv=(48, 0), rot=r))
+    mob(m, MOBTX['gsquid'], P, 0.17, y0=4.6 - 9 * 0.17 + 3.6)
+
+@redesign("slime_buddy")
+def _(m):
+    P = [dict(piv=(0, 0, 0), box=(-3, 17, -3, 6, 6, 6), uv=(0, 16)),
+         dict(piv=(0, 0, 0), box=(-3.25, 18, -3.5, 2, 2, 2), uv=(32, 0)),
+         dict(piv=(0, 0, 0), box=(1.25, 18, -3.5, 2, 2, 2), uv=(32, 4)),
+         dict(piv=(0, 0, 0), box=(0, 21, -3.5, 1, 1, 1), uv=(32, 8)),
+         dict(piv=(0, 0, 0), box=(-4, 16, -4, 8, 8, 8), uv=(0, 0))]
+    for p in P:
+        p['rot'] = ('y', 22.5); p['rotp'] = (0, 24, 0)
+    mob(m, MOBTX['slime'], P, 0.45, z0=0.0)
+    for x, z in ((-2.4, 1.6), (2.2, -1.2)):                                       # little slime blobs hopping along
+        m.box(x - 0.35, 4.6, z - 0.35, x + 0.35, 5.2, z + 0.35, '#7ccf5e9a')
+
+@redesign("baby_dragon")
+def _(m):
+    """Sits on the head on its little legs, wings flapping, tail swaying."""
+    WING = [22.5, 45.0, 22.5, 0.0]
+    N = 8
+    for k in range(N):
+        w = WING[k % 4]
+        chibi_dragon(m, 0.0, 4.6 + 33.6 * 0.075, 0.3, 0.075, f"dr{k}", wing=w, tip=WING[(k - 1) % 4], tail_phase=2 * math.pi * k / N)
+    m.animate(('show', 'dr', N), frames=N, frametime=3, interpolate=False)
+
+@redesign("tung_tung")
+def _(m):
+    """Bat gripped in his right fist, raised and brought down: tung, tung, tung."""
+    ARM = [22.5, 22.5, 0.0, 0.0, 45.0, 45.0, 22.5, 22.5]          # 0 = wind up, 45 = whack
+    N = len(ARM); y0 = 4.6
+    T = lambda u, v, w, h, d, k: Tex(TUNG_TEX2, u, v, w, h, d, (), f"tt{k}")
+    for k in range(N):
+        b = 0.12 if ARM[k] == 45.0 else 0.0
+        for sd in (-1, 1):
+            m.box(sd * 0.65 - 0.25, y0 + 0.25 + b, -0.25, sd * 0.65 + 0.25, y0 + 2.2 + b, 0.25, T(48, 12, 2, 8, 2, k))
+            m.box(sd * 0.65 - 0.38, y0 + b, -0.75, sd * 0.65 + 0.38, y0 + 0.25 + b, 0.25, T(48, 22, 3, 1, 4, k))
+        m.box(-1.75, y0 + 2.1 + b, -1.25, 1.75, y0 + 8.1 + b, 1.25, T(0, 0, 14, 24, 10, k))
+        m.box(-1.5, y0 + 2.1 + b, -1.5, 1.5, y0 + 8.1 + b, 1.5, T(0, 34, 12, 24, 12, k))
+        m.box(-2.25, y0 + 3.4 + b, -0.25, -1.75, y0 + 5.9 + b, 0.25, T(48, 0, 2, 10, 2, k), rot=('z', -22.5, (-1.75, y0 + 5.9 + b, 0)))
+        sh = (2.0, y0 + 5.6 + b, 0.0)
+        a = ARM[k]
+        r = ('x', a, sh) if a else None
+        L = 2.5
+        m.box(1.75, sh[1] - L, -0.25, 2.25, sh[1] + 0.2, 0.25, T(48, 0, 2, 10, 2, k), rot=r)           # arm hanging from the shoulder
+        hy = sh[1] - L                                                                               # fist at the end of the arm
+        m.box(1.65, hy - 0.3, -0.35, 2.35, hy + 0.3, 0.35, T(48, 22, 3, 1, 4, k), rot=r)               # fist
+        # bat sticks forward out of the fist, perpendicular to the arm: handle through the fist, barrel ahead
+        m.box(1.8, hy - 0.2, -0.3, 2.2, hy + 0.2, 0.75, T(48, 58, 3, 1, 3, k), rot=r)                  # knob behind the fist
+        m.box(1.8, hy - 0.18, -1.9, 2.2, hy + 0.18, -0.3, T(48, 30, 2, 7, 2, k), rot=r)                # handle
+        m.box(1.5, hy - 0.5, -4.9, 2.5, hy + 0.5, -1.9, T(48, 40, 4, 12, 4, k), rot=r)                 # barrel
+    m.animate(('show', 'tt', N), frames=N, frametime=2, interpolate=False)
+
+@redesign("taggy_buddy")
+def _(m):
+    """Taggy sat right on the front edge (like the photo): little feet hanging over, kicking."""
+    s = 5.8
+    zb = -4.6                                                      # body front on the edge
+    zc = zb + 0.125 * s
+    taggy(m, 0, 4.6 - (0.032 + 0.136) * s, zc, s=s, feet=False)
+    fx = (0.031 * s, 0.256 * s)                                    # exact Taggy foot: 0.225 wide, 0.225 long, 0.212 tall
+    fl, fh = 0.225 * s, 0.212 * s
+    KICK = [(0.0, 22.5), (22.5, 45.0), (45.0, 22.5), (22.5, 0.0)]
+    N = 8
+    for k in range(N):
+        P = Pose(m, f"tb{k}")
+        for sd, a in zip((-1, 1), KICK[k % 4] if k < 4 else KICK[k % 4][::-1]):
+            x1, x2 = sorted((sd * fx[0], sd * fx[1]))
+            # foot hangs straight down over the edge (toes pointing at the face), swings forward when kicked
+            P.box(x1, 4.6 - fl, zb - fh, x2, 4.6 + 0.15, zb, TAGGY_P, rot=('x', a, (0, 4.6, zb)) if a else None)
+    name_tag(m, -2.6, 4.6, 0.6)
+    m.animate(('show', 'tb', N), frames=N, frametime=2, interpolate=False)
+
+@redesign("tilted_crown")
+def _(m):
+    """A smaller gold crown worn at a jaunty angle: low side sunk into the hair, high side lifted."""
+    n0 = len(m.boxes)
+    crown2(m, GLD, GLD_D, GLD_L, '#d8202e', '#2f6fe0', r=3.4, y0=4.0, h=1.3, shape='fleur', ph=1.5, tip='#f4f2ee',
+           us=(-1.9, 0.0, 1.9), lining='#7a1730')
+    cx = -0.9
+    for b in m.boxes[n0:]:
+        b['f'] = (b['f'][0] + cx, b['f'][1], b['f'][2]); b['t'] = (b['t'][0] + cx, b['t'][1], b['t'][2])
+        b['rot'] = ('z', -22.5, (cx, 4.4, 0.0))
+
+@redesign("parrot_buddy")
+def _(m):
+    """Vanilla parrot perched upright, bobbing its head."""
+    BOB = [0.0, -0.5, 0.0, -0.5]
+    for k, b in enumerate(BOB):
+        nm = f"pa{k}"
+        hy = 15.69 + b
+        P = [dict(piv=(0, 16.5, -3), box=(-1.5, 0, -1.5, 3, 6, 3), uv=(2, 8), rot=('x', -22.5)),
+             dict(piv=(0, 21.07, 1.16), box=(-1.5, -1, -1, 3, 4, 1), uv=(22, 1), rot=('x', -45.0)),
+             dict(piv=(1.5, 16.94, -2.76), box=(-0.5, 0, -1.5, 1, 5, 3), uv=(19, 8), rot=('x', -22.5)),
+             dict(piv=(-1.5, 16.94, -2.76), box=(-0.5, 0, -1.5, 1, 5, 3), uv=(19, 8), rot=('x', -22.5)),
+             dict(piv=(0, hy, -2.76), box=(-1, -1.5, -1, 2, 3, 2), uv=(2, 2), head=True),
+             dict(piv=(0, hy - 2, -3.76), box=(-1, -0.5, -2, 2, 1, 4), uv=(10, 0), head=True),
+             dict(piv=(0, hy - 0.5, -4.26), box=(-0.5, -1, -0.5, 1, 2, 1), uv=(11, 7), head=True),
+             dict(piv=(0, hy - 1.75, -5.21), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(16, 7), head=True),
+             dict(piv=(1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18)), dict(piv=(-1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18))]
+        mob(m, MOBTX['parrot'], P, 0.55, z0=0.4, name=nm)
+    m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=3, interpolate=False)
+
+# ---------------- new (2026) baby mob models: Bedrock geometry + baby textures ----------------
+import json as _json
+_ANG = (-45.0, -22.5, 0.0, 22.5, 45.0)
+
+def _snap(a):
+    return min(_ANG, key=lambda v: abs(v - a))
+
+def _geo(name):
+    with open(_os.path.join(_os.path.dirname(__file__), "geo", name + ".json")) as f:
+        return _json.load(f)['minecraft:geometry'][0]['bones']
+
+BABY = {k: _tex(f"baby_{k}.png") for k in ("pig", "cow", "moo", "sheep", "chick", "wolf", "ocelot", "panda", "bear",
+                                             "villager", "piglin", "bee", "gsquid")}
+_RSIGN = {'x': -1, 'y': -1, 'z': -1}     # Bedrock rotation -> item-model rotation
+
+def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(), move=None):
+    """Bedrock bones -> head px: x = x0 + X*s, y = y0 + Y*s, z = z0 + Z*s (feet at y0).
+    pose = {bone: (axis, deg)} overrides that bone's rotation (children follow if they have none of their own).
+    move = {bone: (dx, dy, dz)} shifts a bone (and its children) in Bedrock px."""
+    bones = {b['name']: b for b in _geo(geo)}
+    pose, move = pose or {}, move or {}
+    def chain(b):
+        out = []
+        while b:
+            out.append(b); b = bones.get(b.get('parent'))
+        return out
+    def brot(b):
+        if b['name'] in pose:
+            return pose[b['name']]
+        r = b.get('rotation') or [0, 0, 0]
+        nz = [(ax, v) for ax, v in zip('xyz', r) if v]
+        if not nz:
+            return None
+        ax, v = max(nz, key=lambda t: abs(t[1]))
+        return (ax, _RSIGN[ax] * v)
+    J = lambda X, Y, Z: (x0 + X * s, y0 + Y * s, z0 + Z * s)
+    for b in bones.values():
+        ch = chain(b)
+        if any(c['name'] in hide for c in ch):
+            continue
+        off = [sum(move.get(c['name'], (0, 0, 0))[i] for c in ch) for i in range(3)]
+        rots = [(brot(c), c['pivot']) for c in ch if brot(c)]
+        for c in b.get('cubes', []):
+            (X, Y, Z), (w, h, d) = c['origin'], c['size']
+            u, v = c['uv']
+            inf = c.get('inflate', 0.0)
+            t = Tex(img, u, v, w, h, d, (), name)
+            X, Y, Z = X + off[0], Y + off[1], Z + off[2]
+            q1 = J(X - inf, Y - inf, Z - inf); q2 = J(X + w + inf, Y + h + inf, Z + d + inf)
+            rot = None
+            cr = c.get('rotation')
+            if cr and any(cr) and b['name'] not in pose:
+                ax, a = max(((ax, v) for ax, v in zip('xyz', cr) if v), key=lambda t: abs(t[1]))
+                p = c.get('pivot', b['pivot'])
+                rot = (ax, _snap(_RSIGN[ax] * a), J(p[0] + off[0], p[1] + off[1], p[2] + off[2]))
+            elif rots:
+                (ax, a), p = rots[0]
+                rot = (ax, _snap(a), J(p[0] + off[0], p[1] + off[1], p[2] + off[2]))
+            if rot and rot[1] == 0.0:
+                rot = None
+            m.box(min(q1[0], q2[0]), min(q1[1], q2[1]), min(q1[2], q2[2]), max(q1[0], q2[0]), max(q1[1], q2[1]),
+                  max(q1[2], q2[2]), t, rot=rot)
+
+def bwalk(a=22.5, legs=("leg0", "leg1", "leg2", "leg3")):
+    """Mid-step pose: diagonal legs swing opposite ways (back-right, back-left, front-right, front-left)."""
+    return {legs[0]: ('x', a), legs[1]: ('x', -a), legs[2]: ('x', -a), legs[3]: ('x', a)}
+
+@redesign("pig_buddy")
+def _(m):
+    bmob(m, "baby_pig", BABY['pig'], 0.6, z0=0.9, pose=dict(bwalk(), head=('y', 22.5)))
+
+@redesign("cow_buddy")
+def _(m):
+    s = 0.45
+    bmob(m, "baby_cow", BABY['cow'], s, z0=1.2, pose=dict(bwalk(), head=('x', -22.5)))
+    for x, z in ((-1.0, -3.6), (-0.5, -3.9), (0.9, -3.7)):                       # grass tufts it's nibbling
+        m.box(x - 0.08, 4.6, z - 0.08, x + 0.08, 5.3, z + 0.08, '#5fae46')
+
+@redesign("mooshroom_buddy")
+def _(m):
+    s = 0.45
+    bmob(m, "baby_cow", BABY['moo'], s, z0=1.2, pose=dict(bwalk(), head=('y', -22.5)))
+    for x, z in ((-0.6, 0.6), (0.7, 2.2)):
+        red_mushroom(m, x, 4.6 + 12 * s - 0.05, z, 0.7)
+
+@redesign("sheep_buddy")
+def _(m):
+    bmob(m, "baby_sheep", BABY['sheep'], 0.55, z0=0.3, pose=dict(bwalk(), head=('z', 22.5)))
+
+@redesign("chick_buddy")
+def _(m):
+    bmob(m, "baby_chicken", BABY['chick'], 1.1, z0=0.0, pose={'body': ('z', -22.5), 'wing0': ('z', -45.0), 'wing1': ('z', 45.0)})
+
+@redesign("wolf_pup")
+def _(m):
+    bmob(m, "baby_wolf", BABY['wolf'], 0.55, z0=1.0, pose=dict(bwalk(), head=('z', 22.5), tail=('x', 22.5)))
+
+@redesign("ocelot_buddy")
+def _(m):
+    bmob(m, "baby_cat", BABY['ocelot'], 0.5, z0=-0.5, pose={'head': ('y', -45.0), 'backLegR': ('x', 22.5), 'backLegL': ('x', -22.5),
+                                                          'frontLegR': ('x', -22.5), 'frontLegL': ('x', 22.5), 'tail1': ('x', -45.0)})
+
+@redesign("panda_buddy")
+def _(m):
+    s = 0.45
+    bmob(m, "baby_panda", BABY['panda'], s, z0=0.2, pose={'head': ('z', 22.5), 'leg2': ('x', 45.0)})
+    for i in range(4):                                                      # bamboo stalk by its raised paw
+        m.box(-1.75, 4.6 + 0.4 + i * 0.75, -4.0 - i * 0.25, -1.45, 4.6 + 1.1 + i * 0.75, -3.7 - i * 0.25, '#6fb43a' if i % 2 else '#5a9a2e')
+    m.box(-1.95, 7.6, -5.0, -1.25, 7.75, -4.6, '#7ac64a')
+
+@redesign("polar_bear_cub")
+def _(m):
+    bmob(m, "baby_polar_bear", BABY['bear'], 0.42, z0=1.3, pose=dict(bwalk(), head=('y', -22.5)))
+
+@redesign("villager_buddy")
+def _(m):
+    s = 0.5
+    bmob(m, "baby_villager", BABY['villager'], s, pose={'head': ('z', -22.5), 'leg0': ('x', 22.5), 'leg1': ('x', -22.5)})
+    m.box(-0.35, 4.6 + 5.6 * s, -2.9 * s - 0.5, 0.35, 4.6 + 6.8 * s, -2.9 * s - 0.1, '#2fbf5a')           # emerald in its arms
+
+@redesign("piglin_buddy")
+def _(m):
+    s = 0.5
+    bmob(m, "baby_piglin", BABY['piglin'], s, pose={'head': ('y', -22.5), 'RightArm': ('x', 45.0), 'RightLeg': ('x', -22.5), 'LeftLeg': ('x', 22.5)})
+    hx, hy, hz = -4 * s, 4.6 + (9 - 5 * 0.7071) * s, -5 * 0.7071 * s - 0.3
+    m.box(hx - 0.3, hy - 0.15, hz - 0.3, hx + 0.3, hy + 0.15, hz + 0.3, '#f2c33a')                    # gold ingot it's admiring
+
+@redesign("glow_squid_buddy")
+def _(m):
+    s = 0.5
+    bmob(m, "baby_squid", BABY['gsquid'], s, y0=4.6 + 10 * s,
+         pose={'tentacle1': ('z', 22.5), 'tentacle5': ('z', -22.5), 'tentacle3': ('x', -22.5), 'tentacle7': ('x', 22.5)})
+
+@redesign("bee_buddy")
+def _(m):
+    N = 6
+    for k in range(N):
+        flap = 22.5 if k % 2 else -22.5
+        bob = 0.35 * math.sin(2 * math.pi * k / N)
+        bmob(m, "baby_bee", BABY['bee'], 0.9, y0=5.6 + bob, z0=0.4, name=f"be{k}",
+             pose={'rightwing_bone': ('z', -flap), 'leftwing_bone': ('z', flap)})
+    m.animate(('show', 'be', N), frames=N, frametime=1, interpolate=False)
+
