@@ -10750,7 +10750,6 @@ def _(m):
 
 
 # removed on request
-D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy")]
 
 # ---------------- round 5: cuter baby dragon, Tung Tung's bat raised, Taggy dangling his feet ----------------
 DR_B, DR_D, DR_S, DR_W, DR_E, DR_EL = '#24202c', '#3a3446', '#a59cb2', '#4b3f5e', '#c860ff', '#f6e8ff'
@@ -10842,3 +10841,36 @@ def _(m):
             P.box(x1, 4.6, -5.6, x2, 4.6 + fh, zb + 0.4, TAGGY_P, rot=('x', a, (0, 4.6 + fh / 2, -4.0)))
     name_tag(m, -2.6, 4.6, 0.6)
     m.animate(('show', 'tb', N), frames=N, frametime=4, interpolate=False)
+
+@redesign("tung_tung")
+def _(m):
+    """Tung Tung Tung Sahur standing with his bat held down at his side in his hand, tapping it: tung, tung, tung."""
+    ARM = [0.0, 0.0, -22.5, -22.5]                                 # 0 = bat down on the hat, -22.5 = lifted forward
+    N = len(ARM); y0 = 4.6
+    T = lambda u, v, w, h, d, k: Tex(TUNG_TEX2, u, v, w, h, d, (), f"tt{k}")
+    HAND = '#e3c290'
+    for k in range(N):
+        P = Pose(m, f"tt{k}")
+        for sd in (-1, 1):                                         # legs + feet
+            m.box(sd * 0.65 - 0.25, y0 + 0.25, -0.25, sd * 0.65 + 0.25, y0 + 2.2, 0.25, T(48, 12, 2, 8, 2, k))
+            m.box(sd * 0.65 - 0.38, y0, -0.75, sd * 0.65 + 0.38, y0 + 0.25, 0.25, T(48, 22, 3, 1, 4, k))
+        m.box(-1.75, y0 + 2.1, -1.25, 1.75, y0 + 8.1, 1.25, T(0, 0, 14, 24, 10, k))            # log body + face
+        m.box(-1.5, y0 + 2.1, -1.5, 1.5, y0 + 8.1, 1.5, T(0, 34, 12, 24, 12, k))
+        # left arm relaxed at his side, with a hand
+        m.box(-2.35, y0 + 3.6, -0.25, -1.85, y0 + 6.0, 0.25, T(48, 0, 2, 10, 2, k))
+        P.box(-2.5, y0 + 3.05, -0.4, -1.7, y0 + 3.75, 0.4, HAND)
+        # right arm hanging down, hand gripping the bat; the bat stands on the hat beside him
+        sh = (2.1, y0 + 6.0, 0.0)
+        a = ARM[k]
+        r = ('x', a, sh) if a else None
+        hy = y0 + 3.4                                              # hand
+        m.box(1.85, hy + 0.3, -0.25, 2.35, sh[1], 0.25, T(48, 0, 2, 10, 2, k), rot=r)           # arm
+        m.box(1.92, hy + 0.3, -0.18, 2.28, hy + 0.9, 0.18, T(48, 30, 2, 7, 2, k), rot=r)         # handle end above the hand
+        m.box(1.72, hy + 0.65, -0.38, 2.48, hy + 0.85, 0.38, T(48, 58, 3, 1, 3, k), rot=r)       # knob
+        P.box(1.65, hy - 0.4, -0.45, 2.55, hy + 0.4, 0.45, HAND, rot=r)                        # hand wrapped round it
+        m.box(1.92, hy - 1.0, -0.18, 2.28, hy - 0.4, 0.18, T(48, 30, 2, 7, 2, k), rot=r)        # handle below the hand
+        m.box(1.65, y0 + 0.05, -0.45, 2.55, hy - 1.0, 0.45, T(48, 40, 4, 12, 4, k), rot=r)           # barrel down to the hat
+    m.animate(('show', 'tt', N), frames=N, frametime=4, interpolate=False)
+
+# removed on request
+D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy", "taggy_buddy")]

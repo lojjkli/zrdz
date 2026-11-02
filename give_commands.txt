@@ -126,7 +126,6 @@
 /give @p minecraft:paper[item_model="aconite:clown_wig",item_name="Clown Wig",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:herobrine_eyes",item_name="Herobrine Eyes",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:watermelon_helmet",item_name="Watermelon Helmet",equippable={slot:"head"}]
-/give @p minecraft:paper[item_model="aconite:taggy_buddy",item_name="Taggy Buddy",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:froggie_buddy",item_name="Froggie Buddy",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:froglight_crown",item_name="Froglight Crown",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:froggie_hat",item_name="Froggie Hat",equippable={slot:"head"}]
