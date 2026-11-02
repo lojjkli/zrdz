@@ -2010,7 +2010,7 @@ TAGGY_P, TAGGY_BAR, TAGGY_EYE = '#a172d0', '#ffffff', '#f6edff'
 GLOW.update({TAGGY_BAR, TAGGY_EYE})
 TAGGY_HEAD_TOP = 0.952 + 0.06   # head made ~12% taller on top in the latest animation
 
-def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False, wave_ang=-22.5, arms=True):
+def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False, wave_ang=-22.5, arms=True, feet=True):
     """Exact Taggy proportions. Blender units (Z up, face -Y) -> head pixels (Y up, face -Z, X mirrored).
     s = head pixels per Blender unit; the feet bottom (z=-0.136) sits at y."""
     def T(x1, y1, z1, x2, y2, z2, c, rot=None):
@@ -2018,7 +2018,8 @@ def taggy(m, x=0.0, y=4.0, z=0.0, s=5.8, wave=False, wave_ang=-22.5, arms=True):
     T(-0.312, -0.281, 0.452, 0.312, 0.281, TAGGY_HEAD_TOP, TAGGY_P)          # head
     T(-0.156, -0.125, 0.032, 0.156, 0.125, 0.452, TAGGY_P)                   # body
     for sd in (-1, 1):
-        T(min(sd * 0.031, sd * 0.256), -0.359, -0.136, max(sd * 0.031, sd * 0.256), -0.134, 0.076, TAGGY_P)   # feet
+        if feet:
+            T(min(sd * 0.031, sd * 0.256), -0.359, -0.136, max(sd * 0.031, sd * 0.256), -0.134, 0.076, TAGGY_P)   # feet
         if wave and sd == -1:   # raised arm, swung up from the shoulder
             sx, sy = x - sd * 0.25 * s, y + (0.42 + 0.136) * s
             T(min(sd * 0.184, sd * 0.316), -0.066, 0.42, max(sd * 0.184, sd * 0.316), 0.066, 0.826, TAGGY_P,
@@ -9371,14 +9372,15 @@ def _(m):
 
 # ---------------- Enderman Buddy: teleports around the top of the head ----------------
 def chibi_enderman(m, y0=4.6):
-    K, K2, P, PL = '#141218', '#22202a', '#d77bff', '#f4c8ff'
+    K, K2, KA, P, PL = '#141218', '#22202a', '#363144', '#d77bff', '#f4c8ff'
     for sd in (-1, 1):
-        m.box(sd * 0.5 - 0.2, y0, -0.2, sd * 0.5 + 0.2, y0 + 2.6, 0.2, K)                    # long legs
-    m.box(-0.8, y0 + 2.5, -0.4, 0.8, y0 + 3.9, 0.4, K2)                                     # body
-    for sd in (-1, 1):
-        m.box(sd * 0.8 - (0.4 if sd > 0 else 0), y0 + 1.6, -0.2, sd * 0.8 + (0.4 if sd < 0 else 0), y0 + 3.9, 0.2, K)
-    rbox(m, -0.9, y0 + 1.4, -1.6, 0.9, y0 + 2.6, -0.4, '#5fae46', r=0.1)                     # grass block
-    m.box(-0.92, y0 + 1.4, -1.62, 0.92, y0 + 2.2, -0.38, '#7a4a26')
+        m.box(sd * 0.4 - 0.2, y0, -0.2, sd * 0.4 + 0.2, y0 + 2.6, 0.2, K)                    # long legs
+    m.box(-0.7, y0 + 2.5, -0.4, 0.7, y0 + 3.9, 0.4, K2)                                     # body
+    for sd in (-1, 1):                                                                      # long arms reaching forward
+        x1, x2 = sorted((sd * 0.8, sd * 1.3))
+        m.box(x1, y0 + 1.4, -0.25, x2, y0 + 3.85, 0.25, KA, rot=('x', 45.0, (sd * 1.05, y0 + 3.85, 0.0)))
+    rbox(m, -0.7, y0 + 1.25, -2.55, 0.7, y0 + 2.5, -1.15, '#5fae46', r=0.1)                  # grass block between the hands
+    m.box(-0.72, y0 + 1.25, -2.57, 0.72, y0 + 2.05, -1.13, '#7a4a26')
     rbox(m, -1.4, y0 + 3.8, -1.4, 1.4, y0 + 6.4, 1.4, K, r=0.2)                              # head
     for sd in (-1, 1):
         m.box(sd * 0.7 - 0.45, y0 + 4.6, -1.48, sd * 0.7 + 0.45, y0 + 5.05, -1.4, P)        # glowing eyes
@@ -9852,3 +9854,439 @@ def _(m):
             P.box(x - 0.1, y - 0.15, z - 0.55, x + 0.1, y + 0.3, z + 0.1, TAGGY_P)
             P.box(x - 0.1, y + 0.9, z + 0.1, x + 0.1, y + 1.2, z + 0.5, TAGGY_P)
     m.animate(('show', 'th', N), frames=N, frametime=3, interpolate=False)
+
+# ---------------- Tung Tung Tung Sahur, redrawn to look like the meme ----------------
+def _tung_texture2():
+    rng = _np.random.default_rng(11)
+    img = _np.zeros((96, 64, 4), _np.uint8)
+    def put(x, y, c):
+        img[y, x] = list(hex2rgb(c)[:3]) + [255]
+    def wood(x0, y0, w, h, base, streak):
+        b = _np.array(hex2rgb(base)[:3], float)
+        for y in range(h):
+            for x in range(w):
+                k = 1 + rng.normal(0, 0.02) + 0.035 * math.sin(x * 1.3 + 0.8 * math.sin(y * 0.25))
+                img[y0 + y, x0 + x] = list(_np.clip(b * k, 0, 255).astype(int)) + [255]
+        for _ in range(max(1, w * h // 70)):                                  # soft vertical grain
+            gx, gy = rng.integers(0, w), rng.integers(0, max(1, h - 3))
+            for t in range(3):
+                put(x0 + gx, y0 + gy + t, streak)
+    def box_uv(u, v, w, h, d, base, streak, top):
+        wood(u, v + d, 2 * d + 2 * w, h, base, streak)
+        for (tx, ty) in ((u + d, v), (u + d + w, v)):                         # end grain rings on top and bottom
+            cx, cy = (w - 1) / 2, (d - 1) / 2
+            for y in range(d):
+                for x in range(w):
+                    r = math.hypot((x - cx) / max(1, w / 2), (y - cy) / max(1, d / 2))
+                    put(tx + x, ty + y, top[int(r * 3) % len(top)] if r < 0.95 else streak)
+    LT, ST, RING = '#dcbc8c', '#c49d6a', ['#ecd2a6', '#d9b783', '#c9a571']
+    box_uv(0, 0, 14, 24, 10, LT, ST, RING)                                    # body, wide and shallow
+    box_uv(0, 34, 12, 24, 12, LT, ST, RING)                                   # body, front (face on it)
+    fx, fy = 12, 46
+    for ex in (1, 7):                                                         # big round eyes, black pupils
+        for y in range(4, 9):
+            for x in range(ex, ex + 4):
+                if not (y in (4, 8) and x in (ex, ex + 3)):
+                    put(fx + x, fy + y, '#fbfaf6')
+        for y in (6, 7):
+            for x in (ex + 1, ex + 2):
+                put(fx + x, fy + y, '#141010')
+        put(fx + ex + 1, fy + 5, '#141010'); put(fx + ex + 2, fy + 5, '#2a2018')
+        for x in range(ex, ex + 4):                                           # brows, raised a little
+            put(fx + x, fy + 2 + (0 if x in (ex + 1, ex + 2) else 1), '#6a4424')
+    for y in (9, 10):                                                         # nose
+        put(fx + 5, fy + y, '#b88d58'); put(fx + 6, fy + y, '#c79c66')
+    put(fx + 5, fy + 11, '#9a6e3c'); put(fx + 6, fy + 11, '#9a6e3c')
+    for x in range(4, 8):                                                     # small smile
+        put(fx + x, fy + 13, '#5a321a')
+    put(fx + 3, fy + 12, '#5a321a'); put(fx + 8, fy + 12, '#5a321a')
+    box_uv(48, 0, 2, 10, 2, '#c9a571', '#b08a58', ['#d9b783'])                # arm
+    box_uv(48, 12, 2, 8, 2, '#c9a571', '#b08a58', ['#d9b783'])                # leg
+    box_uv(48, 22, 3, 2, 4, '#b8925e', '#9a7848', ['#c9a571'])                # foot
+    box_uv(48, 30, 2, 7, 2, '#8a5a2e', '#6e4622', ['#a06a38'])                # bat handle
+    box_uv(48, 40, 4, 12, 4, '#b5783e', '#965f2e', ['#d29a5a', '#c48a4a'])    # bat barrel
+    box_uv(48, 58, 3, 1, 3, '#7a4c26', '#5e3a1c', ['#8a5a2e'])                # bat knob
+    return img
+
+TUNG_TEX2 = _tung_texture2()
+
+@redesign("tung_tung")
+def _(m):
+    SWING = [22.5, 22.5, 0.0, -22.5, -45.0, -45.0, -22.5, 0.0]      # wind up, then whack forward
+    N = len(SWING); y0 = 4.6
+    T = lambda u, v, w, h, d, k: Tex(TUNG_TEX2, u, v, w, h, d, (), f"tt{k}")
+    for k in range(N):
+        b = 0.15 * abs(math.sin(math.pi * k / N * 2))
+        for sd in (-1, 1):
+            m.box(sd * 0.65 - 0.25, y0 + 0.25 + b, -0.25, sd * 0.65 + 0.25, y0 + 2.2 + b, 0.25, T(48, 12, 2, 8, 2, k))     # stick legs
+            m.box(sd * 0.65 - 0.38, y0 + b, -0.75, sd * 0.65 + 0.38, y0 + 0.25 + b, 0.25, T(48, 22, 3, 1, 4, k))         # feet
+        m.box(-1.75, y0 + 2.1 + b, -1.25, 1.75, y0 + 8.1 + b, 1.25, T(0, 0, 14, 24, 10, k))                           # log body
+        m.box(-1.5, y0 + 2.1 + b, -1.5, 1.5, y0 + 8.1 + b, 1.5, T(0, 34, 12, 24, 12, k))                               # front, with the face
+        m.box(-2.25, y0 + 3.4 + b, -0.25, -1.75, y0 + 5.9 + b, 0.25, T(48, 0, 2, 10, 2, k), rot=('z', -22.5, (-1.75, y0 + 5.9 + b, 0)))
+        sh = (2.0, y0 + 5.6 + b, 0.0)                                                                                 # right shoulder
+        r = ('x', SWING[k], sh) if SWING[k] else None
+        m.box(1.75, sh[1] - 2.3, -0.25, 2.25, sh[1] + 0.2, 0.25, T(48, 0, 2, 10, 2, k), rot=r)                           # arm, holding the bat out front
+        hy = sh[1] - 2.3
+        m.box(1.65, hy - 0.45, -0.35, 2.35, hy - 0.2, 0.35, T(48, 58, 3, 1, 3, k), rot=r)                             # knob
+        m.box(1.75, hy - 0.2, -0.25, 2.25, hy + 1.55, 0.25, T(48, 30, 2, 7, 2, k), rot=r)                              # handle, held upright
+        m.box(1.5, hy + 1.55, -0.5, 2.5, hy + 4.55, 0.5, T(48, 40, 4, 12, 4, k), rot=r)                                # barrel
+    m.animate(('show', 'tt', N), frames=N, frametime=2, interpolate=False)
+
+# ---------------- Taggy: one buddy (plus the headphones) ----------------
+D[:] = [d for d in D if d[0] not in ("taggy_wave", "taggy_froggie_duo", "taggy_rides_froggie", "taggy_peek")]
+
+@redesign("taggy_buddy")
+def _(m):
+    """Taggy sat on the front edge of the head, legs over the edge, kicking his feet."""
+    s = 5.8
+    zc = -4.6 + 0.281 * s - 0.15                                   # head lines up with the front edge
+    taggy(m, 0, 4.6 - (0.032 + 0.136) * s, zc, s=s, feet=False)
+    fw = (0.031 * s, 0.256 * s)                                    # foot x span (exact Taggy foot size)
+    fh, fd = 0.212 * s, 0.225 * s
+    zb = zc - 0.125 * s                                            # body front
+    for sd in (-1, 1):
+        x1, x2 = sorted((sd * fw[0], sd * fw[1]))
+        m.box(x1, 4.6, -4.6, x2, 4.6 + fh, zb, TAGGY_P)            # thighs out to the edge
+    KICK = [(0.0, -22.5), (-22.5, -45.0), (-45.0, -22.5), (-22.5, 0.0), (0.0, -22.5), (-22.5, -45.0), (-45.0, -22.5), (-22.5, 0.0)]
+    for k, angs in enumerate(KICK):
+        P = Pose(m, f"tb{k}")
+        for sd, a in zip((-1, 1), angs):
+            x1, x2 = sorted((sd * fw[0], sd * fw[1]))
+            P.box(x1, 4.6 - 2.0, -4.6 - fh, x2, 4.6 + fh, -4.6, TAGGY_P,
+                  rot=('x', a, (0, 4.6 + fh * 0.5, -4.6)) if a else None)   # lower legs hanging, kicking
+    name_tag(m, -2.6, 4.6, 0.4)
+    m.animate(('show', 'tb', len(KICK)), frames=len(KICK), frametime=2, interpolate=False)
+
+# ---------------- Baby Dragon: cuter, chibi proportions on the vanilla texture ----------------
+def chibi_dragon(m, x0, y0, z0, s, name, wing=0.0, tip=0.0, tail_phase=0.0, px=0.5):
+    def T(u, v, w, h, d):
+        t = Tex(DRAGON_TEX, u, v, w, h, d, (), name); t.px = px; return t
+    def P(X, Y, Z):
+        return _np.array([x0 - X * s, y0 - Y * s, z0 + Z * s])
+    def B(piv, X, Y, Z, w, h, d, uv, rot=None, k=1.0):
+        kx, ky, kz = (k, k, k) if not isinstance(k, tuple) else k
+        x1, x2 = piv[0] - (X + w) * kx * s, piv[0] - X * kx * s
+        y1, y2 = piv[1] - (Y + h) * ky * s, piv[1] - Y * ky * s
+        z1, z2 = piv[2] + Z * kz * s, piv[2] + (Z + d) * kz * s
+        r = (rot[0], rot[1], tuple(piv)) if rot and rot[1] else None
+        m.box(x1, y1, z1, x2, y2, z2, T(uv[0], uv[1], w, h, d), rot=r)
+    def rz(v, deg):
+        a = math.radians(deg); c, sn = math.cos(a), math.sin(a)
+        return _np.array([c * v[0] - sn * v[1], sn * v[0] + c * v[1], v[2]])
+    bp = P(0, 4, 8)                                                        # round little body
+    B(bp, -12, 0, -16, 24, 24, 64, (0, 0), k=(0.95, 0.95, 0.55))
+    B(bp, -1, -6, 2, 2, 6, 12, (220, 53), k=0.8)
+    for i in range(2):                                                     # short neck
+        c = P(0, 6 - i * 3.0, -2 - i * 6)
+        B(c, -5, -5, -5, 10, 10, 10, (192, 104), k=0.9)
+    hp = P(0, -4, -16)                                                     # big head
+    H = 1.75
+    B(hp, -8, -8, -10, 16, 16, 16, (112, 30), k=H)
+    B(hp, -6, -1, -24, 12, 5, 16, (176, 44), k=(H, H, H * 0.55))           # short snout
+    B(hp + _np.array([0, -3 * s * H, 0]), -6, 0, -16, 12, 4, 16, (176, 65), k=(H, H * 0.8, H * 0.6))
+    for sx in (-5, 3):
+        B(hp, sx, -12, -4, 2, 4, 6, (0, 0), k=H)                           # little horns
+    zt = 32.0
+    for i in range(7):                                                     # stubby tail, curling
+        kk = 0.85 - i * 0.07
+        sway = 1.8 * i * math.sin(tail_phase + i * 0.6)
+        c = P(sway, 12 + i * 0.6, zt)
+        zt += 9.0 * kk
+        B(c, -5, -5, -5, 10, 10, 10, (192, 104), k=kk)
+    for side in (-1, 1):                                                   # tucked stubby legs
+        B(P(9 * side, 14, 4), -4, -4, -4, 8, 12, 8, (112, 104), ('x', -45.0), k=0.75)
+        B(P(10 * side, 14, 20), -6, -4, -6, 12, 14, 12, (0, 0), ('x', -45.0), k=0.75)
+    WK = 0.52
+    for side in (-1, 1):                                                   # small flapping wings
+        wp = P(9 * side, 4, 2)
+        a1 = -wing * side
+        if side > 0:
+            B(wp, 0, -4, -4, 56, 8, 8, (112, 88), ('z', a1), k=(WK, 0.6, 0.6)); B(wp, 0, 0, 2, 56, 0, 56, (-56, 88), ('z', a1), k=(WK, 1, 0.55))
+        else:
+            B(wp, -56, -4, -4, 56, 8, 8, (112, 88), ('z', a1), k=(WK, 0.6, 0.6)); B(wp, -56, 0, 2, 56, 0, 56, (-56, 88), ('z', a1), k=(WK, 1, 0.55))
+        tp = wp + rz(_np.array([-56 * WK * s * side, 0, 0]), a1)
+        a2 = -tip * side
+        if side > 0:
+            B(tp, 0, -2, -2, 56, 4, 4, (112, 136), ('z', a2), k=(WK * 0.8, 0.6, 0.6)); B(tp, 0, 0, 2, 56, 0, 56, (-56, 144), ('z', a2), k=(WK * 0.8, 1, 0.55))
+        else:
+            B(tp, -56, -2, -2, 56, 4, 4, (112, 136), ('z', a2), k=(WK * 0.8, 0.6, 0.6)); B(tp, -56, 0, 2, 56, 0, 56, (-56, 144), ('z', a2), k=(WK * 0.8, 1, 0.55))
+
+@redesign("baby_dragon")
+def _(m):
+    WING = [45, 22.5, 0, -22.5, -45, -22.5, 0, 22.5]
+    N = len(WING)
+    for k in range(N):
+        bob = 0.35 * math.cos(2 * math.pi * k / N)
+        chibi_dragon(m, 0.0, 7.4 + bob, 0.3, 0.075, f"dr{k}", wing=WING[k], tip=WING[(k - 1) % N], tail_phase=2 * math.pi * k / N)
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
+# ======================================================================
+# VANILLA MOB BUDDIES: real Java models + textures, chibi heads
+# ======================================================================
+from mclib import TexX90
+
+def mob(m, img, parts, s, x0=0.0, y0=4.6, z0=0.0, name="mob", hk=1.0, ground=24.0):
+    """parts: dicts with piv (Java X,Y,Z), box (X,Y,Z,w,h,d), uv (u,v); optional x90, rot (axis, deg),
+    head (scaled by hk about the head pivot), inf (inflate), tex (w,h,d override), mirror, img."""
+    hp = next((p['piv'] for p in parts if p.get('head')), None)
+    for p in parts:
+        px, py, pz = p['piv']
+        X, Y, Z, w, h, d = p['box']
+        tw, th, td = p.get('tex', (w, h, d))
+        t = Tex(p.get('img', img), p['uv'][0], p['uv'][1], tw, th, td, p.get('skip', ()), name)
+        if p.get('x90'):
+            t = TexX90(t, name)
+            X, Y, Z, w, h, d = X, -(Z + d), Y, w, d, h
+        k = hk if p.get('head') else 1.0
+        if p.get('head') and hp is not None and tuple(p['piv']) != tuple(hp):
+            px, py, pz = hp[0] + (px - hp[0]) * hk, hp[1] + (py - hp[1]) * hk, hp[2] + (pz - hp[2]) * hk
+        inf = p.get('inf', 0.0)
+        X, Y, Z, w, h, d = X - inf, Y - inf, Z - inf, w + 2 * inf, h + 2 * inf, d + 2 * inf
+        J = lambda a, b, c: (x0 - a * s, y0 + (ground - b) * s, z0 + c * s)
+        q1 = J(px + X * k, py + Y * k, pz + Z * k); q2 = J(px + (X + w) * k, py + (Y + h) * k, pz + (Z + d) * k)
+        rot = None
+        if p.get('rot'):
+            ax, ang = p['rot']
+            rot = (ax, ang, J(px, py, pz))
+        m.box(min(q1[0], q2[0]), min(q1[1], q2[1]), min(q1[2], q2[2]), max(q1[0], q2[0]), max(q1[1], q2[1]), max(q1[2], q2[2]), t, rot=rot)
+
+def quad_legs(uv, w, h, d, pos, legy):
+    return [dict(piv=(x, legy, z), box=(-w / 2, 0, -d / 2, w, h, d), uv=uv) for x, z in pos]
+
+MOBTX = {n: _tex(f) for n, f in dict(pig="pig_pig.png", cow="cow_cow.png", moo="cow_red_mooshroom.png", sheep="sheep_sheep.png",
+         fur="sheep_fur.png", chicken="chicken.png", wolf="wolf_wolf.png", ocelot="cat_ocelot.png", panda="panda_panda.png",
+         bear="bear_polarbear.png", creeper="creeper_creeper.png", snow="snow_golem.png", golem="iron_golem_iron_golem.png",
+         villager="villager_villager.png", piglin="piglin_piglin.png", bee="bee_bee.png", parrot="parrot_parrot_red_blue.png",
+         gsquid="squid_glow_squid.png", slime="slime_slime.png").items()}
+
+PUMPKIN_F, PUMPKIN_S, PUMPKIN_T = _tex('carved_pumpkin.png'), _tex('pumpkin_side.png'), _tex('pumpkin_top.png')
+
+def pig_parts():
+    return [dict(piv=(0, 12, -6), box=(-4, -4, -8, 8, 8, 8), uv=(0, 0), head=True),
+            dict(piv=(0, 12, -6), box=(-2, 0, -9, 4, 3, 1), uv=(16, 16), head=True),
+            dict(piv=(0, 11, 2), box=(-5, -10, -7, 10, 16, 8), uv=(28, 8), x90=True)] + \
+           quad_legs((0, 16), 4, 6, 4, [(-3, 7), (3, 7), (-3, -5), (3, -5)], 18)
+
+@redesign("pig_buddy")
+def _(m):
+    mob(m, MOBTX['pig'], pig_parts(), 0.3, z0=0.3, hk=1.35)
+
+def cow_parts(moo=False):
+    P = [dict(piv=(0, 4, -8), box=(-4, -4, -6, 8, 8, 6), uv=(0, 0), head=True),
+         dict(piv=(0, 4, -8), box=(-5, -5, -4, 1, 3, 1), uv=(22, 0), head=True),
+         dict(piv=(0, 4, -8), box=(4, -5, -4, 1, 3, 1), uv=(22, 0), head=True),
+         dict(piv=(0, 5, 2), box=(-6, -10, -7, 12, 18, 10), uv=(18, 4), x90=True),
+         dict(piv=(0, 5, 2), box=(-2, 2, -8, 4, 6, 1), uv=(52, 0), x90=True)]
+    return P + quad_legs((0, 16), 4, 12, 4, [(-4, 7), (4, 7), (-4, -6), (4, -6)], 12)
+
+def red_mushroom(m, x, y, z, k=1.0):
+    m.box(x - 0.18 * k, y, z - 0.18 * k, x + 0.18 * k, y + 0.7 * k, z + 0.18 * k, '#e8dcc6')
+    m.box(x - 0.6 * k, y + 0.7 * k, z - 0.6 * k, x + 0.6 * k, y + 1.1 * k, z + 0.6 * k, '#c8312d')
+    m.box(x - 0.35 * k, y + 1.1 * k, z - 0.35 * k, x + 0.35 * k, y + 1.3 * k, z + 0.35 * k, '#c8312d')
+    m.box(x - 0.45 * k, y + 1.08 * k, z - 0.15 * k, x - 0.25 * k, y + 1.12 * k, z + 0.05 * k, '#f4f2ee')
+
+@redesign("cow_buddy")
+def _(m):
+    mob(m, MOBTX['cow'], cow_parts(), 0.25, z0=0.4, hk=1.45)
+
+@redesign("mooshroom_buddy")
+def _(m):
+    mob(m, MOBTX['moo'], cow_parts(), 0.25, z0=0.4, hk=1.45)
+    for x, z in ((-0.6, 0.9), (0.7, 2.3)):
+        red_mushroom(m, x, 4.6 + 22 * 0.25 - 0.05, z, 0.8)
+    red_mushroom(m, 0.0, 4.6 + 24 * 0.25 + 0.4, -2.2, 0.7)
+
+@redesign("sheep_buddy")
+def _(m):
+    P = [dict(piv=(0, 6, -8), box=(-3, -4, -6, 6, 6, 8), uv=(0, 0), head=True),
+         dict(piv=(0, 5, 2), box=(-4, -10, -7, 8, 16, 6), uv=(28, 8), x90=True)] + \
+        quad_legs((0, 16), 4, 12, 4, [(-3, 7), (3, 7), (-3, -5), (3, -5)], 12)
+    F = [dict(piv=(0, 6, -8), box=(-3, -4, -4, 6, 6, 6), uv=(0, 0), head=True, inf=0.6, img=MOBTX['fur']),
+         dict(piv=(0, 5, 2), box=(-4, -10, -7, 8, 16, 6), uv=(28, 8), x90=True, inf=1.75, img=MOBTX['fur'])] + \
+        [dict(d, inf=0.5, img=MOBTX['fur'], box=(-2, 0, -2, 4, 6, 4)) for d in quad_legs((0, 16), 4, 6, 4, [(-3, 7), (3, 7), (-3, -5), (3, -5)], 12)]
+    mob(m, MOBTX['sheep'], P + F, 0.22, z0=0.4, hk=1.45)
+
+def chicken_parts():
+    return [dict(piv=(0, 15, -4), box=(-2, -6, -2, 4, 6, 3), uv=(0, 0), head=True),
+            dict(piv=(0, 15, -4), box=(-2, -4, -4, 4, 2, 2), uv=(14, 0), head=True),
+            dict(piv=(0, 15, -4), box=(-1, -2, -3, 2, 2, 2), uv=(14, 4), head=True),
+            dict(piv=(0, 16, 0), box=(-3, -4, -3, 6, 8, 6), uv=(0, 9), x90=True),
+            dict(piv=(-2, 19, 1), box=(-1, 0, -3, 3, 5, 3), uv=(26, 0)),
+            dict(piv=(1, 19, 1), box=(-1, 0, -3, 3, 5, 3), uv=(26, 0)),
+            dict(piv=(-4, 13, 0), box=(0, 0, -3, 1, 4, 6), uv=(24, 13)),
+            dict(piv=(4, 13, 0), box=(-1, 0, -3, 1, 4, 6), uv=(24, 13))]
+
+@redesign("hen_buddy")
+def _(m):
+    mob(m, MOBTX['chicken'], chicken_parts(), 0.42, z0=0.2, hk=1.2)
+
+@redesign("chick_buddy")
+def _(m):
+    mob(m, MOBTX['chicken'], chicken_parts(), 0.3, z0=0.0, hk=1.7)
+
+@redesign("wolf_pup")
+def _(m):
+    P = [dict(piv=(-1, 13.5, -7), box=(-2, -3, -2, 6, 6, 4), uv=(0, 0), head=True),
+         dict(piv=(-1, 13.5, -7), box=(-2, -5, 0, 2, 2, 1), uv=(16, 14), head=True),
+         dict(piv=(-1, 13.5, -7), box=(2, -5, 0, 2, 2, 1), uv=(16, 14), head=True),
+         dict(piv=(-1, 13.5, -7), box=(-0.5, -0.02, -5, 3, 3, 4), uv=(0, 10), head=True),
+         dict(piv=(0, 14, 2), box=(-3, -2, -3, 6, 9, 6), uv=(18, 14), x90=True),
+         dict(piv=(-1, 14, -3), box=(-3, -3, -3, 8, 6, 7), uv=(21, 0), x90=True),
+         dict(piv=(-1, 12, 8), box=(0, 0, -1, 2, 8, 2), uv=(9, 18), rot=('x', 45.0))] + \
+        [dict(piv=(x, 16, z), box=(0, 0, -1, 2, 8, 2), uv=(0, 18)) for x, z in ((-2.5, 7), (0.5, 7), (-2.5, -4), (0.5, -4))]
+    mob(m, MOBTX['wolf'], P, 0.3, x0=-0.15, z0=0.4, hk=1.45)
+
+@redesign("ocelot_buddy")
+def _(m):
+    P = [dict(piv=(0, 15, -9), box=(-2.5, -2, -3, 5, 4, 5), uv=(0, 0), head=True),
+         dict(piv=(0, 15, -9), box=(-1.5, 0, -4, 3, 2, 2), uv=(0, 24), head=True),
+         dict(piv=(0, 15, -9), box=(-2, -3, 0, 1, 1, 2), uv=(0, 10), head=True),
+         dict(piv=(0, 15, -9), box=(1, -3, 0, 1, 1, 2), uv=(6, 10), head=True),
+         dict(piv=(0, 12, -10), box=(-2, 3, -8, 4, 16, 6), uv=(20, 0), x90=True),
+         dict(piv=(0, 15, 8), box=(-0.5, 0, 0, 1, 8, 1), uv=(0, 15), rot=('x', 45.0)),
+         dict(piv=(1.1, 18, 5), box=(-1, 0, 1, 2, 6, 2), uv=(8, 13)), dict(piv=(-1.1, 18, 5), box=(-1, 0, 1, 2, 6, 2), uv=(8, 13)),
+         dict(piv=(1.2, 14.1, -5), box=(-1, 0, 0, 2, 10, 2), uv=(40, 0)), dict(piv=(-1.2, 14.1, -5), box=(-1, 0, 0, 2, 10, 2), uv=(40, 0))]
+    mob(m, MOBTX['ocelot'], P, 0.4, z0=0.0, hk=1.4)
+
+@redesign("panda_buddy")
+def _(m):
+    P = [dict(piv=(0, 11.5, -17), box=(-6.5, -5, -4, 13, 10, 9), uv=(0, 6), head=True),
+         dict(piv=(0, 11.5, -17), box=(-3.5, 0, -6, 7, 5, 2), uv=(45, 16), head=True),
+         dict(piv=(0, 11.5, -17), box=(-8.5, -8, -1, 5, 4, 1), uv=(52, 25), head=True),
+         dict(piv=(0, 11.5, -17), box=(3.5, -8, -1, 5, 4, 1), uv=(52, 25), head=True),
+         dict(piv=(0, 10, 0), box=(-9.5, -13, -6.5, 19, 26, 13), uv=(0, 25), x90=True)] + \
+        quad_legs((40, 0), 6, 9, 6, [(-5.5, 9), (5.5, 9), (-5.5, -9), (5.5, -9)], 15)
+    mob(m, MOBTX['panda'], P, 0.2, z0=1.2, hk=1.35)
+
+@redesign("polar_bear_cub")
+def _(m):
+    P = [dict(piv=(0, 10, -16), box=(-3.5, -3, -3, 7, 7, 7), uv=(0, 0), head=True),
+         dict(piv=(0, 10, -16), box=(-2.5, 1, -6, 5, 3, 3), uv=(0, 44), head=True),
+         dict(piv=(0, 10, -16), box=(-4.5, -4, -1, 2, 2, 1), uv=(26, 0), head=True),
+         dict(piv=(0, 10, -16), box=(2.5, -4, -1, 2, 2, 1), uv=(26, 0), head=True),
+         dict(piv=(-2, 9, 12), box=(-5, -13, -7, 14, 14, 11), uv=(0, 19), x90=True),
+         dict(piv=(-2, 9, 12), box=(-4, -25, -7, 12, 12, 10), uv=(39, 0), x90=True),
+         dict(piv=(-4.5, 14, 6), box=(-2, 0, -2, 4, 10, 8), uv=(50, 22)), dict(piv=(4.5, 14, 6), box=(-2, 0, -2, 4, 10, 8), uv=(50, 22)),
+         dict(piv=(-3.5, 14, -8), box=(-2, 0, -2, 4, 10, 6), uv=(50, 40)), dict(piv=(3.5, 14, -8), box=(-2, 0, -2, 4, 10, 6), uv=(50, 40))]
+    mob(m, MOBTX['bear'], P, 0.2, z0=0.6, hk=1.45)
+
+@redesign("creeper_buddy")
+def _(m):
+    P = [dict(piv=(0, 6, 0), box=(-4, -8, -4, 8, 8, 8), uv=(0, 0), head=True),
+         dict(piv=(0, 6, 0), box=(-4, 0, -2, 8, 12, 4), uv=(16, 16))] + \
+        quad_legs((0, 16), 4, 6, 4, [(-2, 4), (2, 4), (-2, -4), (2, -4)], 18)
+    mob(m, MOBTX['creeper'], P, 0.24, z0=0.0, hk=1.35)
+
+@redesign("snow_golem_buddy")
+def _(m):
+    P = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
+         dict(piv=(0, 24, 0), box=(-6, -12, -6, 12, 12, 12), uv=(0, 36), inf=-0.5),
+         dict(piv=(5, 6, 1), box=(-1, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', -45.0)),
+         dict(piv=(-5, 6, 1), box=(-11, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 45.0))]
+    s = 0.2
+    mob(m, MOBTX['snow'], P, s)
+    pk = FaceTex({'north': (PUMPKIN_F, 0, 0, 16, 16), 'side': (PUMPKIN_S, 0, 0, 16, 16), 'up': (PUMPKIN_T, 0, 0, 16, 16),
+                  'down': (PUMPKIN_T, 0, 0, 16, 16)}, "pumpkin", "pk")
+    hy = 4.6 + (24 - 4) * s
+    m.box(-3.75 * s * 2.2, hy, -3.75 * s * 2.2, 3.75 * s * 2.2, hy + 7.5 * s * 2.2, 3.75 * s * 2.2, pk)
+
+@redesign("iron_golem_buddy")
+def _(m):
+    G = 0.15
+    P = [dict(piv=(0, -7, -2), box=(-4, -12, -5.5, 8, 10, 8), uv=(0, 0), head=True),
+         dict(piv=(0, -7, -2), box=(-1, -5, -7.5, 2, 4, 2), uv=(24, 0), head=True),
+         dict(piv=(0, -7, 0), box=(-9, -2, -6, 18, 12, 11), uv=(0, 40)),
+         dict(piv=(0, -7, 0), box=(-4.5, 10, -3, 9, 5, 6), uv=(0, 70), inf=0.5),
+         dict(piv=(0, -7, 0), box=(-13, -2.5, -3, 4, 30, 6), uv=(60, 21)),
+         dict(piv=(0, -7, 0), box=(9, -2.5, -3, 4, 30, 6), uv=(60, 58)),
+         dict(piv=(-4, 11, 0), box=(-3.5, -3, -3, 6, 16, 5), uv=(37, 0)),
+         dict(piv=(5, 11, 0), box=(-3.5, -3, -3, 6, 16, 5), uv=(60, 0))]
+    mob(m, MOBTX['golem'], P, G, z0=0.2, hk=1.3)
+
+@redesign("villager_buddy")
+def _(m):
+    P = [dict(piv=(0, 0, 0), box=(-4, -10, -4, 8, 10, 8), uv=(0, 0), head=True),
+         dict(piv=(0, -2, 0), box=(-1, -1, -6, 2, 4, 2), uv=(24, 0), head=True),
+         dict(piv=(0, 0, 0), box=(-4, 0, -3, 8, 12, 6), uv=(16, 20)),
+         dict(piv=(0, 0, 0), box=(-4, 0, -3, 8, 18, 6), uv=(0, 38), inf=0.5),
+         dict(piv=(0, 3, -1), box=(-8, -2, -3, 4, 8, 4), uv=(44, 22), rot=('x', 45.0)),
+         dict(piv=(0, 3, -1), box=(4, -2, -3, 4, 8, 4), uv=(44, 22), rot=('x', 45.0)),
+         dict(piv=(0, 3, -1), box=(-4, 2, -3, 8, 4, 4), uv=(40, 38), rot=('x', 45.0)),
+         dict(piv=(-2, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(0, 22)), dict(piv=(2, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(0, 22))]
+    mob(m, MOBTX['villager'], P, 0.2, z0=0.0, hk=1.35)
+
+@redesign("piglin_buddy")
+def _(m):
+    P = [dict(piv=(0, 0, 0), box=(-5, -8, -4, 10, 8, 8), uv=(0, 0), head=True),
+         dict(piv=(0, 0, 0), box=(-2, -4, -5, 4, 4, 1), uv=(31, 1), head=True),
+         dict(piv=(0, 0, 0), box=(2, -2, -5, 1, 2, 1), uv=(2, 4), head=True),
+         dict(piv=(0, 0, 0), box=(-3, -2, -5, 1, 2, 1), uv=(2, 0), head=True),
+         dict(piv=(4.5, -6, 0), box=(0, 0, -2, 1, 5, 4), uv=(51, 6), head=True, rot=('z', 22.5)),
+         dict(piv=(-4.5, -6, 0), box=(-1, 0, -2, 1, 5, 4), uv=(39, 6), head=True, rot=('z', -22.5)),
+         dict(piv=(0, 0, 0), box=(-4, 0, -2, 8, 12, 4), uv=(16, 16)),
+         dict(piv=(-5, 2, 0), box=(-3, -2, -2, 4, 12, 4), uv=(40, 16)), dict(piv=(5, 2, 0), box=(-1, -2, -2, 4, 12, 4), uv=(32, 48)),
+         dict(piv=(-1.9, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(0, 16)), dict(piv=(1.9, 12, 0), box=(-2, 0, -2, 4, 12, 4), uv=(16, 48))]
+    mob(m, MOBTX['piglin'], P, 0.2, z0=0.0, hk=1.3)
+
+@redesign("glow_squid_buddy")
+def _(m):
+    P = [dict(piv=(0, 8, 0), box=(-6, -8, -6, 12, 16, 12), uv=(0, 0))]
+    for i in range(8):
+        a = 2 * math.pi * i / 8
+        P.append(dict(piv=(5 * math.cos(a), 15, 5 * math.sin(a)), box=(-1, 0, -1, 2, 18, 2), uv=(48, 0)))
+    mob(m, MOBTX['gsquid'], P, 0.17, y0=4.6 - 9 * 0.17 + 3.1, hk=1.0, ground=24.0)
+
+@redesign("slime_buddy")
+def _(m):
+    P = [dict(piv=(0, 0, 0), box=(-3, 17, -3, 6, 6, 6), uv=(0, 16)),
+         dict(piv=(0, 0, 0), box=(-3.25, 18, -3.5, 2, 2, 2), uv=(32, 0)),
+         dict(piv=(0, 0, 0), box=(1.25, 18, -3.5, 2, 2, 2), uv=(32, 4)),
+         dict(piv=(0, 0, 0), box=(0, 21, -3.5, 1, 1, 1), uv=(32, 8)),
+         dict(piv=(0, 0, 0), box=(-4, 16, -4, 8, 8, 8), uv=(0, 0))]
+    mob(m, MOBTX['slime'], P, 0.45, z0=0.0)
+
+@redesign("bee_buddy")
+def _(m):
+    N = 6
+    for k in range(N):
+        nm = f"be{k}"
+        flap = 22.5 if k % 2 else -22.5
+        bob = 0.3 * math.sin(2 * math.pi * k / N)
+        P = [dict(piv=(0, 19, 0), box=(-3.5, -4, -5, 7, 7, 10), uv=(0, 0)),
+             dict(piv=(0, 17, -5), box=(1.5, -2, -3, 1, 2, 3), uv=(2, 0)),
+             dict(piv=(0, 17, -5), box=(-2.5, -2, -3, 1, 2, 3), uv=(2, 3)),
+             dict(piv=(0, 19, 0), box=(-0.5, -1, 5, 1, 1, 2), uv=(26, 7), tex=(0, 1, 2))]
+        for sd in (-1, 1):
+            P.append(dict(piv=(1.5 * sd, 22, -2 + 2 * j), box=(-1.5, 0, 0, 3, 2, 0.4), uv=(26, 1), tex=(7, 2, 0)) if False else None)
+        P = [p for p in P if p]
+        mob(m, MOBTX['bee'], P, 0.32, y0=5.0 + bob, name=nm)
+        J = lambda X, Y, Z: (-X * 0.32, 5.0 + bob + (24 - Y) * 0.32, Z * 0.32)
+        for sd in (-1, 1):                                                 # wings (flat, two-sided)
+            wt = FaceTex({'up': (MOBTX['bee'], 9, 18, 9, 6), 'down': (MOBTX['bee'], 9, 18, 9, 6)}, nm, f"bw{sd}", flipx=('down',))
+            wt.w, wt.d = 9, 6
+            px, py, pz = J(1.5 * sd, 15, -3)
+            x1, x2 = sorted((px, px - sd * 9 * 0.32))
+            m.box(x1, py, pz, x2, py + 0.05, pz + 6 * 0.32, wt, rot=('z', flap * -sd, (px, py, pz)))
+        for i, zz in enumerate((-2, 0, 2)):                                # legs
+            for sd in (-1, 1):
+                x, y, z = J(1.5 * sd, 22, zz)
+                Pose(m, nm).box(x - 0.1, y - 0.6, z - 0.1, x + 0.1, y, z + 0.1, '#2a2018')
+    m.animate(('show', 'be', N), frames=N, frametime=1, interpolate=False)
+
+@redesign("parrot_buddy")
+def _(m):
+    BOB = [0.0, -0.5, 0.0, -0.5]
+    for k, b in enumerate(BOB):                                             # party-parrot head bob
+        nm = f"pa{k}"
+        hy = 15.69 + b
+        P = [dict(piv=(0, 16.5, -3), box=(-1.5, 0, -1.5, 3, 6, 3), uv=(2, 8), rot=('x', 22.5)),
+             dict(piv=(0, 21.07, 1.16), box=(-1.5, -1, -1, 3, 4, 1), uv=(22, 1), rot=('x', 45.0)),
+             dict(piv=(1.5, 16.94, -2.76), box=(-0.5, 0, -1.5, 1, 5, 3), uv=(19, 8), rot=('x', -22.5)),
+             dict(piv=(-1.5, 16.94, -2.76), box=(-0.5, 0, -1.5, 1, 5, 3), uv=(19, 8), rot=('x', -22.5)),
+             dict(piv=(0, hy, -2.76), box=(-1, -1.5, -1, 2, 3, 2), uv=(2, 2), head=True),
+             dict(piv=(0, hy - 2, -3.76), box=(-1, -0.5, -2, 2, 1, 4), uv=(10, 0), head=True),
+             dict(piv=(0, hy - 0.5, -4.26), box=(-0.5, -1, -0.5, 1, 2, 1), uv=(11, 7), head=True),
+             dict(piv=(0, hy - 1.75, -5.21), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(16, 7), head=True),
+             dict(piv=(1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18)), dict(piv=(-1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18))]
+        mob(m, MOBTX['parrot'], P, 0.55, z0=0.4, name=nm)
+    m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=3, interpolate=False)

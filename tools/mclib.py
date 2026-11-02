@@ -505,3 +505,24 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 
         w = d.textlength(label, font=font)
         d.text(((size - w) / 2, size * 0.885), label, fill=(240, 228, 255), font=font, stroke_width=max(2, size // 150), stroke_fill=(28, 16, 48))
     return img
+
+
+class TexX90(Tex):
+    """A Java box turned 90 degrees about x (quadruped bodies: xRot = pi/2). Geometric face -> source face."""
+    SRC = {"up": "south", "down": "north", "north": "up", "south": "down", "east": "east", "west": "west"}
+    ROT = {"up": 0, "down": 0, "north": 0, "south": 0, "east": 1, "west": -1}
+    FLIP = {"up": False, "down": False, "north": False, "south": False}
+
+    def __init__(self, base, name=""):
+        self.base = base
+        self.a, self.skip, self.u, self.v = base.a, base.skip, base.u, base.v
+        self.w, self.h, self.d = base.w, base.d, base.h
+        self.px = getattr(base, 'px', 1.0)
+        self.key = (name, 'x90') + base.key
+
+    def patch(self, face, pw, ph):
+        src, r = self.SRC[face], self.ROT[face]
+        if r:
+            return np.ascontiguousarray(np.rot90(self.base.patch(src, ph, pw), r))
+        p = self.base.patch(src, pw, ph)
+        return np.ascontiguousarray(p[::-1, ::-1]) if self.FLIP.get(face) else p
