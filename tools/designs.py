@@ -10872,5 +10872,144 @@ def _(m):
         m.box(1.65, y0 + 0.05, -0.45, 2.55, hy - 1.0, 0.45, T(48, 40, 4, 12, 4, k), rot=r)           # barrel down to the hat
     m.animate(('show', 'tt', N), frames=N, frametime=4, interpolate=False)
 
+
+# ---------------- round 7: Tung Tung standing still like the picture, dragon flying circles ----------------
+def _tung_texture3():
+    rng = _np.random.default_rng(7)
+    img = _np.zeros((64, 64, 4), _np.uint8)
+    def put(x, y, c):
+        img[y, x] = list(hex2rgb(c)[:3]) + [255]
+    def wood(x0, y0, w, h, base, streak):
+        b = _np.array(hex2rgb(base)[:3], float)
+        for y in range(h):
+            for x in range(w):
+                k = 1 + rng.normal(0, 0.025) + 0.04 * math.sin(x * 1.1 + 0.7 * math.sin(y * 0.2))
+                img[y0 + y, x0 + x] = list(_np.clip(b * k, 0, 255).astype(int)) + [255]
+        for _ in range(max(1, w * h // 45)):                                   # vertical grain lines
+            gx, gy = rng.integers(0, w), rng.integers(0, max(1, h - 4))
+            for t in range(4):
+                put(x0 + gx, y0 + gy + t, streak)
+    def box_uv(u, v, w, h, d, base, streak, top):
+        wood(u, v + d, 2 * d + 2 * w, h, base, streak)
+        for (tx, ty) in ((u + d, v), (u + d + w, v)):
+            cx, cy = (w - 1) / 2, (d - 1) / 2
+            for y in range(d):
+                for x in range(w):
+                    r = math.hypot((x - cx) / max(1, w / 2), (y - cy) / max(1, d / 2))
+                    put(tx + x, ty + y, top[int(r * 3) % len(top)] if r < 0.95 else streak)
+    LT, ST, RING = '#c97a34', '#a65e24', ['#e3a35c', '#cf8742', '#b96e30']
+    box_uv(0, 0, 12, 28, 10, LT, ST, RING)                                     # the log
+    fx, fy = 10, 10                                                            # face on the front, top part
+    for ex in (1, 7):
+        for y in range(5, 10):                                                 # big round eyes
+            for x in range(ex, ex + 4):
+                if not (y in (5, 9) and x in (ex, ex + 3)):
+                    put(fx + x, fy + y, '#f4efe6')
+        for y in (6, 7, 8):                                                    # dark irises
+            for x in (ex + 1, ex + 2):
+                put(fx + x, fy + y, '#2a1c14')
+        put(fx + ex + 1, fy + 6, '#0e0a08'); put(fx + ex + 2, fy + 7, '#0e0a08')
+        put(fx + ex + 2, fy + 6, '#ffffff')                                    # shine
+        for x in range(ex - (1 if ex == 1 else 0), ex + 4 + (1 if ex == 7 else 0)):   # heavy dark brows
+            if 0 <= x < 12:
+                put(fx + x, fy + 3, '#4a2a14'); put(fx + x, fy + 4, '#6a3c1c')
+        for x in range(ex, ex + 4):                                            # shadow under the eyes
+            put(fx + x, fy + 10, '#a65e24')
+    for y in range(10, 14):                                                    # nose shading
+        put(fx + 5, fy + y, '#b5682a'); put(fx + 6, fy + y, '#d58a42')
+    for x in range(2, 10):                                                     # wide smile
+        put(fx + x, fy + 16 - (1 if x in (2, 9) else 0), '#4a2412')
+    for x in range(4, 8):
+        put(fx + x, fy + 17, '#7a3a1c')
+    for x in (2, 3, 8, 9):                                                     # cheeks
+        put(fx + x, fy + 13, '#d98a48')
+    box_uv(48, 0, 2, 13, 2, '#c47534', '#a65e24', ['#d58a42'])                 # arm
+    box_uv(48, 16, 2, 2, 2, '#d08440', '#b06a2c', ['#dc944c'])                 # hand
+    box_uv(48, 22, 2, 12, 2, '#c47534', '#a65e24', ['#d58a42'])                # leg
+    box_uv(48, 38, 2, 1, 3, '#b56a2c', '#94541e', ['#c47534'])                 # foot
+    box_uv(0, 40, 1, 6, 1, '#9a5a28', '#7a4420', ['#b06a32'])                  # bat handle
+    box_uv(8, 40, 3, 10, 3, '#c98a4a', '#a8703a', ['#e0a868', '#d0985a'])      # bat barrel
+    box_uv(24, 40, 2, 1, 2, '#7a4420', '#5e3418', ['#8a5028'])                 # bat knob
+    return img
+
+TUNG_TEX3 = _tung_texture3()
+
+@redesign("tung_tung")
+def _(m):
+    """Tung Tung Tung Sahur standing still: tall log, big eyes and brows, long thin arms and legs, bat in his right hand."""
+    T = lambda u, v, w, h, d: Tex(TUNG_TEX3, u, v, w, h, d, (), "tt")
+    y0 = 4.6
+    for sd in (-1, 1):
+        m.box(sd * 0.6 - 0.2, y0 + 0.15, -0.2, sd * 0.6 + 0.2, y0 + 3.0, 0.2, T(48, 22, 2, 12, 2))         # long thin legs
+        m.box(sd * 0.6 - 0.25, y0, -0.7, sd * 0.6 + 0.25, y0 + 0.2, 0.25, T(48, 38, 2, 1, 3))              # feet
+        ax1, ax2 = sorted((sd * 1.5, sd * 1.86))
+        m.box(ax1, y0 + 3.6, -0.18, ax2, y0 + 6.8, 0.18, T(48, 0, 2, 13, 2))                                                                         # long arms down his sides
+        m.box(sd * 1.68 - 0.3, y0 + 3.1, -0.3, sd * 1.68 + 0.3, y0 + 3.7, 0.3, T(48, 16, 2, 2, 2))         # hands
+    m.box(-1.5, y0 + 2.8, -1.25, 1.5, y0 + 9.8, 1.25, T(0, 0, 12, 28, 10))                               # the log, face on top
+    m.box(-0.35, y0 + 6.6, -1.6, 0.35, y0 + 7.5, -1.25, '#c97a34')                                       # big nose
+    hp = (1.68, y0 + 3.4, 0.0)                                                                           # bat, pointing down and forward
+    r = ('x', 45.0, hp)
+    m.box(1.53, hp[1] + 0.3, -0.15, 1.83, hp[1] + 0.55, 0.15, T(24, 40, 2, 1, 2), rot=r)                  # knob above the fist
+    m.box(1.56, hp[1] - 1.6, -0.12, 1.8, hp[1] + 0.3, 0.12, T(0, 40, 1, 6, 1), rot=r)                     # handle
+    m.box(1.38, hp[1] - 4.3, -0.3, 1.98, hp[1] - 1.6, 0.3, T(8, 40, 3, 10, 3), rot=r)                     # barrel
+
+@redesign("baby_dragon")
+def _(m):
+    """The chibi baby ender dragon flies little circles round your head, wings flapping."""
+    WING = [22.5, 45.0, 22.5, 0.0, -22.5, 0.0]
+    FACE = [(0, -1), (1, 0), (0, 1), (-1, 0)]                          # facing after q quarter turns
+    N, R = 16, 3.2
+    for k in range(N):
+        phi = 2 * math.pi * k / N
+        x, z = R * math.cos(phi), R * math.sin(phi)
+        vx, vz = -math.sin(phi), math.cos(phi)
+        q = max(range(4), key=lambda i: FACE[i][0] * vx + FACE[i][1] * vz)
+        y = 6.6 + 0.5 * math.sin(2 * phi)
+        baby_ender_dragon(Pose(m, f"dr{k}", dx=x, dz=z, q=q), y, WING[k % len(WING)], math.sin(phi * 2), 0.0)
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
+def fat_ender_dragon(P, y0, wing, jiggle):
+    """A very round, very fat ender dragon: huge belly, tiny wings, little legs."""
+    y = y0
+    for sx in (-1, 1):                                                         # stubby little legs
+        for z1 in (-0.9, 2.0):
+            P.box(sx * 1.6 - 0.45, y, z1, sx * 1.6 + 0.45, y + 0.8, z1 + 0.9, DR_B)
+    b = y + 0.6 + jiggle
+    P.box(-2.7, b, -1.6, 2.7, b + 4.2, 3.6, DR_B)                              # the big round body
+    P.box(-2.35, b - 0.25, -1.3, 2.35, b + 4.45, 3.3, DR_B)                    # rounded top and bottom
+    P.box(-2.95, b + 0.35, -1.3, 2.95, b + 3.85, 3.3, DR_B)                    # rounded sides
+    P.box(-1.9, b + 0.3, -1.65, 1.9, b + 3.4, -1.6, DR_D)                      # belly plate on the front
+    for i in range(3):
+        P.box(-1.9, b + 0.9 + i * 0.95, -1.68, 1.9, b + 1.0 + i * 0.95, -1.65, '#2c2734')   # belly stripes
+    for i, z in enumerate((-0.6, 0.6, 1.8, 3.0)):                              # back spikes
+        P.box(-0.18, b + 4.45, z, 0.18, b + 4.95, z + 0.45, DR_S)
+    P.box(-0.5, b + 0.6, 3.6, 0.5, b + 1.6, 4.8, DR_B)                         # short tail
+    P.box(-0.3, b + 0.9, 4.8, 0.3, b + 1.5, 5.5, DR_B)
+    P.box(-0.12, b + 1.5, 5.0, 0.12, b + 1.9, 5.4, DR_S)
+    hy = b + 3.0                                                               # head perched on the front of the body
+    P.box(-1.6, hy, -3.3, 1.6, hy + 3.0, -0.4, DR_B)
+    P.box(-1.0, hy + 0.1, -4.2, 1.0, hy + 1.2, -3.3, DR_B)                     # snout
+    P.box(-1.75, hy - 0.2, -2.6, 1.75, hy + 0.5, -0.6, DR_B)                   # chubby cheeks / double chin
+    for sx in (-1, 1):
+        P.box(sx * 0.55 - 0.13, hy + 0.75, -4.25, sx * 0.55 + 0.13, hy + 1.0, -4.2, '#0c0a10')
+        P.box(sx * 0.8 - 0.4, hy + 1.5, -3.35, sx * 0.8 + 0.4, hy + 2.35, -3.3, DR_E)
+        P.box(sx * 0.8 - 0.35, hy + 2.0, -3.37, sx * 0.8 - 0.1, hy + 2.3, -3.35, DR_EL)
+        P.box(sx * 0.9 - 0.18, hy + 3.0, -1.6, sx * 0.9 + 0.18, hy + 3.8, -1.25, DR_S,
+              rot=('x', 22.5, (sx * 0.9, hy + 3.0, -1.4)))
+    for sx in (-1, 1):                                                         # comically tiny wings
+        sp = (sx * 2.7, b + 3.6, 0.6)
+        r = ('z', sx * wing, sp) if wing else None
+        x1, x2 = sorted((sx * 2.7, sx * 4.3))
+        P.box(x1, b + 3.5, 0.5, x2, b + 3.7, 0.7, DR_D, rot=r)
+        P.box(x1, b + 3.55, 0.7, x2, b + 3.65, 1.8, DR_W, rot=r)
+
+@design("fat_ender_dragon", "Fat Ender Dragon", "cute")
+def _(m):
+    WING = [45.0, 0.0, 45.0, 0.0, 22.5, 0.0]                                  # tiny wings flapping hard, not helping
+    JIG = [0.0, -0.1, 0.0, -0.1, 0.0, -0.1]
+    for k in range(len(WING)):
+        fat_ender_dragon(Pose(m, f"fd{k}"), 4.6, WING[k], JIG[k])
+    m.animate(('show', 'fd', len(WING)), frames=len(WING), frametime=2, interpolate=False)
+
 # removed on request
 D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy", "taggy_buddy")]

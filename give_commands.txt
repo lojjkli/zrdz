@@ -509,3 +509,4 @@
 /give @p minecraft:paper[item_model="aconite:kite_hat",item_name="Kite",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:hot_air_balloon_hat",item_name="Hot Air Balloon",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:tiny_island_hat",item_name="Tiny Island",equippable={slot:"head"}]
+/give @p minecraft:paper[item_model="aconite:fat_ender_dragon",item_name="Fat Ender Dragon",equippable={slot:"head"}]
