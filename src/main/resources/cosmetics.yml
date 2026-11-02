@@ -247,7 +247,7 @@ aviator_goggles:
   name: "Aviator Goggles"
   category: "Face"
 vr_visor:
-  name: "Cyber Visor"
+  name: "Neon Visor"
   category: "Animated"
 ninja_headband:
   name: "Ninja Headband"
@@ -853,7 +853,7 @@ hopper_hat:
   name: "Hopper Funnel Hat"
   category: "Blocks & Items"
 cauldron_hat:
-  name: "Bubbling Cauldron"
+  name: "Witch's Cauldron"
   category: "Blocks & Items"
 brewing_hat:
   name: "Brewing Stand Hat"
@@ -1420,7 +1420,7 @@ police_siren_hat:
   name: "Police Siren"
   category: "Animated"
 rgb_headset:
-  name: "RGB Gamer Headset"
+  name: "Rainbow Shift Headset"
   category: "Animated"
 loading_halo:
   name: "Loading Halo"
