@@ -11011,5 +11011,66 @@ def _(m):
         fat_ender_dragon(Pose(m, f"fd{k}"), 4.6, WING[k], JIG[k])
     m.animate(('show', 'fd', len(WING)), frames=len(WING), frametime=2, interpolate=False)
 
+
+class _YRot:
+    """Proxy that turns every box about y through o (for in-between headings; boxes must have no rotation)."""
+    def __init__(self, P, r, o):
+        self.P, self.r, self.o = P, r, o
+    def box(self, *a, rot=None, **k):
+        return self.P.box(*a, rot=('y', self.r, self.o) if self.r else None, **k)
+
+def flying_ender_dragon(P, y, wing, sway):
+    """Same chibi dragon, but with no per-part rotations (wings flap as stepped segments), so the
+    whole dragon can be turned to any 22.5 degree heading."""
+    for sx in (-1, 1):
+        for z1 in (-0.3, 1.7):
+            P.box(sx * 0.55 - 0.4, y + 0.1, z1, sx * 0.55 + 0.4, y + 1.1, z1 + 0.8, DR_B)
+    P.box(-1.4, y + 1.0, -0.6, 1.4, y + 3.3, 2.6, DR_B)
+    P.box(-1.0, y + 0.95, -0.4, 1.0, y + 1.05, 2.2, DR_D)
+    for i, z in enumerate((0.1, 1.0, 1.9)):
+        P.box(-0.15, y + 3.3, z, 0.15, y + 3.75 - 0.1 * i, z + 0.4, DR_S)
+    tz, ty = 2.6, y + 1.5
+    for i, (r, l) in enumerate(((0.6, 1.2), (0.45, 1.0), (0.3, 0.9))):
+        tx = sway * (i + 1) * 0.35
+        P.box(tx - r, ty - r, tz, tx + r, ty + r, tz + l, DR_B)
+        tz += l; ty += 0.25
+    P.box(sway * 1.05 - 0.15, ty + 0.05, tz - 0.6, sway * 1.05 + 0.15, ty + 0.55, tz - 0.2, DR_S)
+    hy = y + 2.6
+    P.box(-1.8, hy, -3.6, 1.8, hy + 3.4, -0.2, DR_B)
+    P.box(-1.1, hy + 0.1, -4.6, 1.1, hy + 1.3, -3.6, DR_B)
+    for sx in (-1, 1):
+        P.box(sx * 0.6 - 0.15, hy + 0.85, -4.65, sx * 0.6 + 0.15, hy + 1.1, -4.6, '#0c0a10')
+        P.box(sx * 0.9 - 0.45, hy + 1.65, -3.65, sx * 0.9 + 0.45, hy + 2.6, -3.6, DR_E)
+        P.box(sx * 0.9 - 0.4, hy + 2.25, -3.67, sx * 0.9 - 0.1, hy + 2.55, -3.65, DR_EL)
+        P.box(sx * 1.0 - 0.2, hy + 3.4, -1.5, sx * 1.0 + 0.2, hy + 4.2, -1.1, DR_S)
+    k = math.sin(math.radians(wing))
+    for sx in (-1, 1):                                                         # wings in 3 stepped segments
+        for i in range(3):
+            d0, d1 = 1.4 + i, 2.4 + i
+            dy = k * (d0 + 0.5 - 1.4)
+            x1, x2 = sorted((sx * d0, sx * d1))
+            P.box(x1, y + 2.85 + dy, 0.15, x2, y + 3.15 + dy, 0.45, DR_D)
+            P.box(x1, y + 2.95 + dy, 0.45, x2, y + 3.05 + dy, 2.4 - 0.3 * i, DR_W)
+        x1, x2 = sorted((sx * 3.6, sx * 4.4))
+        P.box(x1, y + 2.95 + k * 2.6, 1.8, x2, y + 3.05 + k * 2.6, 2.9, DR_W)
+
+@redesign("baby_dragon")
+def _(m):
+    """Flies smooth circles round your head: turns 22.5 degrees a frame, wings flapping."""
+    WING = [22.5, 45.0, 22.5, 0.0, -22.5, 0.0]
+    N, R = 16, 3.2
+    for k in range(N):
+        phi = 2 * math.pi * k / N
+        x, z = R * math.cos(phi), R * math.sin(phi)
+        vx, vz = -math.sin(phi), math.cos(phi)
+        A = round(math.degrees(math.atan2(-vx, -vz)) / 22.5) * 22.5             # heading as a y rotation
+        q = int(round(-A / 90.0)); r = A + 90 * q
+        if r > 45: q += 1; r -= 90
+        if r < -45: q -= 1; r += 90
+        y = 6.6 + 0.5 * math.sin(2 * phi)
+        P = Pose(m, f"dr{k}", dx=x, dz=z, q=q)
+        flying_ender_dragon(_YRot(P, r, (0.0, y + 2.0, 0.5)), y, WING[k % len(WING)], math.sin(phi * 2))
+    m.animate(('show', 'dr', N), frames=N, frametime=2, interpolate=False)
+
 # removed on request
 D[:] = [d for d in D if d[0] not in ("tilted_crown", "hen_buddy", "taggy_buddy")]
