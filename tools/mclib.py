@@ -37,6 +37,27 @@ class Tex:
         return np.array(Image.fromarray(np.ascontiguousarray(p)).resize((pw, ph), Image.NEAREST))
 
 
+class TexQ(Tex):
+    """A Tex box turned by q quarter turns about y (so whole textured models can face any of 4 ways).
+    Geometric face -> source face; up/down patches are turned in-plane."""
+    STEP = {"east": "north", "south": "east", "west": "south", "north": "west", "up": "up", "down": "down"}
+    def __init__(self, base, q, name=""):
+        self.base, self.q = base, q % 4
+        self.a, self.h, self.skip = base.a, base.h, base.skip
+        self.w, self.d = (base.d, base.w) if self.q % 2 else (base.w, base.d)
+        self.u, self.v = base.u, base.v
+        self.key = (name, self.q) + base.key
+
+    def patch(self, face, pw, ph):
+        src = face
+        for _ in range(self.q):
+            src = self.STEP[src]
+        if face in ("up", "down"):
+            p = self.base.patch(src, *((ph, pw) if self.q % 2 else (pw, ph)))
+            return np.ascontiguousarray(np.rot90(p, self.q if face == "up" else -self.q))
+        return self.base.patch(src, pw, ph)
+
+
 class Model:
     def __init__(self, name, title, tier="basic"):
         self.name, self.title, self.tier = name, title, tier
@@ -170,8 +191,14 @@ class Model:
         base = np.array(self.bake())
         rng = np.random.default_rng(int(hashlib.md5(self.name.encode()).hexdigest()[:8], 16))
         out = base.copy()
+        shows = [fx for fx in (self.anim or {}).get('fx', ()) if fx[0] == 'show']
         for i, (w, h, c, d) in enumerate(self._paint_order):
             if isinstance(c, Tex):
+                for _, prefix, n in shows:     # 'show': copy k of a textured group is only visible on frame k
+                    nm = c.key[0] if isinstance(c.key[0], str) else ''
+                    if nm.startswith(prefix) and nm[len(prefix):].isdigit() and int(nm[len(prefix):]) != f % n:
+                        x, y = self._pos[i]
+                        out[y:y + h, x:x + w] = 0
                 continue
             t = self.frame_tint(c, f)
             p = paint(w, h, c, d, rng, tint=t)
@@ -214,6 +241,8 @@ class Model:
                             "fixed": {"scale": [0.5] * 3}}}
 
     def render_elements(self, tex=None):
+        if tex is None and self.anim and any(fx[0] == 'show' for fx in self.anim['fx']):
+            tex = self.frame_atlas(0)          # still pictures show one pose, not every copy at once
         arr = np.array(self.bake()) if tex is None else tex
         out = []
         for bx, fu in zip(self.boxes, self.face_uv):

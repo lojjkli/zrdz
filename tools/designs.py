@@ -8504,3 +8504,72 @@ def _attached(fn, name):
     return run
 
 D[:] = [(n, t, tier, _attached(fn, n)) for (n, t, tier, fn) in D]
+
+
+# ======================================================================
+# Wither Crown v3: real Minecraft wither texture, and a mini wither that
+# flies circles round the head (16 poses; the animated texture shows one
+# pose per frame, so it works in vanilla with no mods).
+# ======================================================================
+from mclib import TexQ
+WITHER_TEX = _os.path.join(_os.path.dirname(__file__), "textures", "wither.png")
+
+# vanilla WitherBossModel parts: (texOffs u, v, box X, Y, Z (Java units, Y down), size w, h, d)
+WITHER_PARTS = [
+    (0, 0, -4, -4, -4, 8, 8, 8),             # centre head
+    (32, 0, -12, 0, -4, 6, 6, 6),            # right head
+    (32, 0, 6, 0, -4, 6, 6, 6),              # left head
+    (0, 16, -10, 3.9, -0.5, 20, 3, 3),       # shoulders
+    (0, 22, -2, 6.9, -0.5, 3, 10, 3),        # spine
+    (24, 22, -6, 8.4, 0.0, 11, 2, 2),        # ribs
+    (24, 22, -6, 10.9, 0.0, 11, 2, 2),
+    (24, 22, -6, 13.4, 0.0, 11, 2, 2),
+    (12, 22, -2, 16.9, 1.5, 3, 6, 3),        # tail
+]
+
+def mini_wither(m, cx, cy, cz, s, ang, name):
+    """Vanilla wither at scale s, centred on (cx, cy, cz), turned `ang` degrees about y
+    (a multiple of 22.5). Its front faces -z at ang = 0."""
+    q = int(round(-ang / 90.0)); r = ang + 90 * q          # quarter turns + a legal leftover (-45..45)
+    if r > 45:
+        q += 1; r -= 90
+    if r < -45:
+        q -= 1; r += 90
+    for (u, v, X, Y, Z, w, h, d) in WITHER_PARTS:
+        x1, x2 = -(X + w) * s, -X * s                          # Java X is mirrored
+        y1, y2 = (9.5 - Y - h) * s, (9.5 - Y) * s              # Y down -> up, centred on the body
+        z1, z2 = Z * s, (Z + d) * s
+        for _ in range(q % 4):                                 # quarter turn: (x, z) -> (-z, x)
+            x1, x2, z1, z2 = -z2, -z1, x1, x2
+        tex = TexQ(Tex(WITHER_TEX, u, v, w, h, d, (), name), q, name)
+        m.box(cx + x1, cy + y1, cz + z1, cx + x2, cy + y2, cz + z2, tex,
+              rot=('y', r, (cx, cy, cz)) if r else None)
+
+_crown_only = dict((n, f) for n, _, _, f in D)["wither_crown"]
+
+@redesign("wither_crown")
+def _(m):
+    # crown band and spikes from the redone version, but the three skulls use the real wither heads
+    K, KD, KL = '#2b2b2f', '#18181b', '#3d3d43'
+    band(m, 3.6, 4.8, K, 4.6)
+    band(m, 3.6, 3.85, KD, 4.7)
+    band(m, 4.6, 4.8, KL, 4.7)
+    for i in range(12):
+        a = i / 12 * 2 * math.pi
+        x, z = 4.4 * math.sin(a), 4.4 * math.cos(a)
+        if z < -2.0:
+            continue
+        h = 1.2 if i % 2 else 0.7
+        x, z = max(-4.4, min(4.4, x)), max(-4.4, min(4.4, z))
+        m.box(x - 0.3, 4.8, z - 0.3, x + 0.3, 4.8 + h, z + 0.3, K)
+        m.box(x - 0.15, 4.8 + h, z - 0.15, x + 0.15, 4.8 + h + 0.4, z + 0.15, KL)
+    for (cx, cz, sz, u, n) in ((0.0, -3.1, 3.0, 0, 8), (-3.1, -2.8, 2.1, 32, 6), (3.1, -2.8, 2.1, 32, 6)):
+        m.box(cx - sz / 2, 4.8, cz - sz / 2, cx + sz / 2, 4.8 + sz, cz + sz / 2, Tex(WITHER_TEX, u, 0, n, n, n, (), "wskull"))
+    # the flying wither: 16 poses round the head, bobbing up and down
+    N, R, s = 16, 9.0, 0.3
+    for k in range(N):
+        phi = 2 * math.pi * k / N
+        x, z = R * math.cos(phi), R * math.sin(phi)
+        y = 7.8 + 0.8 * math.sin(2 * phi)
+        mini_wither(m, x, y, z, s, 180.0 - 22.5 * k, f"wo{k}")
+    m.animate(('show', 'wo', N), frames=N, frametime=3, interpolate=False)
