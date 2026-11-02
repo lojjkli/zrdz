@@ -11158,7 +11158,7 @@ _mcl.FLAT.update({WG_BONE, WG_SKIN}) if isinstance(_mcl.FLAT, set) else None
 
 def clean_wings(P, y, a):
     """One straight wing per side tilted by a: thin overlapping slices so it reads as one clean plate."""
-    L, root, n = 3.1, 1.3, 12
+    L, root, n = 3.1, 1.3, 10
     ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
     for sx in (-1, 1):
         for i in range(n):
@@ -11173,17 +11173,17 @@ def clean_wings(P, y, a):
 
 @redesign("baby_dragon")
 def _(m):
-    """Circles round your head, turning smoothly, clean wings beating up and down. 32 frames, seamless."""
-    N = 32
-    BEAT = [30.0 * math.cos(2 * math.pi * j / 8) for j in range(8)]          # 8-frame beat, 4 per loop
+    """Circles round your head, turning smoothly, clean wings beating up and down. 40 frames, seamless."""
+    N = 40
+    BEAT = [30.0 * math.cos(2 * math.pi * j / 8) for j in range(8)]          # 8-frame beat, 5 per loop
     def pos(t):
         return 3.6 * math.cos(t), 3.6 * math.sin(t), 6.6 + 0.2 * math.sin(2 * t)
     for k in range(N):
         t = 2 * math.pi * k / N
         x, z, y = pos(t)
         x2, z2, _ = pos(t + 0.005)
-        A = round(math.degrees(math.atan2(-(x2 - x), -(z2 - z))) / 22.5) * 22.5
-        q = int(round(-A / 90.0)); r = A + 90 * q
+        A = math.degrees(math.atan2(-(x2 - x), -(z2 - z)))                   # exact heading (needs 1.21.6+ any-angle rotation)
+        q = int(round(-A / 90.0)); r = round(A + 90 * q, 2)
         if r > 45: q += 1; r -= 90
         if r < -45: q -= 1; r += 90
         P = _YRot(Pose(m, f"dr{k}", dx=x, dz=z, q=q), r, (0.0, y + 2.0, 0.5))
