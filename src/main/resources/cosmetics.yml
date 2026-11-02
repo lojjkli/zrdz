@@ -416,7 +416,7 @@ tralalero:
   category: "Memes"
 tung_tung:
   name: "Tung Tung Buddy"
-  category: "Animated"
+  category: "Memes"
 ballerina_cappuccina:
   name: "Ballerina Cappuccina"
   category: "Memes"
@@ -1542,3 +1542,6 @@ hot_air_balloon_hat:
 tiny_island_hat:
   name: "Tiny Island"
   category: "Hats & Caps"
+fat_ender_dragon:
+  name: "Fat Ender Dragon"
+  category: "Animated"
