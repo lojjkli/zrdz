@@ -9177,14 +9177,15 @@ def _tex(name):
 class Pose:
     """Proxy model: plain colours become PTex named `name` (one 'show' frame copy), optionally moved
     and turned q quarter turns about y through (cx, cz)."""
-    def __init__(self, m, name, dx=0.0, dy=0.0, dz=0.0, q=0, cx=0.0, cz=0.0):
+    def __init__(self, m, name, dx=0.0, dy=0.0, dz=0.0, q=0, cx=0.0, cz=0.0, sy=1.0, fy=0.0, sxz=1.0):
         self.m, self.name, self.dx, self.dy, self.dz, self.q, self.cx, self.cz = m, name, dx, dy, dz, q % 4, cx, cz
+        self.sy, self.fy, self.sxz = sy, fy, sxz          # squash/stretch: y scaled about floor fy, x/z about (cx, cz)
 
     def _pt(self, x, y, z):
-        x, z = x - self.cx, z - self.cz
+        x, z = (x - self.cx) * self.sxz, (z - self.cz) * self.sxz
         for _ in range(self.q):
             x, z = -z, x
-        return x + self.cx + self.dx, y + self.dy, z + self.cz + self.dz
+        return x + self.cx + self.dx, self.fy + (y - self.fy) * self.sy + self.dy, z + self.cz + self.dz
 
     def box(self, x1, y1, z1, x2, y2, z2, c, rot=None, flat=False):
         a, b = self._pt(x1, y1, z1), self._pt(x2, y2, z2)
@@ -13706,6 +13707,114 @@ redesign("creeper_buddy")(_mob_idle2(_ORIG_ANIMAL["creeper_buddy"], acts(L_(), [
 redesign("iron_golem_buddy")(_mob_idle2(_ORIG_ANIMAL["iron_golem_buddy"], acts(L_(a=30, h=20), ND(a=12), R_(a=30, h=20), rest=30), **SM))
 redesign("slime_buddy")(_mob_idle(_ORIG_ANIMAL["slime_buddy"], [({}, 40), ({'_hop': 0.9}, 2, 6), ({}, 4, 6), ({'_hop': 0.9}, 2, 6), ({}, 30, 6)],
                                   steps=6, step_t=1, ft=1))
+
+# ---------------- round 21: flying baby dragon (always flapping, bobs with each wing beat), frog princess real jump ----------------
+@redesign("baby_dragon")
+def _(m):
+    y = 4.0
+    BOB = [0.0, 0.22, 0.44, 0.66]                       # body height levels: each down-stroke lifts it, it sinks on the up-stroke
+    for b, dy in enumerate(BOB):
+        P = Pose(m, f"bb{b}", dy=dy)
+        P.box(-1.5, y + 0.9, -0.5, 1.5, y + 3.2, 2.5, DR_B)                      # chubby body
+        P.box(-1.2, y + 0.85, -0.3, 1.2, y + 0.95, 2.2, DR_D)                    # belly plate
+        for sx in (-1, 1):                                                       # stubby legs, dangling a bit
+            for z1 in (-0.2, 1.6):
+                P.box(sx * 0.7 - 0.4, y + 0.55, z1, sx * 0.7 + 0.4, y + 1.0, z1 + 0.75, DR_B)
+        for i, z in enumerate((0.3, 1.2)):                                       # two little back spikes
+            P.box(-0.15, y + 3.2, z, 0.15, y + 3.55 - 0.1 * i, z + 0.4, DR_S)
+        tz, ty = 2.5, y + 1.6
+        for r_, l in ((0.55, 1.0), (0.4, 0.9), (0.28, 0.8)):                    # short tail
+            P.box(-r_, ty - r_, tz, r_, ty + r_, tz + l, DR_B)
+            tz += l; ty += 0.15
+        P.box(-0.15, ty + 0.1, tz - 0.5, 0.15, ty + 0.5, tz - 0.15, DR_S)
+    hy = y + 2.5
+    YAW = [0.0, 6.0, 12.0, 18.0, 24.0, 30.0, -6.0, -12.0, -18.0, -24.0, -30.0]
+    for k, yaw in enumerate(YAW):                                                # big baby head: per glance and per height
+        for b, dy in enumerate(BOB):
+            P = Pose(m, f"bh{k * len(BOB) + b}", dy=dy)
+            hr = ('y', yaw, (0.0, hy, -0.4)) if yaw else None
+            B = lambda x1, y1, z1, x2, y2, z2, c: P.box(x1, y1, z1, x2, y2, z2, c, rot=hr)
+            B(-2.0, hy, -3.8, 2.0, hy + 3.6, -0.2, DR_B)
+            B(-1.7, hy + 3.6, -3.5, 1.7, hy + 3.8, -0.5, DR_B)
+            B(-1.0, hy + 0.15, -4.5, 1.0, hy + 1.2, -3.8, DR_B)
+            for sx in (-1, 1):
+                B(sx * 0.5 - 0.12, hy + 0.85, -4.55, sx * 0.5 + 0.12, hy + 1.05, -4.5, '#0c0a10')
+                B(sx * 1.0 - 0.6, hy + 1.6, -3.86, sx * 1.0 + 0.6, hy + 2.9, -3.8, EYE_L)
+                B(sx * 1.0 - 0.6 + 0.15, hy + 1.6, -3.88, sx * 1.0 + 0.45, hy + 2.3, -3.86, EYE_M)
+                B(sx * 1.0 - 0.4, hy + 2.4, -3.9, sx * 1.0 - 0.1, hy + 2.7, -3.88, '#ffffff')
+                B(sx * 1.0 + 0.15, hy + 1.85, -3.9, sx * 1.0 + 0.3, hy + 2.0, -3.88, '#ffffff')
+                B(sx * 1.55 - 0.3, hy + 1.2, -3.84, sx * 1.55 + 0.3, hy + 1.4, -3.8, '#7a5a9a')
+                B(sx * 1.1 - 0.2, hy + 3.8, -1.6, sx * 1.1 + 0.2, hy + 4.4, -1.2, DR_S)
+    # one wing beat, 16 ticks: (wing angle, body height). Wings sweep down fast (lift), come up slower (sink)
+    WA = [-14.0, -6.0, 4.0, 14.0, 24.0, 32.0, 38.0]
+    beat = [(6, 1), (5, 2), (3, 3), (1, 3), (0, 3), (0, 3), (1, 3), (2, 2),          # down-stroke: rises
+            (3, 2), (3, 1), (4, 1), (4, 1), (5, 0), (5, 0), (6, 0), (6, 1)]           # up-stroke: sinks
+    wcombo = sorted(set(beat))
+    for k, (w, b) in enumerate(wcombo):                                          # wings ride with the body
+        nm, ang, dy = f"bw{k}", WA[w], BOB[b]
+        for sx in (-1, 1):
+            sp = (sx * 1.4, y + 2.9 + dy, 0.2)
+            x1, x2 = sorted((sx * 1.4, sx * 4.2))
+            ft = FaceTex({'up': (BABY_WING, 0, 0, 16, 12), 'down': (BABY_WING, 0, 0, 16, 12)}, nm, f"w{sx}",
+                         flipx=('up', 'down') if sx < 0 else ())
+            m.box(x1, y + 2.86 + dy, 0.2, x2, y + 2.94 + dy, 2.3, ft, rot=('z', round(sx * ang, 2), sp))
+    # head track (yaw index per tick); the wings never stop
+    def glance(idx, hold):
+        return idx + [idx[-1]] * hold + idx[::-1][1:] + [0]
+    head = [0] * 40 + glance([1, 2, 3, 4, 5], 26) + [0] * 30 + glance([6, 7, 8, 9, 10], 26)
+    L = -(-len(head) // 16) * 16
+    head += [0] * (L - len(head))
+    seq = [(head[t], beat[t % 16]) for t in range(L)]
+    combos, times = [], []
+    for h, (w, b) in seq:
+        c = (h, w, b)
+        if c not in combos:
+            combos.append(c)
+        i = combos.index(c)
+        if times and times[-1][0] == i:
+            times[-1] = (i, times[-1][1] + 1)
+        else:
+            times.append((i, 1))
+    m.animate(('show', 'bb', len(BOB), [c[2] for c in combos]),
+              ('show', 'bh', len(YAW) * len(BOB), [c[0] * len(BOB) + c[2] for c in combos]),
+              ('show', 'bw', len(wcombo), [wcombo.index((c[1], c[2])) for c in combos]),
+              frames=len(combos), frametime=1, interpolate=False, times=times)
+
+@redesign("froggie_princess")
+def _(m):
+    G, GD, GEM, GEM2 = '#f2c33a', '#b8861c', '#ff6fb5', '#7fd6ff'
+    GLOW.add('#fff6b0')
+    one = lambda st, t=1: (st, t, 1)                      # a key held t ticks, no in-betweens (hand-timed frames)
+    air = [0.0, 0.55, 1.0, 1.35, 1.6, 1.75, 1.8, 1.75, 1.6, 1.35, 1.0, 0.55]            # gravity arc, 0.6 s in the air
+    sq = [0.10, 0.08, 0.05, 0.02, 0.0, -0.02, -0.02, -0.02, 0.0, 0.03, 0.06, 0.08]           # stretched going up/down, round at the top
+    def jump():
+        k = [({'_sq': -0.06}, 1, 2), ({'_sq': -0.14}, 3, 2), ({'_sq': -0.20}, 2, 1)]         # crouch down, wait for it...
+        k += [one({'_hop': h, '_sq': s}) for h, s in zip(air, sq)]
+        k += [one({'_sq': -0.20}, 2), one({'_sq': -0.12}), one({'_sq': 0.05}), one({'_sq': 0.02}), ({}, 1, 3)]   # squash, wobble, settle
+        return k
+    keys = ([({}, 40, 1), ({'_blink': 1}, 3, 1), ({}, 34, 1)] + jump() + [({}, 30, 3), ({'_blink': 1}, 3, 1), ({}, 4, 1),
+            ({'_blink': 1}, 3, 1), ({}, 36, 1)] + jump() + [({}, 24, 3)])
+    states, times = timeline(*keys, step_t=1)
+    for k, st in enumerate(states):
+        dy, blink, sy = st.get('_hop', 0.0), st.get('_blink', 0) > 0.5, 1.0 + st.get('_sq', 0.0)
+        nm = f"fp{k}"
+        P = Pose(m, nm, dy=dy, sy=sy, fy=4.6, sxz=1.0 + (1.0 - sy) * 0.5, cx=0.0, cz=-1.3)
+        J = vanilla_frog(P, 0, 4.6, -0.2, s=0.8, bow=False, name=nm, blink=blink)
+        cz, hw, base = -1.3, 2.0, 15.5
+        J(-hw, base - 1.2, cz - hw, 2 * hw, 1.2, 0.35, G); J(-hw, base - 1.2, cz + hw - 0.35, 2 * hw, 1.2, 0.35, G)
+        J(-hw, base - 1.2, cz - hw, 0.35, 1.2, 2 * hw, G); J(hw - 0.35, base - 1.2, cz - hw, 0.35, 1.2, 2 * hw, G)
+        for x, z in ((-hw, cz - hw), (hw - 0.45, cz - hw), (-hw, cz + hw - 0.45), (hw - 0.45, cz + hw - 0.45), (-0.225, cz - hw),
+                     (-0.225, cz + hw - 0.45), (-hw, cz - 0.225), (hw - 0.45, cz - 0.225)):
+            J(x, base - 2.1, z, 0.45, 0.9, 0.45, G)
+            J(x + 0.05, base - 2.45, z + 0.05, 0.35, 0.35, 0.35, GD)
+        J(-0.4, base - 0.95, cz - hw - 0.07, 0.8, 0.6, 0.07, '#ffd0ea' if dy > 1.5 else GEM)        # gem glints at the top
+        for x in (-1.45, 0.95):
+            J(x, base - 0.9, cz - hw - 0.06, 0.5, 0.45, 0.06, GEM2)
+        J(-hw + 0.35, base - 0.3, cz - hw + 0.35, 2 * hw - 0.7, 0.3, 2 * hw - 0.7, '#e0609c')
+        if dy > 1.5:                                                                                # sparkles pop off the crown
+            for sx, sy_ in ((2.7, base - 3.0), (-2.9, base - 2.6)):
+                J(sx - 0.25, sy_, cz - hw, 0.5, 0.12, 0.12, '#fff6b0'); J(sx - 0.06, sy_ - 0.2, cz - hw, 0.12, 0.5, 0.12, '#fff6b0')
+    m.animate(('show', 'fp', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
