@@ -12791,8 +12791,9 @@ def _(m):
     G, GD, GEM, GEM2 = '#f2c33a', '#b8861c', '#ff6fb5', '#7fd6ff'
     GLOW.add('#fff6b0')
     hop = [({'_hop': 0.4}, 2, 1), ({'_hop': 0.8}, 2, 1), ({'_hop': 1.05}, 3, 1), ({'_hop': 0.8}, 2, 1), ({'_hop': 0.4}, 2, 1)]
-    keys = [({}, 70, 1), ({'_blink': 1}, 3, 1), ({}, 60, 1)] + hop + [({}, 50, 1), ({'_blink': 1}, 3, 1), ({}, 4, 1), ({'_blink': 1}, 3, 1), ({}, 40, 1)]
-    states, times = timeline(*keys)
+    keys = [({}, 40, 1), ({'_blink': 1}, 3, 1), ({}, 36, 1), ({'_hop': 1.05}, 2, 6), ({}, 30, 6), ({'_blink': 1}, 3, 1), ({}, 4, 1),
+            ({'_blink': 1}, 3, 1), ({}, 30, 1)]
+    states, times = timeline(*keys, step_t=1)
     for k, st in enumerate(states):
         dy, blink = st.get('_hop', 0.0), st.get('_blink', 0) > 0.5
         nm = f"fp{k}"
@@ -12812,7 +12813,7 @@ def _(m):
         if dy > 0.9:                                                                                # sparkles pop off the crown
             for sx, sy in ((2.7, base - 3.0), (-2.9, base - 2.6)):
                 J(sx - 0.25, sy, cz - hw, 0.5, 0.12, 0.12, '#fff6b0'); J(sx - 0.06, sy - 0.2, cz - hw, 0.12, 0.5, 0.12, '#fff6b0')
-    m.animate(('show', 'fp', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+    m.animate(('show', 'fp', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 # --- Sword through head v2: the real Minecraft diamond sword item (16x16 sprite, 1 px thick), stuck through sideways
 SWORD_IMG = _np.array(_Image.open(_os.path.join(_os.path.dirname(__file__), "textures", "diamond_sword.png")).convert('RGBA'))
@@ -12841,8 +12842,8 @@ def _(m):
     sprite_voxels(m, SWORD_IMG, 2.2, 1.2, 0.0, s, s, "dsword", rot=("z", 45.0))
 
 # --- vanilla-mob buddies get the same slow idles (creeper, iron golem, slime, snow golem, snowman)
-def _mob_idle(old, keys, axis='y'):
-    states, times = timeline(*keys)
+def _mob_idle(old, keys, axis='y', steps=3, step_t=2, ft=3):
+    states, times = timeline(*keys, steps=steps, step_t=step_t)
     def fn(m):
         global mob
         real = mob
@@ -12860,7 +12861,7 @@ def _mob_idle(old, keys, axis='y'):
             old(m)
         finally:
             mob = real
-        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=ft, interpolate=False, times=times)
     return fn
 
 _cur = dict((n, f) for n, _, _, f in D)
@@ -12899,8 +12900,8 @@ def _(m):
     for y in (5.4, 6.4):
         m.box(-0.25, y, -2.66, 0.25, y + 0.5, -2.6, K)                                    # coal buttons
     m.box(-2.0, 7.0, -2.0, 2.0, 7.6, 2.0, R)                                              # scarf
-    states, times = timeline(({}, 70), ({'head': 30}, 30), ({}, 40), ({'arm': 1}, 6, 2), ({'arm': 0}, 4, 2), ({'arm': 1}, 6, 2),
-                             ({}, 50), ({'head': -30}, 30))
+    states, times = timeline(({}, 36), ({'head': 30}, 16, 6), ({}, 24, 6), ({'arm': 1}, 3, 4), ({'arm': 0}, 2, 4), ({'arm': 1}, 3, 4),
+                             ({}, 30, 4), ({'head': -30}, 16, 6), steps=6, step_t=1)
     for f, st in enumerate(states):
         P = Pose(m, f"sn{f}")
         a = round(st.get('head', 0.0), 2)
@@ -12919,7 +12920,7 @@ def _(m):
         for sd in (-1, 1):                                                                # stick arms, one waves
             ang = 22.5 * sd + (22.5 * sd * wv if sd > 0 else 0.0)
             P.box(*xs(sd, 2.6, 4.6)[:1], 6.4, -0.15, xs(sd, 2.6, 4.6)[1], 6.7, 0.15, '#6b4326', rot=('z', round(ang, 2), (sd * 2.6, 6.5, 0)))
-    m.animate(('show', 'sn', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+    m.animate(('show', 'sn', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 # --- Bat buddy v2: chibi bat, big head and ears, sparkly eyes, smooth wings that stretch and flap now and then
 def _bat_wing_img():
@@ -12963,9 +12964,9 @@ def _(m):
     m.box(-0.3, y0 + 2.55, -1.47, -0.15, y0 + 2.75, -1.4, '#ffffff'); m.box(0.15, y0 + 2.55, -1.47, 0.3, y0 + 2.75, -1.4, '#ffffff')  # fangs
     for sd in (-1, 1):
         m.box(sd * 1.05 - 0.25, y0 + 2.7, -1.46, sd * 1.05 + 0.25, y0 + 2.9, -1.4, '#ff9fb4')   # blush
-    keys = [({'w': 0}, 60), ({'_blink': 1}, 3, 1), ({'w': 0}, 40, 1), ({'w': 1}, 20, 3), ({'w': 0.4}, 3, 2), ({'w': 1}, 3, 2),
-            ({'w': 0.4}, 3, 2), ({'w': 1}, 10, 2), ({'w': 0}, 50, 3)]
-    states, times = timeline(*keys)
+    keys = [({'w': 0}, 40), ({'_blink': 1}, 3, 1), ({'w': 0}, 24, 1), ({'w': 1}, 10, 6), ({'w': 0.4}, 2, 3), ({'w': 1}, 2, 3),
+            ({'w': 0.4}, 2, 3), ({'w': 1}, 6, 3), ({'w': 0}, 30, 6)]
+    states, times = timeline(*keys, step_t=1)
     for f, st in enumerate(states):
         nm = f"bt{f}"
         P = Pose(m, nm)
@@ -12984,7 +12985,7 @@ def _(m):
                 P.box(sd * 0.7 - 0.38, y0 + 3.15, -1.46, sd * 0.7 + 0.38, y0 + 3.95, -1.4, K)    # big shiny eyes
                 P.box(sd * 0.7 - 0.25, y0 + 3.6, -1.48, sd * 0.7 - 0.05, y0 + 3.8, -1.46, '#ffffff')
                 P.box(sd * 0.7 + 0.1, y0 + 3.3, -1.48, sd * 0.7 + 0.2, y0 + 3.4, -1.46, '#ffffff')
-    m.animate(('show', 'bt', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+    m.animate(('show', 'bt', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 # --- Shiba buddy: ears sit properly on the head (were floating)
 _shiba_old = dict((n, f) for n, _, _, f in D)["shiba_buddy"]
@@ -13466,8 +13467,8 @@ def _pick(st, bone):
             best = (ax, v)
     return best
 
-def _idle4(old, bones, base, keys, keep, steps=3):
-    states, times = timeline(*keys, steps=steps)
+def _idle4(old, bones, base, keys, keep, steps=3, step_t=2, ft=3):
+    states, times = timeline(*keys, steps=steps, step_t=step_t)
     def fn(m):
         global bmob
         real = bmob
@@ -13495,7 +13496,7 @@ def _idle4(old, bones, base, keys, keep, steps=3):
             old(m)
         finally:
             bmob = real
-        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=ft, interpolate=False, times=times)
     return fn
 
 LOOK_L = lambda b='head', a=35, h=30: [({f'{b}:y': a}, h)]
@@ -13532,8 +13533,8 @@ for _n, (_bn, _bs, _ks) in IDLE4.items():
 def _(m):
     """Snow golem: body drawn once; the pumpkin head and the waving arm are copied per pose."""
     s = 0.2
-    states, times = timeline(*acts([({'head:y': 30}, 36)], [({'arm:z': 1}, 6, 2), ({'arm:z': -1}, 6, 2), ({'arm:z': 1}, 6, 2)],
-                                   [({'head:y': -30}, 36)], rest=44), steps=2)
+    states, times = timeline(*acts([({'head:y': 30}, 16)], [({'arm:z': 1}, 3, 4), ({'arm:z': -1}, 3, 4), ({'arm:z': 1}, 3, 4)],
+                                   [({'head:y': -30}, 16)], rest=24), steps=6, step_t=1)
     hy = 4.6 + (24 - 4) * s
     r = 3.75 * s * 2.2
     body = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
@@ -13550,11 +13551,11 @@ def _(m):
         pk.px = 0.5                                                                      # tiny in game: half the texels is plenty
         ang = round(st.get('head:y', 0.0), 2)
         m.box(-r, hy, -r, r, hy + 2 * r, r, pk, rot=('y', ang, (0, hy, 0)) if ang else None)
-    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 # vanilla-mob buddies: body drawn once, only the head copied per pose
-def _mob_idle2(old, keys):
-    states, times = timeline(*keys)
+def _mob_idle2(old, keys, steps=3, step_t=2, ft=3):
+    states, times = timeline(*keys, steps=steps, step_t=step_t)
     def fn(m):
         global mob
         real = mob
@@ -13572,7 +13573,7 @@ def _mob_idle2(old, keys):
             old(m)
         finally:
             mob = real
-        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=ft, interpolate=False, times=times)
     return fn
 
 redesign("creeper_buddy")(_mob_idle2(_ORIG_ANIMAL["creeper_buddy"], acts(LOOK_L(), [({'head:x': -18}, 40)], LOOK_R(), TILT(a=15), rest=44)))
@@ -13618,7 +13619,7 @@ def _(m):
         tz += l; ty += 0.15
     m.box(-0.15, ty + 0.1, tz - 0.5, 0.15, ty + 0.5, tz - 0.15, DR_S)
     hy = y + 2.5
-    YAW = [0.0, 15.0, 30.0, -15.0, -30.0]
+    YAW = [0.0, 6.0, 12.0, 18.0, 24.0, 30.0, -6.0, -12.0, -18.0, -24.0, -30.0]
     for k, yaw in enumerate(YAW):                                                # big baby head, copied per glance
         P = Pose(m, f"bh{k}")
         hr = ('y', yaw, (0.0, hy, -0.4)) if yaw else None
@@ -13634,7 +13635,7 @@ def _(m):
             B(sx * 1.0 + 0.15, hy + 1.85, -3.9, sx * 1.0 + 0.3, hy + 2.0, -3.88, '#ffffff')
             B(sx * 1.55 - 0.3, hy + 1.2, -3.84, sx * 1.55 + 0.3, hy + 1.4, -3.8, '#7a5a9a')       # soft blush
             B(sx * 1.1 - 0.2, hy + 3.8, -1.6, sx * 1.1 + 0.2, hy + 4.4, -1.2, DR_S)              # nub horns
-    WA = [-6.0, 10.0, 24.0, 36.0]
+    WA = [-6.0, 0.0, 6.0, 12.0, 18.0, 24.0, 30.0, 36.0]
     for k, ang in enumerate(WA):                                                 # small smooth wings
         nm = f"bw{k}"
         for sx in (-1, 1):
@@ -13643,19 +13644,19 @@ def _(m):
             ft = FaceTex({'up': (BABY_WING, 0, 0, 16, 12), 'down': (BABY_WING, 0, 0, 16, 12)}, nm, f"w{sx}",
                          flipx=('up', 'down') if sx < 0 else ())
             m.box(x1, y + 2.86, 0.2, x2, y + 2.94, 2.3, ft, rot=('z', round(sx * ang, 2), sp))
-    beat = [(1, 3), (2, 3), (3, 6), (2, 3), (1, 3), (0, 6)]                       # one slow, soft flap
+    beat = [(w, 1) for w in (1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, 0)]       # one soft flap, 16 smooth frames
     seq = []
     def flaps(n, head):
         for _ in range(n):
             seq.extend((head, w, t) for w, t in beat)
     def turn(path, hold):
         for h in path[:-1]:
-            seq.append((h, 1, 3))
+            seq.append((h, 1, 1))
         seq.append((path[-1], 1, hold))
-    seq.append((0, 1, 60)); flaps(2, 0); seq.append((0, 1, 60))
-    turn([1, 2], 45); turn([1, 0], 50)
-    flaps(1, 0); seq.append((0, 1, 70))
-    turn([3, 4], 45); turn([3, 0], 40)
+    seq.append((0, 1, 30)); flaps(2, 0); seq.append((0, 1, 30))
+    turn([1, 2, 3, 4, 5], 24); turn([4, 3, 2, 1, 0], 24)
+    flaps(1, 0); seq.append((0, 1, 34))
+    turn([6, 7, 8, 9, 10], 24); turn([9, 8, 7, 6, 0], 20)
     combos, times = [], []
     for h, w, t in seq:
         if (h, w) not in combos:
@@ -13666,7 +13667,40 @@ def _(m):
         else:
             times.append((i, t))
     m.animate(('show', 'bh', len(YAW), [c[0] for c in combos]), ('show', 'bw', len(WA), [c[1] for c in combos]),
-              frames=len(combos), frametime=3, interpolate=False, times=times)
+              frames=len(combos), frametime=1, interpolate=False, times=times)
+
+# ---------------- round 20: normal speed, smooth 20 fps motion (1 tick per frame), short natural pauses ----------------
+SM = dict(steps=6, step_t=1, ft=1)                                                  # a move takes ~0.3 s in 6 smooth frames
+L_ = lambda b='head', a=35, h=16: [({f'{b}:y': a}, h)]
+R_ = lambda b='head', a=35, h=16: [({f'{b}:y': -a}, h)]
+T_ = lambda b='head', a=20, h=16: [({f'{b}:z': a}, h)]
+NB = lambda b='head', a=-30, n=3: [({f'{b}:x': a}, 6)] + sum([[({f'{b}:x': a + 7}, 2, 2), ({f'{b}:x': a}, 2, 2)] for _ in range(n)], [])
+ND = lambda b='head', a=16: [({f'{b}:x': a}, 3), ({f'{b}:x': 0.01}, 2, 3), ({f'{b}:x': a}, 3, 3)]
+WG = lambda b='tail', a=30, n=4: sum([[({f'{b}:z': a}, 1, 2), ({f'{b}:z': -a}, 1, 2)] for _ in range(n)], [])
+
+IDLE5 = {
+    "pig_buddy":       (('head',), {}, acts(L_(), R_(), NB(a=-25), T_(a=18), rest=24)),
+    "sheep_buddy":     (('head',), {}, acts(L_(), NB(a=-35, n=4), R_(), T_(), rest=24)),
+    "cow_buddy":       (('head',), {}, acts(NB(a=-30, n=4), L_(a=30), NB(a=-30, n=3), R_(a=30), rest=22)),
+    "mooshroom_buddy": (('head',), {}, acts(R_(), NB(a=-28), L_(), T_(a=-18), rest=24)),
+    "polar_bear_cub":  (('head',), {}, acts(L_(h=20), T_(a=-20), R_(h=20), ND(a=-15), rest=26)),
+    "villager_buddy":  (('head',), {}, acts(L_(a=30), ND(a=15), R_(a=30), T_(a=15), rest=24)),
+    "ocelot_buddy":    (('head', 'tail1'), {}, acts(L_(), [({'tail1:z': 25}, 4, 5), ({'tail1:z': -25}, 4, 5)], R_(), T_(a=-18), rest=24)),
+    "wolf_pup":        (('head', 'tail'), {}, acts(T_(a=25), WG(), L_(a=30), T_(a=-25), WG(n=3), R_(a=30), rest=20)),
+    "chick_buddy":     (('wing0', 'wing1'), {'wing0': ('z', -5.0), 'wing1': ('z', 5.0)},
+                        acts(sum([[({'wing0:z': -40, 'wing1:z': 40}, 1, 2), ({}, 1, 2)] for _ in range(3)], []),
+                             sum([[({'wing0:z': -40, 'wing1:z': 40}, 1, 2), ({}, 1, 2)] for _ in range(2)], []), rest=34)),
+    "panda_buddy":     (('head',), {}, acts([({'head:z': 18}, 20, 8)], ND(a=-14), [({'head:z': -18}, 20, 8)], rest=20)),
+    "piglin_buddy":    (('head',), {'head': ('y', -22.5)}, acts(ND(a=15), R_(a=20, h=20), ND(a=15), rest=28)),
+}
+
+for _n, (_bn, _bs, _ks) in IDLE5.items():
+    redesign(_n)(_idle4(_ORIG_ANIMAL[_n], _bn, _bs, _ks, _n in KEEP_POSE, **(dict(SM, steps=4) if _n == "villager_buddy" else SM)))
+
+redesign("creeper_buddy")(_mob_idle2(_ORIG_ANIMAL["creeper_buddy"], acts(L_(), [({'head:x': -18}, 20)], R_(), T_(a=15), rest=26), **SM))
+redesign("iron_golem_buddy")(_mob_idle2(_ORIG_ANIMAL["iron_golem_buddy"], acts(L_(a=30, h=20), ND(a=12), R_(a=30, h=20), rest=30), **SM))
+redesign("slime_buddy")(_mob_idle(_ORIG_ANIMAL["slime_buddy"], [({}, 40), ({'_hop': 0.9}, 2, 6), ({}, 4, 6), ({'_hop': 0.9}, 2, 6), ({}, 30, 6)],
+                                  steps=6, step_t=1, ft=1))
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head

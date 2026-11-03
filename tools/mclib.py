@@ -119,7 +119,11 @@ class Model:
         return out
 
     def mcmeta(self):
-        return {"animation": {"frametime": self.anim['frametime'], "interpolate": self.anim['interpolate']}}
+        a = {"frametime": self.anim['frametime'], "interpolate": self.anim['interpolate']}
+        W, H = self.bake().size
+        if H != W:
+            a["width"], a["height"] = W, H
+        return {"animation": a}
 
     def frame_tint(self, c, f):
         """RGBA a colour should be painted with on frame f, or None to keep it."""
@@ -229,7 +233,10 @@ class Model:
             if H <= W:
                 break
             W *= 2
-        H = W
+        if self.anim and self.anim.get('times'):          # long baked animations: drop the unused rows (keeps strips small)
+            H = min(W, max(16, -(-H // 16) * 16))
+        else:
+            H = W
         atlas = np.zeros((H, W, 4), np.uint8)
         for i, (x, y) in pos.items():
             p = patches[i][1]; atlas[y:y + p.shape[0], x:x + p.shape[1]] = p
