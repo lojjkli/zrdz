@@ -11384,6 +11384,7 @@ def _idle(old, spec, N=16):
     return fn
 
 _cur = dict((n, f) for n, _, _, f in D)
+_ORIG_ANIMAL = dict(_cur)
 for _n, _sp in IDLE.items():
     redesign(_n)(_idle(_cur[_n], _sp))
 
@@ -12344,6 +12345,166 @@ def _(m):
             P.box(cx + 1.6 * math.cos(j * 3 + t * 4) - 0.15, 10.2 + 2.0 * t, 0.8 * math.sin(j * 3 + t * 4) - 0.15,
                   cx + 1.6 * math.cos(j * 3 + t * 4) + 0.15, 10.5 + 2.0 * t, 0.8 * math.sin(j * 3 + t * 4) + 0.15, '#9be7ff')
     m.animate(('show', 'wl', N), frames=N, frametime=2, interpolate=False)
+
+# ---------------- round 15: wither clear of the crown + heads glancing; dragon sits still with fast wings ----------------
+def _bump(k, start, length, amp, N):
+    """Smooth look: 0 outside the window, eases out to amp and back inside it (wraps round the loop)."""
+    t = ((k - start) % N) / length
+    return amp * math.sin(math.pi * t) if 0 <= t <= 1 else 0.0
+
+def mini_wither2(m, cx, cy, cz, s, ang, name, head_yaw=(0.0, 0.0, 0.0)):
+    """mini_wither, but each of the three heads can turn a little on its own (head_yaw degrees)."""
+    q = int(round(-ang / 90.0)); r = ang + 90 * q
+    cr, sr = math.cos(math.radians(r)), math.sin(math.radians(r))
+    for idx, (u, v, X, Y, Z, w, h, d) in enumerate(WITHER_PARTS):
+        x1, x2 = -(X + w) * s, -X * s
+        y1, y2 = (9.5 - Y - h) * s, (9.5 - Y) * s
+        z1, z2 = Z * s, (Z + d) * s
+        hy = head_yaw[idx] if idx < 3 else 0.0
+        if not hy:
+            for _ in range(q % 4):
+                x1, x2, z1, z2 = -z2, -z1, x1, x2
+            tex = TexQ(Tex(WITHER_TEX, u, v, w, h, d, (), name), q, name)
+            m.box(cx + x1, cy + y1, cz + z1, cx + x2, cy + y2, cz + z2, tex, rot=('y', r, (cx, cy, cz)) if r else None)
+            continue
+        lx, lz = (x1 + x2) / 2, (z1 + z2) / 2                     # head centre, quarter-turned like the body
+        for _ in range(q % 4):
+            lx, lz = -lz, lx
+        px, pz = cx + cr * lx + sr * lz, cz - sr * lx + cr * lz    # ... then turned with the body
+        rr, qq = r + hy, q                                        # the head's own total turn
+        if rr > 45: rr -= 90; qq -= 1
+        if rr < -45: rr += 90; qq += 1
+        hx, hz = (x2 - x1) / 2, (z2 - z1) / 2
+        if qq % 2: hx, hz = hz, hx
+        tex = TexQ(Tex(WITHER_TEX, u, v, w, h, d, (), name), qq, name)
+        m.box(px - hx, cy + y1, pz - hz, px + hx, cy + y2, pz + hz, tex, rot=('y', round(rr, 2), (px, cy, pz)) if rr else None)
+
+@redesign("wither_crown")
+def _(m):
+    """Crown; the little wither circles well clear of it, its three heads glancing round now and then."""
+    K, KD, KL = '#2b2b2f', '#18181b', '#4a4a52'
+    crown2(m, K, KD, KL, '#8fd6ff', '#5b2a6e', r=4.7, y0=3.4, h=1.5, shape='spike', ph=1.9,
+           tip='#d9d9de', us=(-2.9, -1.45, 0.0, 1.45, 2.9), tall=1.4)
+    for side in 'NESW':
+        for u in (-1.3, 1.3):
+            _side(m, side, u - 0.35, u + 0.35, 4.05, 4.2, 4.7, 4.75, '#4a3a2a')
+    N, R, s = 24, 9.0, 0.3
+    for k in range(N):
+        phi = 2 * math.pi * k / N
+        yaw = (_bump(k, 3, 6, 30.0, N) + _bump(k, 15, 5, -25.0, N),               # centre head
+               _bump(k, 8, 6, -30.0, N),                                         # right head
+               _bump(k, 18, 6, 30.0, N) + _bump(k, 1, 4, 20.0, N))               # left head
+        mini_wither2(m, R * math.cos(phi), 8.4, R * math.sin(phi), s, 180.0 - 15.0 * k, f"wo{k}", yaw)
+    m.animate(('show', 'wo', N), frames=N, frametime=2, interpolate=False)
+
+@redesign("baby_dragon")
+def _(m):
+    """Sits on your head like the fat one: wings buzzing fast, and now and then it looks round."""
+    y = 4.0                                                                    # legs stand on the head (4.6)
+    m.box(-1.4, y + 1.0, -0.6, 1.4, y + 3.3, 2.6, DR_B)                          # body
+    m.box(-1.2, y + 0.6, -0.2, 1.2, y + 1.0, 0.5, DR_B)                          # front legs
+    m.box(-1.2, y + 0.6, 1.7, 1.2, y + 1.0, 2.4, DR_B)                           # back legs
+    m.box(-0.15, y + 3.3, 0.1, 0.15, y + 3.7, 2.2, DR_S)                         # back ridge
+    tz, ty = 2.6, y + 1.7
+    for r_, l in ((0.6, 1.2), (0.42, 1.1), (0.28, 1.0)):                        # tail
+        m.box(-r_, ty - r_, tz, r_, ty + r_, tz + l, DR_B)
+        tz += l; ty += 0.1
+    N = 40
+    hy = y + 2.6
+    for k in range(N):
+        P = Pose(m, f"bd{k}")
+        yaw = round(_bump(k, 8, 10, 35.0, N) + _bump(k, 26, 9, -30.0, N), 2)     # glances left, later right
+        hr = ('y', yaw, (0.0, hy, -0.4)) if yaw else None
+        B = lambda x1, y1, z1, x2, y2, z2, c: P.box(x1, y1, z1, x2, y2, z2, c, rot=hr)
+        B(-1.8, hy, -3.6, 1.8, hy + 3.4, -0.2, DR_B)                             # head
+        B(-1.1, hy + 0.1, -4.6, 1.1, hy + 1.3, -3.6, DR_B)                       # snout
+        for sx in (-1, 1):
+            B(sx * 0.9 - 0.45, hy + 1.65, -3.65, sx * 0.9 + 0.45, hy + 2.6, -3.6, DR_E)
+            B(sx * 1.0 - 0.2, hy + 3.4, -1.5, sx * 1.0 + 0.2, hy + 4.2, -1.1, DR_S)
+        a = 22.5 * (1 - math.cos(2 * math.pi * (k % 4) / 4)) - 10.0             # fast 4-frame wing beat
+        ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+        L, root, n = 3.0, 1.3, 3
+        for sx in (-1, 1):
+            for i in range(n):
+                d0, d1 = L * i / n, L * (i + 1) / n
+                xa, xb = sorted((sx * (root + d0 * ca), sx * (root + d1 * ca)))
+                ya, yb = min(d0 * sa, d1 * sa) - 0.1, max(d0 * sa, d1 * sa) + 0.1
+                ch = 2.4 - 1.3 * ((d0 + d1) / 2) / L
+                P.box(xa, y + 3.0 + ya, 0.15, xb, y + 3.0 + yb, 0.15 + ch, WG_SKIN)
+    m.animate(('show', 'bd', N), frames=N, frametime=1, interpolate=False)
+
+# ---------------- round 16: baby animals stand naturally and do cute idle moves (no frozen walk pose) ----------------
+def _keys(*kv):
+    """Smooth curve through (t, value) keyframes over one loop, eased, with holds where values repeat."""
+    kv = list(kv) + [(1.0, kv[0][1])]
+    def f(t):
+        for (t1, a), (t2, b) in zip(kv, kv[1:]):
+            if t1 <= t <= t2:
+                u = (t - t1) / (t2 - t1) if t2 > t1 else 0.0
+                u = u * u * (3 - 2 * u)
+                return a + (b - a) * u
+        return kv[0][1]
+    return f
+
+LOOK = _keys((0.0, 0), (0.12, 0), (0.25, 1), (0.42, 1), (0.55, 0), (0.62, 0), (0.75, -1), (0.9, -1))      # glance left, pause, glance right
+HOP = _keys((0.0, 0), (0.9, 0), (0.95, 1), (1.0, 0))                                                       # one happy little hop
+WAG = lambda t: math.sin(2 * math.pi * 4 * t)                                                              # quick tail wag
+SWISH = lambda t: math.sin(2 * math.pi * 2 * t)
+GRAZE = _keys((0.0, 1), (0.08, 0.6), (0.16, 1), (0.24, 0.6), (0.32, 1), (0.45, 1), (0.6, -0.2), (0.85, -0.2))  # nibble, nibble, look up
+FLAP = _keys((0.0, 0), (0.3, 0), (0.36, 1), (0.42, 0), (0.48, 1), (0.54, 0), (0.6, 1), (0.66, 0))         # pause, then a burst of flaps
+TILT = _keys((0.0, 0), (0.15, 0), (0.3, 1), (0.55, 1), (0.7, -1), (0.9, -1))                               # curious head tilt
+NOD = _keys((0.0, 0), (0.3, 0), (0.4, 1), (0.5, 0), (0.6, 1), (0.7, 0))
+SWAY = lambda t: math.sin(2 * math.pi * t)
+
+# bone -> (axis, base, amp, curve); '_hop' -> px
+IDLE2 = {
+    "pig_buddy":        {'head': ('y', 0.0, 35.0, LOOK), '_hop': 0.6},
+    "cow_buddy":        {'head': ('x', -10.0, 20.0, GRAZE)},
+    "mooshroom_buddy":  {'head': ('y', 0.0, 35.0, LOOK)},
+    "sheep_buddy":      {'head': ('y', 0.0, 35.0, LOOK), '_hop': 0.6},
+    "chick_buddy":      {'wing0': ('z', -5.0, -40.0, FLAP), 'wing1': ('z', 5.0, 40.0, FLAP), '_hop': 0.5},
+    "wolf_pup":         {'head': ('z', 0.0, 25.0, TILT), 'tail': ('z', 0.0, 30.0, WAG)},
+    "ocelot_buddy":     {'head': ('y', 0.0, 35.0, LOOK), 'tail1': ('z', 0.0, 25.0, SWISH)},
+    "panda_buddy":      {'head': ('z', 0.0, 18.0, SWAY)},
+    "polar_bear_cub":   {'head': ('y', 0.0, 35.0, LOOK)},
+    "villager_buddy":   {'head': ('y', 0.0, 30.0, LOOK)},
+    "piglin_buddy":     {'head': ('x', 0.0, 18.0, NOD)},
+    "glow_squid_buddy": {'tentacle1': ('z', 22.5, 15.0, SWAY), 'tentacle5': ('z', -22.5, -15.0, SWAY),
+                         'tentacle3': ('x', -22.5, 15.0, lambda t: SWAY(t + 0.25)), 'tentacle7': ('x', 22.5, -15.0, lambda t: SWAY(t + 0.25))},
+}
+KEEP_POSE = {"panda_buddy", "piglin_buddy", "chick_buddy", "glow_squid_buddy"}   # their pose is a deliberate action, not a step
+
+def _idle2(old, spec, keep, N=24):
+    def fn(m):
+        global bmob
+        real = bmob
+        def frames(m2, *a, pose=None, name=None, **k):
+            base = {b: v for b, v in (pose or {}).items() if keep or 'leg' not in b.lower()}   # legs stand straight
+            if not keep:
+                base.pop('tail', None); base.pop('tail1', None)
+            hop = spec.get('_hop', 0.0)
+            for f in range(N):
+                t = f / N
+                ps = dict(base)
+                for bone, v in spec.items():
+                    if bone[0] == '_':
+                        continue
+                    ax, b0, amp, cv = v
+                    ps[bone] = (ax, round(b0 + amp * cv(t), 2))
+                kk = dict(k)
+                kk['y0'] = kk.get('y0', 4.6) + hop * HOP(t)
+                real(m2, *a, pose=ps, name=f"ib{f}", fine=True, **kk)
+        bmob = frames
+        try:
+            old(m)
+        finally:
+            bmob = real
+        m.animate(('show', 'ib', N), frames=N, frametime=2, interpolate=False)
+    return fn
+
+_cur = dict((n, f) for n, _, _, f in D)
+for _n, _sp in IDLE2.items():
+    redesign(_n)(_idle2(_ORIG_ANIMAL[_n], _sp, _n in KEEP_POSE))
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
