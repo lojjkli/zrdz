@@ -212,7 +212,7 @@ tnt_hat:
   category: "Animated"
 slime_buddy:
   name: "Slime Buddy"
-  category: "Buddies"
+  category: "Animated"
 chick_buddy:
   name: "Chick Buddy"
   category: "Animated"
@@ -324,14 +324,8 @@ chicken_jockey:
 lava_chicken:
   name: "Lava Chicken"
   category: "Memes"
-banana_cat:
-  name: "Banana Cat"
-  category: "Memes"
 bread_face:
   name: "Bread Face"
-  category: "Memes"
-tinfoil_hat:
-  name: "Tinfoil Hat"
   category: "Memes"
 bucket_head:
   name: "Bucket Head"
@@ -339,9 +333,6 @@ bucket_head:
 shiba_buddy:
   name: "Shiba Buddy"
   category: "Buddies"
-fish_slap:
-  name: "Fish On Head"
-  category: "Memes"
 clown_wig:
   name: "Clown Wig"
   category: "Memes"
@@ -353,9 +344,6 @@ watermelon_helmet:
   category: "Food"
 froggie_buddy:
   name: "Froggie Buddy"
-  category: "Aconite & Froggie"
-froglight_crown:
-  name: "Froglight Crown"
   category: "Aconite & Froggie"
 froggie_hat:
   name: "Froggie Hat"
@@ -417,9 +405,6 @@ frying_pan:
 toaster_hat:
   name: "Toaster Hat"
   category: "Memes"
-big_brain:
-  name: "Big Brain"
-  category: "Memes"
 duck_floatie:
   name: "Duck Floatie"
   category: "Memes"
@@ -452,12 +437,6 @@ penguin_buddy:
   category: "Buddies"
 baby_hippo:
   name: "Baby Hippo"
-  category: "Buddies"
-hamster_buddy:
-  name: "Hamster Buddy"
-  category: "Buddies"
-raccoon_buddy:
-  name: "Raccoon Buddy"
   category: "Buddies"
 warden_tendrils:
   name: "Warden Tendrils"
@@ -662,7 +641,7 @@ trophy_hat:
   category: "Crowns & Halos"
 creeper_buddy:
   name: "Creeper Buddy"
-  category: "Buddies"
+  category: "Animated"
 enderman_buddy:
   name: "Enderman Buddy"
   category: "Animated"
@@ -686,7 +665,7 @@ parrot_buddy:
   category: "Animated"
 bat_buddy:
   name: "Bat Buddy"
-  category: "Buddies"
+  category: "Animated"
 strider_buddy:
   name: "Strider Buddy"
   category: "Buddies"
@@ -710,10 +689,10 @@ dolphin_buddy:
   category: "Buddies"
 snow_golem_buddy:
   name: "Snow Golem Buddy"
-  category: "Buddies"
+  category: "Animated"
 iron_golem_buddy:
   name: "Iron Golem Buddy"
-  category: "Buddies"
+  category: "Animated"
 villager_buddy:
   name: "Villager Buddy"
   category: "Animated"
@@ -1058,7 +1037,7 @@ elf_hat:
   category: "Holiday"
 snowman_hat:
   name: "Snowman Buddy"
-  category: "Holiday"
+  category: "Animated"
 xmas_tree_hat:
   name: "Christmas Tree Hat"
   category: "Animated"
@@ -1215,17 +1194,11 @@ lava_lamp_hat:
 traffic_light_hat:
   name: "Traffic Light"
   category: "Animated"
-fire_hair:
-  name: "Fire Hair"
-  category: "Animated"
 lightning_cloud:
   name: "Lightning Cloud"
   category: "Animated"
 aurora_halo:
   name: "Aurora Halo"
-  category: "Animated"
-neon_cat_ears:
-  name: "Neon Cat Ears"
   category: "Animated"
 pulsing_heart_hat:
   name: "Pulsing Heart"
