@@ -9337,7 +9337,7 @@ ALLAY_IMG = _tex("allay.png")
 @redesign("allay_buddy")
 def _(m):
     s = 0.55
-    WINGS = [0.0, 22.5, 45.0, 22.5, 0.0, 22.5, 45.0, 22.5]
+    WINGS = [round(22.5 * (1 - math.cos(2 * math.pi * k / 8)), 2) for k in range(8)]   # smooth flap
     N = len(WINGS)
     for k in range(N):
         nm = f"al{k}"
@@ -10589,7 +10589,7 @@ def _(m):
 @redesign("parrot_buddy")
 def _(m):
     """Vanilla parrot perched upright, bobbing its head."""
-    BOB = [0.0, -0.5, 0.0, -0.5]
+    BOB = [round(-0.25 * (1 - math.cos(2 * math.pi * k / 8)), 3) for k in range(8)]   # smooth bob
     for k, b in enumerate(BOB):
         nm = f"pa{k}"
         hy = 15.69 + b
@@ -10603,7 +10603,7 @@ def _(m):
              dict(piv=(0, hy - 1.75, -5.21), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(16, 7), head=True),
              dict(piv=(1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18)), dict(piv=(-1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18))]
         mob(m, MOBTX['parrot'], P, 0.55, z0=0.4, name=nm)
-    m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=3, interpolate=False)
+    m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=2, interpolate=False)
 
 # ---------------- new (2026) baby mob models: Bedrock geometry + baby textures ----------------
 import json as _json
@@ -11005,8 +11005,8 @@ def fat_ender_dragon(P, y0, wing, jiggle):
 
 @design("fat_ender_dragon", "Fat Ender Dragon", "cute")
 def _(m):
-    WING = [45.0, 0.0, 45.0, 0.0, 22.5, 0.0]                                  # tiny wings flapping hard, not helping
-    JIG = [0.0, -0.1, 0.0, -0.1, 0.0, -0.1]
+    WING = [round(22.5 * (1 - math.cos(2 * math.pi * k / 6)), 2) for k in range(6)]                                  # tiny wings flapping hard, not helping
+    JIG = [round(-0.05 * (1 - math.cos(2 * math.pi * k / 6)), 3) for k in range(6)]
     for k in range(len(WING)):
         fat_ender_dragon(Pose(m, f"fd{k}"), 4.6, WING[k], JIG[k])
     m.animate(('show', 'fd', len(WING)), frames=len(WING), frametime=2, interpolate=False)
@@ -11336,23 +11336,22 @@ def _(m):
     """Halo on the head; the wings sit down on the back, where the torso is."""
     H, HL = '#fff1a0', '#fffbe0'
     GLOW.update({H, HL})
-    SWEEP = [0.0, 22.5, 45.0, 45.0, 22.5, 0.0]
-    N = len(SWEEP)
-    for k in range(N):
+    octo_ring(m, 7.2, 3.5, H, t=0.7, h=0.45)                                   # halo stays still
+    octo_ring(m, 7.65, 3.5, HL, t=0.35, h=0.12)
+    N = 12
+    for k in range(N):                                                        # wings sweep in small even steps
         P = Pose(m, f"ag{k}")
-        y = 7.2 + 0.3 * math.sin(2 * math.pi * k / N)
-        octo_ring(P, y, 3.5, H, t=0.7, h=0.45)
-        octo_ring(P, y + 0.45, 3.5, HL, t=0.35, h=0.12)
+        a = round(20.0 * (1 - math.cos(2 * math.pi * k / N)), 2)
         for s in (-1, 1):
-            angel_wing(_Shift(P, dy=-8.5, dz=-1.75), s, SWEEP[k])
-    m.animate(('show', 'ag', N), frames=N, frametime=3, interpolate=False)
+            angel_wing(_Shift(P, dy=-8.5, dz=-1.75), s, a)
+    m.animate(('show', 'ag', N), frames=N, frametime=2, interpolate=False)
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
 SHRINK = {"frog_buddy": 0.7, "froggie_buddy": 0.7, "froggie_hat": 0.7, "froggie_strawberry": 0.7,
           "froggie_mushroom": 0.7, "froggie_princess": 0.7, "froggie_flower_crown": 0.7}
 
-THIN = {"headband_flame": 3, "fire_hair": 2}                                   # flicker only: fewer copies, same look
+THIN = {"headband_flame": 2, "fire_hair": 2}                                   # flicker only: fewer copies, same look
 
 def _fit(name, fn):
     def wrapped(m):
