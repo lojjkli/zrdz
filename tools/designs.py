@@ -11312,6 +11312,41 @@ def _overhead_min(m):
     ys = [b['f'][1] for b in m.boxes if b['f'][0] < 4.6 and b['t'][0] > -4.6 and b['f'][2] < 4.6 and b['t'][2] > -4.6]
     return min(ys) if ys else None
 
+# ---------------- lowered on request: blaze halo closer to the head, angel wings on the back ----------------
+class _Shift:
+    """Proxy that moves every box (and its rotation origin) by (dx, dy, dz)."""
+    def __init__(self, P, dx=0.0, dy=0.0, dz=0.0):
+        self.P, self.d = P, (dx, dy, dz)
+    def box(self, x1, y1, z1, x2, y2, z2, c, rot=None, **k):
+        dx, dy, dz = self.d
+        if rot:
+            ax, ang, o = rot
+            rot = (ax, ang, (o[0] + dx, o[1] + dy, o[2] + dz))
+        return self.P.box(x1 + dx, y1 + dy, z1 + dz, x2 + dx, y2 + dy, z2 + dz, c, rot=rot, **k)
+
+_blaze_old = dict((n, f) for n, _, _, f in D)["blaze_halo"]
+
+@redesign("blaze_halo")
+def _(m):
+    _blaze_old(m)
+    _move(m, dy=-3.0)
+
+@redesign("angel_set")
+def _(m):
+    """Halo on the head; the wings sit down on the back, where the torso is."""
+    H, HL = '#fff1a0', '#fffbe0'
+    GLOW.update({H, HL})
+    SWEEP = [0.0, 22.5, 45.0, 45.0, 22.5, 0.0]
+    N = len(SWEEP)
+    for k in range(N):
+        P = Pose(m, f"ag{k}")
+        y = 7.2 + 0.3 * math.sin(2 * math.pi * k / N)
+        octo_ring(P, y, 3.5, H, t=0.7, h=0.45)
+        octo_ring(P, y + 0.45, 3.5, HL, t=0.35, h=0.12)
+        for s in (-1, 1):
+            angel_wing(_Shift(P, dy=-8.5, dz=-1.75), s, SWEEP[k])
+    m.animate(('show', 'ag', N), frames=N, frametime=3, interpolate=False)
+
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
 SHRINK = {"frog_buddy": 0.7, "froggie_buddy": 0.7, "froggie_hat": 0.7, "froggie_strawberry": 0.7,
