@@ -230,7 +230,7 @@ slime_buddy:
   category: "Buddies"
 chick_buddy:
   name: "Chick Buddy"
-  category: "Buddies"
+  category: "Animated"
 frog_buddy:
   name: "Frog Buddy"
   category: "Buddies"
@@ -728,19 +728,19 @@ enderman_buddy:
   category: "Animated"
 pig_buddy:
   name: "Pig Buddy"
-  category: "Buddies"
+  category: "Animated"
 cow_buddy:
   name: "Cow Buddy"
-  category: "Buddies"
+  category: "Animated"
 mooshroom_buddy:
   name: "Mooshroom Buddy"
-  category: "Buddies"
+  category: "Animated"
 sheep_buddy:
   name: "Sheep Buddy"
-  category: "Buddies"
+  category: "Animated"
 wolf_pup:
   name: "Wolf Pup"
-  category: "Buddies"
+  category: "Animated"
 parrot_buddy:
   name: "Parrot Buddy"
   category: "Animated"
@@ -758,13 +758,13 @@ camel_buddy:
   category: "Buddies"
 panda_buddy:
   name: "Panda Buddy"
-  category: "Buddies"
+  category: "Animated"
 polar_bear_cub:
   name: "Polar Bear Cub"
-  category: "Buddies"
+  category: "Animated"
 glow_squid_buddy:
   name: "Glow Squid Buddy"
-  category: "Buddies"
+  category: "Animated"
 dolphin_buddy:
   name: "Dolphin Buddy"
   category: "Buddies"
@@ -776,13 +776,13 @@ iron_golem_buddy:
   category: "Buddies"
 villager_buddy:
   name: "Villager Buddy"
-  category: "Buddies"
+  category: "Animated"
 llama_buddy:
   name: "Llama Buddy"
   category: "Buddies"
 piglin_buddy:
   name: "Piglin Buddy"
-  category: "Buddies"
+  category: "Animated"
 shulker_buddy:
   name: "Shulker Buddy"
   category: "Buddies"
@@ -791,7 +791,7 @@ phantom_buddy:
   category: "Buddies"
 ocelot_buddy:
   name: "Ocelot Buddy"
-  category: "Buddies"
+  category: "Animated"
 diamond_ore_hat:
   name: "Diamond Ore Hat"
   category: "Blocks & Items"
