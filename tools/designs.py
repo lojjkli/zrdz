@@ -11006,11 +11006,11 @@ def fat_ender_dragon(P, y0, wing, jiggle):
 
 @design("fat_ender_dragon", "Fat Ender Dragon", "cute")
 def _(m):
-    WING = [round(22.5 * (1 - math.cos(2 * math.pi * k / 6)), 2) for k in range(6)]                                  # tiny wings flapping hard, not helping
-    JIG = [round(-0.05 * (1 - math.cos(2 * math.pi * k / 6)), 3) for k in range(6)]
+    WING = [round(22.5 * (1 - math.cos(2 * math.pi * k / 4)), 2) for k in range(4)]   # heavy, so the tiny wings buzz fast (5 flaps a second)
+    JIG = [round(-0.05 * (1 - math.cos(2 * math.pi * k / 4)), 3) for k in range(4)]
     for k in range(len(WING)):
         fat_ender_dragon(Pose(m, f"fd{k}"), 4.6, WING[k], JIG[k])
-    m.animate(('show', 'fd', len(WING)), frames=len(WING), frametime=2, interpolate=False)
+    m.animate(('show', 'fd', len(WING)), frames=len(WING), frametime=1, interpolate=False)
 
 
 class _YRot:
