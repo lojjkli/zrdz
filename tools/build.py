@@ -307,7 +307,7 @@ def build_heads():
         tex = m.texture(); models[name] = m
         if m.anim:   # animated texture: all frames stacked vertically + .mcmeta
             w(f"{A}/textures/item/heads/{name}.png", m.anim_strip())
-            w(f"{A}/textures/item/heads/{name}.png.mcmeta", {"animation": {"frametime": m.anim['frametime'], "interpolate": m.anim['interpolate']}})
+            w(f"{A}/textures/item/heads/{name}.png.mcmeta", m.mcmeta())
             gif = anim_gif(m, skin(SKINS.index(HOME[name] + ".png") if name in HOME else i))
             os.makedirs(f"{PV}/animated", exist_ok=True)
             gif[0].save(f"{PV}/animated/{name}.gif", save_all=True, append_images=gif[1:], duration=gif_durations(m), loop=0, disposal=2)

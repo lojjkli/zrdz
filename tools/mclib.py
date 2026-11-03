@@ -101,10 +101,17 @@ class Model:
         self.colors = []
         self.anim = None
 
-    def animate(self, *fx, frames=16, frametime=2, interpolate=True):
-        """Animated texture: fx are (kind, colours, ...) tuples applied per frame - see frame_tint()."""
-        self.anim = dict(fx=fx, frames=frames, frametime=frametime, interpolate=interpolate)
+    def animate(self, *fx, frames=16, frametime=2, interpolate=True, times=None):
+        """Animated texture: fx are (kind, colours, ...) tuples applied per frame - see frame_tint().
+        times = [(frame index, ticks), ...] plays the strip's frames in that order and for that long (holds without copies)."""
+        self.anim = dict(fx=fx, frames=frames, frametime=frametime, interpolate=interpolate, times=times)
         return self
+
+    def mcmeta(self):
+        a = {"frametime": self.anim['frametime'], "interpolate": self.anim['interpolate']}
+        if self.anim.get('times'):
+            a["frames"] = [{"index": i, "time": t} for i, t in self.anim['times']]
+        return {"animation": a}
 
     def frame_tint(self, c, f):
         """RGBA a colour should be painted with on frame f, or None to keep it."""

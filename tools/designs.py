@@ -12541,6 +12541,910 @@ def _(m):
             J(-w / 2, 21.6 - 0.4 * puff, -4.0 - 1.1 * puff, w, 1.2 + 0.5 * puff, 1.1 * puff, '#f1e6c8')   # croak bubble
     m.animate(('show', 'fp', N), frames=N, frametime=3, interpolate=False)
 
+# ---------------- round 18: slow idles with long holds (mcmeta frame times), no copies wasted on pauses ----------------
+def timeline(*keys, steps=3, step_t=2):
+    """keys: (state, hold_ticks[, tween_steps]) looping. States are {name: value}; between keys `steps`
+    eased in-between states of step_t ticks each. Returns (unique states, [(state index, ticks), ...])."""
+    uniq, idx, times = [], {}, []
+    def put(st, t):
+        k = tuple(sorted((a, round(b, 2)) for a, b in st.items() if round(b, 2) != 0))
+        if k not in idx:
+            idx[k] = len(uniq); uniq.append(dict(k))
+        i = idx[k]
+        if times and times[-1][0] == i:
+            times[-1] = (i, times[-1][1] + t)
+        else:
+            times.append((i, t))
+    n = len(keys)
+    for j, key in enumerate(keys):
+        st, hold = key[0], key[1]
+        put(st, hold)
+        nx = keys[(j + 1) % n]
+        ns = nx[2] if len(nx) > 2 else steps
+        for i in range(1, ns):
+            u = i / ns; u = u * u * (3 - 2 * u)
+            names = set(st) | set(nx[0])
+            put({a: st.get(a, 0.0) + (nx[0].get(a, 0.0) - st.get(a, 0.0)) * u for a in names}, step_t)
+    if len(times) > 1 and times[0][0] == times[-1][0]:
+        times[0] = (times[0][0], times[0][1] + times[-1][1]); times.pop()
+    return uniq, times
+
+def LOOKS(b='head', amp=35.0, rest=70, look=30):
+    return [({}, rest), ({b: amp}, look), ({}, rest - 20), ({b: -amp}, look)]
+
+HOPK = [({'_hop': 0.45}, 2, 2), ({'_hop': 0.75}, 2, 2), ({'_hop': 0.45}, 2, 2)]       # little hop (rise, top, fall)
+
+# animal -> (bone axes, bone base angles, keys)
+IDLE3 = {
+    "pig_buddy":       ({'head': 'y'}, {}, LOOKS() + [({}, 40)] + HOPK),
+    "sheep_buddy":     ({'head': 'y'}, {}, LOOKS(rest=80) + [({}, 40)] + HOPK),
+    "mooshroom_buddy": ({'head': 'y'}, {}, LOOKS(rest=90)),
+    "polar_bear_cub":  ({'head': 'y'}, {}, LOOKS(rest=90, look=40)),
+    "villager_buddy":  ({'head': 'y'}, {}, LOOKS(amp=30, rest=80)),
+    "ocelot_buddy":    ({'head': 'y', 'tail1': 'z'}, {}, LOOKS(rest=60) + [({'tail1': 25}, 8, 4), ({'tail1': -25}, 8, 4), ({}, 30)]),
+    "cow_buddy":       ({'head': 'x'}, {}, [({'head': -30}, 30), ({'head': -24}, 4, 2), ({'head': -30}, 4, 2), ({'head': -24}, 4, 2),
+                                            ({'head': -30}, 30), ({}, 90)]),
+    "wolf_pup":        ({'head': 'z', 'tail': 'z'}, {}, [({}, 60), ({'head': 25}, 40), ({}, 30), ({'tail': 30}, 2, 2), ({'tail': -30}, 2, 2),
+                                                        ({'tail': 30}, 2, 2), ({'tail': -30}, 2, 2), ({}, 50), ({'head': -25}, 40)]),
+    "chick_buddy":     ({'wing0': 'z', 'wing1': 'z'}, {'wing0': -5.0, 'wing1': 5.0},
+                        [({}, 80), ({'wing0': -40, 'wing1': 40}, 2, 2), ({}, 2, 2), ({'wing0': -40, 'wing1': 40}, 2, 2), ({}, 40)] + HOPK),
+    "panda_buddy":     ({'head': 'z'}, {}, [({}, 50), ({'head': 18}, 40, 4), ({}, 40, 4), ({'head': -18}, 40, 4)]),
+    "piglin_buddy":    ({'head': 'x'}, {}, [({}, 80), ({'head': 18}, 6), ({}, 4), ({'head': 18}, 6)]),
+    "glow_squid_buddy": ({'tentacle1': 'z', 'tentacle5': 'z', 'tentacle3': 'x', 'tentacle7': 'x'},
+                         {'tentacle1': 22.5, 'tentacle5': -22.5, 'tentacle3': -22.5, 'tentacle7': 22.5},
+                         [({'tentacle1': 12, 'tentacle5': -12, 'tentacle3': -12, 'tentacle7': 12}, 12, 4),
+                          ({'tentacle1': -12, 'tentacle5': 12, 'tentacle3': 12, 'tentacle7': -12}, 12, 4)]),
+}
+
+def _idle3(old, axes, base, keys, keep):
+    states, times = timeline(*keys)
+    def fn(m):
+        global bmob
+        real = bmob
+        def frames(m2, *a, pose=None, name=None, **k):
+            bp = {b: v for b, v in (pose or {}).items() if keep or 'leg' not in b.lower()}
+            if not keep:
+                bp.pop('tail', None); bp.pop('tail1', None)
+            for f, st in enumerate(states):
+                ps = dict(bp)
+                for b, ax in axes.items():
+                    ang = base.get(b, 0.0) + st.get(b, 0.0)
+                    if ang or b in base:
+                        ps[b] = (ax, round(ang, 2))
+                    else:
+                        ps.pop(b, None)
+                kk = dict(k)
+                kk['y0'] = kk.get('y0', 4.6) + st.get('_hop', 0.0)
+                real(m2, *a, pose=ps, name=f"ic{f}", fine=True, **kk)
+        bmob = frames
+        try:
+            old(m)
+        finally:
+            bmob = real
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+    return fn
+
+for _n, (_ax, _bs, _ks) in IDLE3.items():
+    redesign(_n)(_idle3(_ORIG_ANIMAL[_n], _ax, _bs, _ks, _n in KEEP_POSE))
+
+# --- Totem halo v3: single clean cards (no crossed line), the rainbow core floats and has a rainbow aura
+@redesign("totem_halo")
+def _(m):
+    M = 40
+    ring = ("taggy", "baggy", "daggy", "gaggy", "kli", "laggy", "oaggy", "roggy", "waggy", "yaggy")
+    gap = M // len(ring)
+    R, s = 6.2, 0.16
+    for j in range(M):
+        def fn(f, j=j):
+            k = (j - f) % M
+            return _TOT[ring[k // gap]] if k % gap == 0 else None
+        phi = 2 * math.pi * j / M
+        x, z = R * math.cos(phi), R * math.sin(phi)
+        y = 5.4 + 0.6 * math.sin(phi * 3)
+        A = (math.degrees(math.atan2(-math.cos(phi), -math.sin(phi))) + 180) % 180 - 90     # card faces outward
+        if abs(A) <= 45:
+            b = (x - 8 * s, y, z - 0.01, x + 8 * s, y + 16 * s, z + 0.01); along = True; r = A
+        else:
+            b = (x - 0.01, y, z - 8 * s, x + 0.01, y + 16 * s, z + 8 * s); along = False; r = A - 90 if A > 0 else A + 90
+        r = round(r, 2)
+        m.box(*b, SlotTex(fn, "tslot", f"{j}", along), rot=('y', r, (x, y, z)) if r else None)
+    KC = 10                                                                               # core floats up and down
+    for k in range(KC):
+        bob = 0.45 * math.sin(2 * math.pi * k / KC)
+        totem_voxels(m, _TOT["core"], 0.0, 6.0 + bob, 0.0, 0.36, 0.7, f"tc{k}")
+    AU = ['#ff5a5a', '#ffa63a', '#ffe14f', '#5cff8a', '#4fd6ff', '#8a7aff', '#ff7ae0']
+    GLOW.update(AU)
+    KA = 10                                                                               # rainbow aura rising round the core
+    for k in range(KA):
+        P = Pose(m, f"ta{k}")
+        for i in range(14):
+            t = ((k / KA) + i * 0.37) % 1.0
+            a = 2 * math.pi * i / 14 + t * 1.2
+            rr = 3.4 - 1.2 * t
+            px, pz, py = rr * math.cos(a), rr * math.sin(a) * 0.55, 6.0 + 6.2 * t
+            sz = 0.22 * (1 - t) + 0.08
+            P.box(px - sz, py - sz, pz - sz, px + sz, py + sz, pz + sz, AU[i % len(AU)])
+        for i in range(6):                                                                # flickering aura flames at the base
+            a = 2 * math.pi * i / 6 + 0.5
+            hh = 0.8 + 0.7 * ((k + i * 3) % KA) / KA
+            fx_, fz_ = 2.6 * math.cos(a), 1.2 * math.sin(a)
+            P.box(fx_ - 0.18, 6.2, fz_ - 0.18, fx_ + 0.18, 6.2 + hh, fz_ + 0.18, AU[(i * 2) % len(AU)])
+    m.animate(('show', 'tc', KC, [f * KC // M for f in range(M)]), ('show', 'ta', KA, [f * KA // M for f in range(M)]),
+              frames=M, frametime=2, interpolate=False)
+
+# --- Baby ender dragon v4: calm slow wing beats with rests, rare glances, smooth wing membranes, ender eyes
+def _dragon_wing_img():
+    W, H = 34, 26                                                                       # texels: x along the wing, y back from the bone
+    a = _np.zeros((H, W, 4), _np.uint8)
+    MEM, MEMD, BONE = _rgba('#4b3f5e'), _rgba('#3a3049'), _rgba('#1d1924')
+    for x in range(W):
+        u = x / (W - 1)
+        depth = 25 * (1 - 0.55 * u)                                                     # wing narrows toward the tip
+        scal = 3.2 * abs(math.sin(u * math.pi * 3))                                     # scalloped trailing edge
+        for y in range(H):
+            if y <= depth - scal:
+                a[y, x] = MEM if (x + y // 3) % 7 else MEMD
+    for x in range(W):                                                                  # leading bone
+        a[0:2, x] = BONE
+    for f in (0.35, 0.68, 1.0):                                                         # finger bones fanning back
+        x0 = int(f * (W - 1))
+        for y in range(H):
+            x = int(x0 - y * f * 0.5)
+            if 0 <= x < W and a[y, x, 3]:
+                a[y, x] = BONE
+    return a
+
+DR_WING = _dragon_wing_img()
+EYE_L, EYE_M = '#e079fa', '#cc00fa'
+GLOW.update({EYE_L, EYE_M})
+
+def _ender_eye(m, x, y, z, px, flip, name, key):
+    """4x2 ender eye (light rim, magenta core, slanted), drawn as one textured plate."""
+    rows = [[EYE_L, EYE_M, EYE_L, None], [EYE_L, EYE_M, EYE_M, EYE_L]]
+    a = _np.zeros((2, 4, 4), _np.uint8)
+    for j, row in enumerate(rows):
+        for i, c in enumerate(row[::-1] if flip else row):
+            if c:
+                a[j, i] = _rgba(c)
+    m.box(x - 2 * px, y - px, z - 0.03, x + 2 * px, y + px, z, FaceTex({'north': (a, 0, 0, 4, 2)}, name, key))
+
+@redesign("baby_dragon")
+def _(m):
+    y = 4.0
+    m.box(-1.4, y + 1.0, -0.6, 1.4, y + 3.3, 2.6, DR_B)                          # body
+    m.box(-1.2, y + 0.6, -0.2, 1.2, y + 1.0, 0.5, DR_B)                          # front legs
+    m.box(-1.2, y + 0.6, 1.7, 1.2, y + 1.0, 2.4, DR_B)                           # back legs
+    m.box(-0.15, y + 3.3, 0.1, 0.15, y + 3.7, 2.2, DR_S)                         # back ridge
+    tz, ty = 2.6, y + 1.7
+    for r_, l in ((0.6, 1.2), (0.42, 1.1), (0.28, 1.0)):                        # tail
+        m.box(-r_, ty - r_, tz, r_, ty + r_, tz + l, DR_B)
+        tz += l; ty += 0.1
+    hy = y + 2.6
+    YAW = [0.0, 12.0, 24.0, 32.0, -12.0, -24.0, -32.0]
+    for k, yaw in enumerate(YAW):                                                # head copies
+        nm = f"bh{k}"
+        P = Pose(m, nm)
+        hr = ('y', yaw, (0.0, hy, -0.4)) if yaw else None
+        B = lambda x1, y1, z1, x2, y2, z2, c: P.box(x1, y1, z1, x2, y2, z2, c, rot=hr)
+        B(-1.8, hy, -3.6, 1.8, hy + 3.4, -0.2, DR_B)                             # head
+        B(-1.1, hy + 0.1, -4.6, 1.1, hy + 1.3, -3.6, DR_B)                       # snout
+        for sx in (-1, 1):
+            B(sx * 0.6 - 0.15, hy + 0.85, -4.65, sx * 0.6 + 0.15, hy + 1.1, -4.6, '#0c0a10')   # nostrils
+            B(sx * 1.0 - 0.2, hy + 3.4, -1.5, sx * 1.0 + 0.2, hy + 4.2, -1.1, DR_S)            # horns
+        for sx in (-1, 1):                                                       # ender eyes
+            ex, ey, ez = sx * 0.95, hy + 2.05, -3.6
+            if yaw:
+                ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+            pxs = 0.33
+            a = _np.zeros((2, 4, 4), _np.uint8)
+            rows = [[EYE_L, EYE_M, EYE_L, None], [EYE_L, EYE_M, EYE_M, EYE_L]]
+            for j, row in enumerate(rows):
+                for i, c in enumerate(row if sx > 0 else row[::-1]):
+                    if c:
+                        a[j, i] = _rgba(c)
+            m.box(ex - 2 * pxs, ey - pxs, ez - 0.04, ex + 2 * pxs, ey + pxs, ez, FaceTex({'north': (a, 0, 0, 4, 2)}, nm, f"eye{sx}"), rot=hr)
+    WA = [-8.0, 4.0, 16.0, 28.0, 38.0]                                           # wing angles
+    for k, ang in enumerate(WA):                                                 # wing copies: one smooth membrane each
+        nm = f"bw{k}"
+        for sx in (-1, 1):
+            sp = (sx * 1.3, y + 3.0, 0.15)
+            x1, x2 = sorted((sx * 1.3, sx * 5.0))
+            ft = FaceTex({'up': (DR_WING, 0, 0, 34, 26), 'down': (DR_WING, 0, 0, 34, 26)}, nm, f"w{sx}",
+                         flipx=('up', 'down') if sx < 0 else ())
+            m.box(x1, y + 2.96, 0.15, x2, y + 3.04, 2.75, ft, rot=('z', round(sx * ang, 2), sp))
+            m.box(min(sx * 1.3, sx * 4.9), y + 2.9, 0.05, max(sx * 1.3, sx * 4.9), y + 3.1, 0.3, PTex(DR_D, nm, 7, 1, 1),
+                  rot=('z', round(sx * ang, 2), sp))                            # wing arm
+    # timeline: (head copy, wing copy, ticks)
+    beat = [(1, 2), (2, 2), (3, 3), (4, 4), (3, 3), (2, 2), (1, 2), (0, 3)]         # one slow flap
+    seq = []
+    def flaps(n, head):
+        for _ in range(n):
+            seq.extend((head, w, t) for w, t in beat)
+    def rest(head, t):
+        seq.append((head, 1, t))
+    flaps(3, 0); rest(0, 60)
+    for h in (1, 2): seq.append((h, 1, 2))
+    rest(3, 40)
+    for h in (2, 1): seq.append((h, 1, 2))
+    rest(0, 40); flaps(2, 0); rest(0, 50)
+    for h in (4, 5): seq.append((h, 1, 2))
+    rest(6, 40)
+    for h in (5, 4): seq.append((h, 1, 2))
+    rest(0, 30)
+    combos, times = [], []
+    for h, w, t in seq:
+        if (h, w) not in combos:
+            combos.append((h, w))
+        i = combos.index((h, w))
+        if times and times[-1][0] == i:
+            times[-1] = (i, times[-1][1] + t)
+        else:
+            times.append((i, t))
+    m.animate(('show', 'bh', len(YAW), [c[0] for c in combos]), ('show', 'bw', len(WA), [c[1] for c in combos]),
+              frames=len(combos), frametime=2, interpolate=False, times=times)
+
+# --- Froggie Princess v2: slow and calm. Long rests, soft blinks, a proper little hop (no croak)
+@redesign("froggie_princess")
+def _(m):
+    G, GD, GEM, GEM2 = '#f2c33a', '#b8861c', '#ff6fb5', '#7fd6ff'
+    GLOW.add('#fff6b0')
+    hop = [({'_hop': 0.4}, 2, 1), ({'_hop': 0.8}, 2, 1), ({'_hop': 1.05}, 3, 1), ({'_hop': 0.8}, 2, 1), ({'_hop': 0.4}, 2, 1)]
+    keys = [({}, 70, 1), ({'_blink': 1}, 3, 1), ({}, 60, 1)] + hop + [({}, 50, 1), ({'_blink': 1}, 3, 1), ({}, 4, 1), ({'_blink': 1}, 3, 1), ({}, 40, 1)]
+    states, times = timeline(*keys)
+    for k, st in enumerate(states):
+        dy, blink = st.get('_hop', 0.0), st.get('_blink', 0) > 0.5
+        nm = f"fp{k}"
+        P = Pose(m, nm, dy=dy)
+        J = vanilla_frog(P, 0, 4.6, -0.2, s=0.8, bow=False, name=nm, blink=blink)
+        cz, hw, base = -1.3, 2.0, 15.5
+        J(-hw, base - 1.2, cz - hw, 2 * hw, 1.2, 0.35, G); J(-hw, base - 1.2, cz + hw - 0.35, 2 * hw, 1.2, 0.35, G)
+        J(-hw, base - 1.2, cz - hw, 0.35, 1.2, 2 * hw, G); J(hw - 0.35, base - 1.2, cz - hw, 0.35, 1.2, 2 * hw, G)
+        for x, z in ((-hw, cz - hw), (hw - 0.45, cz - hw), (-hw, cz + hw - 0.45), (hw - 0.45, cz + hw - 0.45), (-0.225, cz - hw),
+                     (-0.225, cz + hw - 0.45), (-hw, cz - 0.225), (hw - 0.45, cz - 0.225)):
+            J(x, base - 2.1, z, 0.45, 0.9, 0.45, G)
+            J(x + 0.05, base - 2.45, z + 0.05, 0.35, 0.35, 0.35, GD)
+        J(-0.4, base - 0.95, cz - hw - 0.07, 0.8, 0.6, 0.07, '#ffd0ea' if dy > 0.9 else GEM)       # gem glints at the top of the hop
+        for x in (-1.45, 0.95):
+            J(x, base - 0.9, cz - hw - 0.06, 0.5, 0.45, 0.06, GEM2)
+        J(-hw + 0.35, base - 0.3, cz - hw + 0.35, 2 * hw - 0.7, 0.3, 2 * hw - 0.7, '#e0609c')
+        if dy > 0.9:                                                                                # sparkles pop off the crown
+            for sx, sy in ((2.7, base - 3.0), (-2.9, base - 2.6)):
+                J(sx - 0.25, sy, cz - hw, 0.5, 0.12, 0.12, '#fff6b0'); J(sx - 0.06, sy - 0.2, cz - hw, 0.12, 0.5, 0.12, '#fff6b0')
+    m.animate(('show', 'fp', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+
+# --- Sword through head v2: the real Minecraft diamond sword item (16x16 sprite, 1 px thick), stuck through sideways
+SWORD_IMG = _np.array(_Image.open(_os.path.join(_os.path.dirname(__file__), "textures", "diamond_sword.png")).convert('RGBA'))
+
+def sprite_voxels(m, img, cx, cy, cz, s, t, name, rot=None):
+    """Like totem_voxels (centred on cx, cy), with an optional ('z', angle) turn about the centre."""
+    H, W = img.shape[:2]
+    for y in range(H):
+        x = 0
+        while x < W:
+            if img[y, x, 3] < 128:
+                x += 1; continue
+            x1 = x
+            while x < W and img[y, x, 3] >= 128:
+                x += 1
+            w = x - x1
+            ft = FaceTex({'north': (img, x1, y, w, 1), 'south': (img, x1, y, w, 1), 'up': (img, x1, y, w, 1),
+                          'down': (img, x1, y, w, 1), 'east': (img, x1, y, 1, 1), 'west': (img, x - 1, y, 1, 1)},
+                         name, f"sv{y}_{x1}", flipx=('south', 'up', 'down'))
+            m.box(cx + (W / 2 - x) * s, cy + (H / 2 - 1 - y) * s, cz - t / 2, cx + (W / 2 - x1) * s, cy + (H / 2 - y) * s, cz + t / 2, ft,
+                  rot=(rot[0], rot[1], (cx, cy, cz)) if rot else None)
+
+@redesign("sword_through_head")
+def _(m):
+    s = 0.95
+    sprite_voxels(m, SWORD_IMG, 2.2, 1.2, 0.0, s, s, "dsword", rot=("z", 45.0))
+
+# --- vanilla-mob buddies get the same slow idles (creeper, iron golem, slime, snow golem, snowman)
+def _mob_idle(old, keys, axis='y'):
+    states, times = timeline(*keys)
+    def fn(m):
+        global mob
+        real = mob
+        def frames(m2, img, parts, s, *a, **k):
+            k.pop('pose', None)                                                   # stand, no frozen step
+            for f, st in enumerate(states):
+                kk = dict(k)
+                ang = st.get('head', 0.0)
+                kk['head_rot'] = (axis, round(ang, 2)) if ang else None
+                kk['y0'] = kk.get('y0', 4.6) + st.get('_hop', 0.0)
+                kk['name'] = f"ic{f}"
+                real(m2, img, [dict(p) for p in parts], s * (1 + st.get('_puff', 0.0)), *a, **kk)
+        mob = frames
+        try:
+            old(m)
+        finally:
+            mob = real
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+    return fn
+
+_cur = dict((n, f) for n, _, _, f in D)
+redesign("creeper_buddy")(_mob_idle(_cur["creeper_buddy"], LOOKS(rest=80) + [({}, 50), ({'_puff': 0.06}, 3, 2), ({'_puff': 0.1}, 3, 1),
+                                                                           ({'_puff': 0.06}, 3, 1), ({}, 30, 2)]))
+redesign("iron_golem_buddy")(_mob_idle(_cur["iron_golem_buddy"], LOOKS(amp=30, rest=90, look=40)))
+redesign("slime_buddy")(_mob_idle(_cur["slime_buddy"], [({}, 50), ({'_hop': 0.5}, 2, 1), ({'_hop': 0.9}, 3, 1), ({'_hop': 0.5}, 2, 1),
+                                                        ({}, 6, 1), ({'_hop': 0.5}, 2, 1), ({'_hop': 0.9}, 3, 1), ({'_hop': 0.5}, 2, 1)]))
+
+@redesign("snow_golem_buddy")
+def _(m):
+    s = 0.2
+    states, times = timeline(({}, 70), ({'head': 30}, 30), ({}, 40), ({'arm': 1}, 6, 2), ({'arm': -1}, 6, 2), ({'arm': 1}, 6, 2),
+                             ({}, 50), ({'head': -30}, 30))
+    hy = 4.6 + (24 - 4) * s
+    r = 3.75 * s * 2.2
+    for f, st in enumerate(states):
+        nm = f"ic{f}"
+        wave = st.get('arm', 0.0)
+        P = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
+             dict(piv=(0, 24, 0), box=(-6, -12, -6, 12, 12, 12), uv=(0, 36), inf=-0.5),
+             dict(piv=(5, 6, 1), box=(-1, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', round(-45.0 + 12 * wave, 2))),   # waving arm
+             dict(piv=(-5, 6, 1), box=(-11, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 45.0))]
+        mob(m, MOBTX['snow'], P, s, name=nm)
+        pk = FaceTex({'north': (PUMPKIN_F, 0, 0, 16, 16), 'side': (PUMPKIN_S, 0, 0, 16, 16), 'up': (PUMPKIN_T, 0, 0, 16, 16),
+                      'down': (PUMPKIN_T, 0, 0, 16, 16)}, nm, "pk")
+        ang = round(st.get('head', 0.0), 2)
+        m.box(-r, hy, -r, r, hy + 2 * r, r, pk, rot=('y', ang, (0, hy, 0)) if ang else None)
+    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+
+@redesign("snowman_hat")
+def _(m):
+    W, K, O, R = '#fbfcff', '#1d1b22', '#ff8a1f', '#c8202e'
+    rbox(m, -2.6, 4.6, -2.6, 2.6, 7.4, 2.6, W, r=0.9)                                     # base ball (stays)
+    m.box(1.0, 5.6, -2.8, 1.8, 7.4, -2.0, R)                                              # scarf tail
+    for y in (5.4, 6.4):
+        m.box(-0.25, y, -2.66, 0.25, y + 0.5, -2.6, K)                                    # coal buttons
+    m.box(-2.0, 7.0, -2.0, 2.0, 7.6, 2.0, R)                                              # scarf
+    states, times = timeline(({}, 70), ({'head': 30}, 30), ({}, 40), ({'arm': 1}, 6, 2), ({'arm': 0}, 4, 2), ({'arm': 1}, 6, 2),
+                             ({}, 50), ({'head': -30}, 30))
+    for f, st in enumerate(states):
+        P = Pose(m, f"sn{f}")
+        a = round(st.get('head', 0.0), 2)
+        hr = ('y', a, (0.0, 8.6, 0.0)) if a else None
+        B = lambda x1, y1, z1, x2, y2, z2, c: P.box(x1, y1, z1, x2, y2, z2, c, rot=hr)
+        B(-1.9, 7.6, -1.9, 1.9, 10.0, 1.9, W)                                             # head ball
+        B(-1.6, 7.4, -1.6, 1.6, 7.6, 1.6, W)
+        for sx in (-1, 1):
+            B(sx * 0.6 - 0.18, 8.8, -1.96, sx * 0.6 + 0.18, 9.2, -1.9, K)                 # coal eyes
+        B(-0.2, 8.2, -3.0, 0.2, 8.6, -1.9, O)                                             # carrot
+        for x in (-0.6, 0.0, 0.6):
+            B(x - 0.12, 7.75, -1.96, x + 0.12, 7.95, -1.9, K)                             # smile
+        B(-1.8, 10.0, -1.8, 1.8, 10.3, 1.8, K); B(-1.2, 10.3, -1.2, 1.2, 12.0, 1.2, K)    # top hat
+        B(-1.25, 10.4, -1.25, 1.25, 10.8, 1.25, R)
+        wv = st.get('arm', 0.0)
+        for sd in (-1, 1):                                                                # stick arms, one waves
+            ang = 22.5 * sd + (22.5 * sd * wv if sd > 0 else 0.0)
+            P.box(*xs(sd, 2.6, 4.6)[:1], 6.4, -0.15, xs(sd, 2.6, 4.6)[1], 6.7, 0.15, '#6b4326', rot=('z', round(ang, 2), (sd * 2.6, 6.5, 0)))
+    m.animate(('show', 'sn', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+
+# --- Bat buddy v2: chibi bat, big head and ears, sparkly eyes, smooth wings that stretch and flap now and then
+def _bat_wing_img():
+    W, H = 30, 22
+    a = _np.zeros((H, W, 4), _np.uint8)
+    MEM, MEMD, BONE = _rgba('#4a3628'), _rgba('#3a2a20'), _rgba('#2a1e18')
+    for x in range(W):
+        u = x / (W - 1)
+        top = int(6 * (1 - math.sin(u * math.pi * 0.9)) * 0.6)                          # arched top edge
+        bot = 21 - int(7 * abs(math.sin(u * math.pi * 3))) - int(4 * u)                 # three scallops
+        for y in range(top, max(top + 1, bot)):
+            a[y, x] = MEM if (x // 10) % 2 == 0 else MEMD
+        a[top:top + 2, x] = BONE
+    for xf in (10, 20, 29):                                                              # finger bones
+        for y in range(H):
+            x = int(xf - y * 0.25)
+            if 0 <= x < W and a[y, x, 3]:
+                a[y, x] = BONE
+    return a
+
+BAT_WING = _bat_wing_img()
+
+@redesign("bat_buddy")
+def _(m):
+    BR, BRL, BRD, PK, K = '#6a4e3a', '#8a6a50', '#4a3628', '#e89aa8', '#16101a'
+    y0 = 4.6
+    m.box(-0.5, y0, -0.2, -0.2, y0 + 0.3, 0.3, BRD); m.box(0.2, y0, -0.2, 0.5, y0 + 0.3, 0.3, BRD)     # tiny feet
+    rbox(m, -1.1, y0 + 0.3, -0.9, 1.1, y0 + 2.2, 0.9, BR, r=0.5)                         # fuzzy body
+    rbox(m, -0.7, y0 + 0.5, -0.95, 0.7, y0 + 1.9, -0.85, BRL, r=0.3)                     # lighter tummy
+    rbox(m, -1.6, y0 + 2.0, -1.4, 1.6, y0 + 4.6, 1.2, BR, r=0.6)                         # big round head
+    m.box(-1.75, y0 + 4.3, -0.8, 1.75, y0 + 4.7, 0.6, BR)                                # fluffy tuft
+    for sd in (-1, 1):                                                                   # big pointy ears
+        for i, (w, h) in enumerate(((0.55, 0.6), (0.42, 0.6), (0.26, 0.5), (0.12, 0.35))):
+            yb = y0 + 4.5 + sum(hh for _, hh in ((0.55, 0.6), (0.42, 0.6), (0.26, 0.5), (0.12, 0.35))[:i])
+            cx = sd * (1.05 + 0.12 * i)
+            m.box(cx - w, yb, -0.3, cx + w, yb + h, 0.3, BR)
+            if i < 3:
+                m.box(cx - w * 0.55, yb, -0.34, cx + w * 0.55, yb + h * 0.9, -0.3, PK)
+    m.box(-0.35, y0 + 2.75, -1.48, 0.35, y0 + 3.15, -1.4, BRL)                           # little snout
+    m.box(-0.12, y0 + 2.95, -1.5, 0.12, y0 + 3.05, -1.48, K)
+    m.box(-0.3, y0 + 2.55, -1.47, -0.15, y0 + 2.75, -1.4, '#ffffff'); m.box(0.15, y0 + 2.55, -1.47, 0.3, y0 + 2.75, -1.4, '#ffffff')  # fangs
+    for sd in (-1, 1):
+        m.box(sd * 1.05 - 0.25, y0 + 2.7, -1.46, sd * 1.05 + 0.25, y0 + 2.9, -1.4, '#ff9fb4')   # blush
+    keys = [({'w': 0}, 60), ({'_blink': 1}, 3, 1), ({'w': 0}, 40, 1), ({'w': 1}, 20, 3), ({'w': 0.4}, 3, 2), ({'w': 1}, 3, 2),
+            ({'w': 0.4}, 3, 2), ({'w': 1}, 10, 2), ({'w': 0}, 50, 3)]
+    states, times = timeline(*keys)
+    for f, st in enumerate(states):
+        nm = f"bt{f}"
+        P = Pose(m, nm)
+        ang = round(10.0 + 32.0 * st.get('w', 0.0), 2)
+        for sd in (-1, 1):                                                               # wings
+            ft = FaceTex({'north': (BAT_WING, 0, 0, 30, 22), 'south': (BAT_WING, 0, 0, 30, 22)}, nm, f"w{sd}",
+                         flipx=('north',) if sd > 0 else ('south',))
+            x1, x2 = sorted((sd * 1.0, sd * 4.6))
+            sp = (sd * 1.0, y0 + 2.1, 0.2)
+            m.box(x1, y0 + 0.2, 0.15, x2, y0 + 2.1, 0.25, ft, rot=('z', round(sd * ang, 2), sp))
+        if st.get('_blink', 0) > 0.5:
+            for sd in (-1, 1):
+                P.box(sd * 0.7 - 0.35, y0 + 3.4, -1.47, sd * 0.7 + 0.35, y0 + 3.55, -1.4, K)    # happy closed eyes
+        else:
+            for sd in (-1, 1):
+                P.box(sd * 0.7 - 0.38, y0 + 3.15, -1.46, sd * 0.7 + 0.38, y0 + 3.95, -1.4, K)    # big shiny eyes
+                P.box(sd * 0.7 - 0.25, y0 + 3.6, -1.48, sd * 0.7 - 0.05, y0 + 3.8, -1.46, '#ffffff')
+                P.box(sd * 0.7 + 0.1, y0 + 3.3, -1.48, sd * 0.7 + 0.2, y0 + 3.4, -1.46, '#ffffff')
+    m.animate(('show', 'bt', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+
+# --- Shiba buddy: ears sit properly on the head (were floating)
+_shiba_old = dict((n, f) for n, _, _, f in D)["shiba_buddy"]
+@redesign("shiba_buddy")
+def _(m):
+    O, Cr = '#e3a052', '#f6ead6'
+    real_steps = steps
+    def no_ears(*a, **k):
+        pass
+    globals()['steps'] = no_ears
+    try:
+        _shiba_old(m)
+    finally:
+        globals()['steps'] = real_steps
+    for s_ in (-1, 1):                                                                   # ears grow out of the head top
+        for i, (w, h) in enumerate(((0.75, 0.55), (0.55, 0.5), (0.35, 0.45), (0.15, 0.35))):
+            yb = 8.3 + sum(hh for _, hh in ((0.75, 0.55), (0.55, 0.5), (0.35, 0.45), (0.15, 0.35))[:i])
+            cx = s_ * (1.15 + 0.06 * i)
+            m.box(cx - w, yb, -2.3, cx + w, yb + h, -1.5, O)
+            if i < 3:
+                m.box(cx - w * 0.5, yb, -2.34, cx + w * 0.5, yb + h * 0.85, -2.3, Cr)
+
+# ---------------- round 18: better brainrot models (Tung Tung left as he is) ----------------
+def taper(m, segs, c, axis='z', cx=0.0, cy=0.0, r=0.4):
+    """Smooth tapered body along z: segs = [(z1, z2, half_w, half_h, dy), ...] as soft boxes."""
+    for z1, z2, hw, hh, dy in segs:
+        rbox(m, cx - hw, cy + dy - hh, z1, cx + hw, cy + dy + hh, z2, c, r=min(r, hw / 2), top=False)
+
+# --- Tralalero Tralala: sleek blue shark on three legs in blue sneakers
+@redesign("tralalero")
+def _(m):
+    SH, SHD, SHL, BELLY, SHOE, SOLE, LACE = '#5f8fc4', '#46729f', '#7aa6d6', '#eef3f8', '#2b62e0', '#ffffff', '#cfe0ff'
+    y0 = 4.6
+    for x, z in ((-1.25, -1.5), (1.25, -1.5), (0.0, 2.0)):                               # three legs in sneakers
+        m.box(x - 0.65, y0, z - 1.25, x + 0.65, y0 + 0.3, z + 0.8, SOLE)                 # sole
+        rbox(m, x - 0.62, y0 + 0.3, z - 1.15, x + 0.62, y0 + 1.0, z + 0.8, SHOE, r=0.25)
+        m.box(x - 0.64, y0 + 0.45, z - 0.5, x + 0.64, y0 + 0.62, z + 0.35, SOLE)         # swoosh stripe
+        m.box(x - 0.3, y0 + 1.0, z - 0.9, x + 0.3, y0 + 1.05, z - 0.2, LACE)             # laces
+        m.box(x - 0.66, y0 + 0.05, z - 1.28, x + 0.66, y0 + 0.3, z - 1.15, SOLE)         # toe cap
+        m.box(x - 0.3, y0 + 1.0, z - 0.3, x + 0.3, y0 + 2.2, z + 0.3, BELLY)             # skinny legs
+    yb = y0 + 3.4                                                                        # body centre line
+    taper(m, [(-5.6, -4.8, 0.7, 0.55, -0.15), (-4.8, -3.6, 1.35, 0.95, 0.0), (-3.6, -1.6, 1.85, 1.25, 0.05),
+              (-1.6, 0.8, 1.95, 1.3, 0.1), (0.8, 2.6, 1.5, 1.0, 0.1), (2.6, 3.8, 0.95, 0.65, 0.2), (3.8, 4.6, 0.5, 0.4, 0.3)],
+          SH, cy=yb)
+    taper(m, [(-4.6, -3.6, 1.1, 0.4, -0.75), (-3.6, 0.8, 1.6, 0.45, -0.9), (0.8, 2.6, 1.2, 0.35, -0.75)], BELLY, cy=yb, r=0.3)
+    m.box(-1.0, yb - 0.55, -5.3, 1.0, yb - 0.25, -3.9, BELLY)                            # white jaw
+    m.box(-0.95, yb - 0.25, -5.25, 0.95, yb - 0.12, -3.95, '#3a1d22')                    # mouth
+    for i, x in enumerate((-0.75, -0.42, -0.1, 0.22, 0.54)):                             # little teeth
+        m.box(x, yb - 0.25, -5.27 + 0.12 * abs(i - 2), x + 0.2, yb - 0.05, -5.2 + 0.12 * abs(i - 2), '#ffffff')
+    for sd in (-1, 1):
+        x1, x2 = xs(sd, 1.2, 1.46)
+        m.box(x1, yb + 0.2, -4.35, x2, yb + 0.7, -3.85, '#0e1218')                       # eyes
+        m.box(*(min(sd * 1.44, sd * 1.47), yb + 0.5, -4.3), max(sd * 1.44, sd * 1.47), yb + 0.65, -4.15, '#ffffff')
+        for k in range(3):                                                               # gills
+            gx1, gx2 = xs(sd, 1.86, 1.99)
+            m.box(gx1, yb - 0.4, -2.9 + 0.35 * k, gx2, yb + 0.5, -2.75 + 0.35 * k, SHD)
+        fx1, fx2 = xs(sd, 1.8, 3.6)                                                      # pectoral fins, swept back
+        m.box(fx1, yb - 0.55, -1.4, fx2, yb - 0.35, 0.2, SHD, rot=('z', 22.5 * -sd, (sd * 1.8, yb - 0.45, 0)))
+    for i in range(5):                                                                   # dorsal fin, one solid swept shape
+        y = yb + 1.1 + 0.42 * i
+        m.box(-0.22, y, -1.3 + 0.38 * i, 0.22, y + 0.48, 0.9 - 0.12 * i, SHD)
+    for i in range(5):                                                                   # tail fin: upper lobe sweeping back
+        y = yb - 0.1 + 0.45 * i
+        m.box(-0.2, y, 4.2 + 0.3 * i, 0.2, y + 0.5, 4.9 + 0.22 * i, SHD)
+    for i in range(3):                                                                   # lower lobe
+        y = yb - 0.15 - 0.35 * (i + 1)
+        m.box(-0.2, y, 4.25 + 0.25 * i, 0.2, y + 0.4, 4.85 + 0.1 * i, SHD)
+    m.box(-1.2, yb + 1.25, -3.0, 1.2, yb + 1.32, 0.6, SHL)                               # top shine
+
+# --- Ballerina Cappuccina: cappuccino-cup head with a latte-art heart, pink tutu, on pointe
+@redesign("ballerina_cappuccina")
+def _(m):
+    CUP, CUPD, COF, FOAM, PK, PKL, PKD, SKIN, K = '#f4f1ec', '#d9d3ca', '#7a4a2c', '#f2e2c8', '#ff9cc8', '#ffc4de', '#e46aa4', '#f2c9a8', '#2a1a18'
+    y0 = 4.6
+    for sd in (-1, 1):                                                                   # legs on pointe
+        x = sd * 0.45
+        m.box(x - 0.18, y0, -0.18, x + 0.18, y0 + 0.5, 0.18, PKD)                         # pointe shoe
+        m.box(x - 0.2, y0 + 0.5, -0.2, x + 0.2, y0 + 0.8, 0.2, PK)
+        m.box(x - 0.16, y0 + 0.8, -0.16, x + 0.16, y0 + 2.4, 0.16, SKIN)
+        m.box(x - 0.2, y0 + 0.75, -0.21, x + 0.2, y0 + 0.82, 0.21, PKD)                  # ribbon
+    yt = y0 + 2.4
+    for i, (r_, c) in enumerate(((2.6, PKL), (2.3, PK), (1.9, PKL), (1.4, PK))):          # layered tutu
+        disc(m, 0, yt + 0.18 * i, 0, r_, 0.2, c)
+    rbox(m, -0.7, yt, -0.55, 0.7, yt + 1.6, 0.55, PK, r=0.25)                            # bodice
+    m.box(-0.35, yt + 1.2, -0.6, 0.35, yt + 1.4, -0.55, PKD)
+    for sd in (-1, 1):                                                                   # arms up in a hoop
+        x1, x2 = xs(sd, 0.7, 1.0)
+        m.box(x1, yt + 1.2, -0.12, x2, yt + 2.6, 0.12, SKIN, rot=('z', -22.5 * sd, (sd * 0.85, yt + 1.3, 0)))
+        x1, x2 = xs(sd, 0.4, 1.4)
+    yc = yt + 1.6                                                                        # cup head
+    rbox(m, -1.55, yc, -1.55, 1.55, yc + 2.4, 1.55, CUP, r=0.55)
+    rbox(m, -1.3, yc - 0.15, -1.3, 1.3, yc + 0.1, 1.3, CUPD, r=0.45)                     # foot ring
+    m.box(-1.6, yc + 2.15, -1.6, 1.6, yc + 2.4, 1.6, CUP)                                # rim
+    disc(m, 0, yc + 2.3, 0, 1.38, 0.12, COF)                                             # coffee
+    disc(m, 0, yc + 2.33, 0, 1.1, 0.12, FOAM)
+    for x, z in ((-0.3, -0.35), (0.3, -0.35), (0.0, 0.1), (-0.15, -0.1), (0.15, -0.1)):  # latte-art heart
+        m.box(x - 0.22, yc + 2.44, z - 0.22, x + 0.22, yc + 2.47, z + 0.22, COF)
+    rbox(m, 1.5, yc + 0.6, -0.25, 2.3, yc + 1.9, 0.25, CUP, r=0.25)                      # handle
+    for sd in (-1, 1):                                                                   # face on the cup
+        m.box(sd * 0.55 - 0.22, yc + 1.15, -1.6, sd * 0.55 + 0.22, yc + 1.65, -1.55, K)
+        m.box(sd * 0.55 - 0.12, yc + 1.45, -1.62, sd * 0.55 - 0.02, yc + 1.55, -1.6, '#ffffff')
+        m.box(sd * 0.55 - 0.3, yc + 1.72, -1.6, sd * 0.55 + 0.3, yc + 1.8, -1.55, K)      # lashes
+        m.box(sd * 0.95 - 0.22, yc + 0.85, -1.6, sd * 0.95 + 0.22, yc + 1.0, -1.55, '#ffb0c8')
+    m.box(-0.25, yc + 0.75, -1.6, 0.25, yc + 0.85, -1.55, K)                             # smile
+    for x in (-0.55, 0.0, 0.55):                                                         # little bun of foam + bow
+        m.box(x - 0.2, yc + 2.45, 0.6, x + 0.2, yc + 2.75, 1.0, FOAM)
+    m.box(-0.5, yc + 2.5, 1.1, 0.5, yc + 2.9, 1.3, PK); m.box(-0.15, yc + 2.55, 1.05, 0.15, yc + 2.85, 1.35, PKD)
+
+# --- Bombardiro Crocodilo: crocodile-headed bomber plane
+@redesign("bombardiro")
+def _(m):
+    G, GD, GL, BEL, MET, MD, K = '#5f7f3a', '#46612a', '#7da04e', '#c9d49a', '#9aa4ae', '#6b747e', '#14181a'
+    y0 = 4.6
+    for sd in (-1, 1):                                                                   # landing struts on the head
+        m.box(sd * 1.0 - 0.1, y0, -1.2, sd * 1.0 + 0.1, y0 + 1.2, -1.0, MD)
+        m.box(sd * 1.0 - 0.25, y0, -1.45, sd * 1.0 + 0.25, y0 + 0.4, -0.75, K)
+    yb = y0 + 2.2
+    taper(m, [(-2.0, 0.0, 1.25, 1.0, 0.0), (0.0, 2.4, 1.15, 0.95, 0.05), (2.4, 3.8, 0.8, 0.7, 0.2), (3.8, 4.8, 0.45, 0.45, 0.35)], MET, cy=yb)  # fuselage
+    m.box(-1.0, yb - 1.02, -1.8, 1.0, yb - 0.9, 3.6, MD)                                 # belly seam
+    rbox(m, -0.7, yb + 0.85, -0.6, 0.7, yb + 1.35, 1.2, '#a8e4ff', r=0.3)                # cockpit glass
+    m.box(-0.6, yb + 1.3, -0.4, 0.6, yb + 1.36, 1.0, '#e8f8ff')
+    taper(m, [(-3.4, -2.0, 1.3, 0.95, 0.0), (-4.8, -3.4, 1.05, 0.7, -0.15), (-5.8, -4.8, 0.8, 0.5, -0.3)], G, cy=yb)   # croc head
+    m.box(-0.95, yb - 0.85, -5.7, 0.95, yb - 0.55, -2.4, BEL)                            # pale jaw
+    m.box(-0.9, yb - 0.55, -5.75, 0.9, yb - 0.45, -2.6, K)                               # mouth line
+    for z in (-5.5, -5.0, -4.5, -4.0, -3.5, -3.0):                                       # zig-zag teeth
+        for sd in (-1, 1):
+            x = sd * (0.55 + 0.04 * (z + 5.5))
+            m.box(x - 0.1, yb - 0.75, z, x + 0.1, yb - 0.5, z + 0.18, '#ffffff')
+    for sd in (-1, 1):
+        x1, x2 = xs(sd, 0.45, 1.05)                                                      # bulging eyes on top
+        rbox(m, x1, yb + 0.8, -3.6, x2, yb + 1.4, -2.9, G, r=0.2)
+        m.box(x1 + 0.05, yb + 1.0, -3.65, x2 - 0.05, yb + 1.3, -3.58, '#f4e04a')
+        m.box((x1 + x2) / 2 - 0.06, yb + 1.0, -3.68, (x1 + x2) / 2 + 0.06, yb + 1.3, -3.64, K)
+        m.box(sd * 0.3 - 0.08, yb - 0.1, -5.82, sd * 0.3 + 0.08, yb + 0.05, -5.78, K)   # nostrils
+    for z in (-3.0, -2.4):                                                               # bumpy back scales
+        m.box(-0.5, yb + 0.95, z, 0.5, yb + 1.12, z + 0.4, GD)
+    for sd in (-1, 1):                                                                   # main wings + engines + bombs
+        x1, x2 = xs(sd, 1.1, 5.6)
+        m.box(x1, yb - 0.1, -0.6, x2, yb + 0.18, 1.2, GD)
+        m.box(x1, yb + 0.18, -0.6, x2, yb + 0.22, 0.0, GL)
+        ex = sd * 3.0
+        rbox(m, ex - 0.45, yb - 0.65, -1.6, ex + 0.45, yb + 0.2, 0.4, MET, r=0.2)        # engine
+        m.box(ex - 0.08, yb - 0.95, -1.72, ex + 0.08, yb + 0.5, -1.64, K)                # propeller blade
+        m.box(ex - 0.75, yb - 0.3, -1.72, ex + 0.75, yb - 0.14, -1.64, K)
+        m.box(ex - 0.15, yb - 0.37, -1.8, ex + 0.15, yb - 0.07, -1.6, '#d8a030')         # spinner
+        bx = sd * 4.6
+        rbox(m, bx - 0.3, yb - 0.85, -0.4, bx + 0.3, yb - 0.25, 0.9, '#3a3f44', r=0.15)  # bomb
+        m.box(bx - 0.05, yb - 0.25, 0.1, bx + 0.05, yb - 0.1, 0.4, MD)
+        m.box(bx - 0.32, yb - 0.6, 0.85, bx + 0.32, yb - 0.5, 1.1, '#c8202e')
+        x1, x2 = xs(sd, 0.3, 2.2)                                                        # tail planes
+        m.box(x1, yb + 0.3, 3.9, x2, yb + 0.45, 4.8, GD)
+    m.box(-0.12, yb + 0.6, 3.9, 0.12, yb + 2.1, 4.8, GD)                                 # tail fin
+    m.box(-0.14, yb + 1.6, 4.3, 0.14, yb + 2.0, 4.8, '#c8202e')
+
+# --- Chimpanzini Bananini: little chimp popping out of a half-peeled banana
+@redesign("chimpanzini_bananini")
+def _(m):
+    Y, YD, YL, TIP, BRN, BRND, FACE, K = '#f5d43a', '#d9b228', '#fff3a0', '#5a3a1a', '#6b4326', '#4e2f1a', '#e8b98a', '#1d1418'
+    y0 = 4.6
+    m.box(-0.35, y0, -0.35, 0.35, y0 + 0.3, 0.35, TIP)                                   # banana stem end
+    for i, (hw, h) in enumerate(((0.8, 0.5), (1.15, 0.6), (1.35, 0.7), (1.45, 0.6))):     # banana bottom (unpeeled)
+        yb = y0 + 0.3 + sum(hh for _, hh in ((0.8, 0.5), (1.15, 0.6), (1.35, 0.7), (1.45, 0.6))[:i])
+        rbox(m, -hw, yb, -hw, hw, yb + h, hw, Y if i % 2 == 0 else YD, r=hw / 3, top=False)
+    yp = y0 + 2.7
+    for k, (dx, dz, ax, sg) in enumerate(((0, -1, 'x', -1), (0, 1, 'x', 1), (-1, 0, 'z', 1), (1, 0, 'z', -1))):   # four peel flaps
+        for j in range(3):                                                               # each flap curls outward
+            off = 1.25 + 0.35 * j
+            cx, cz = dx * off, dz * off
+            w = 0.9 - 0.15 * j
+            yy = yp + 0.9 * j
+            ang = 22.5 * sg * (j + 1) / 3 * 1.6
+            if ax == 'x':
+                m.box(cx - w, yy, cz - 0.15, cx + w, yy + 0.95, cz + 0.15, Y if j < 2 else YL, rot=('x', round(ang, 2), (cx, yy, cz)))
+            else:
+                m.box(cx - 0.15, yy, cz - w, cx + 0.15, yy + 0.95, cz + w, Y if j < 2 else YL, rot=('z', round(ang, 2), (cx, yy, cz)))
+        if ax == 'x':
+            m.box(-0.2, yp + 2.6, dz * 2.3 - 0.15, 0.2, yp + 2.85, dz * 2.3 + 0.15, TIP)
+        else:
+            m.box(dx * 2.3 - 0.15, yp + 2.6, -0.2, dx * 2.3 + 0.15, yp + 2.85, 0.2, TIP)
+    rbox(m, -1.05, yp - 0.2, -1.05, 1.05, yp + 0.6, 1.05, '#fff6d6', r=0.3)             # banana flesh inside
+    yh = yp + 0.4                                                                        # chimp
+    rbox(m, -1.0, yh, -0.9, 1.0, yh + 1.2, 0.9, BRN, r=0.35)                             # shoulders
+    rbox(m, -1.3, yh + 1.1, -1.2, 1.3, yh + 3.3, 1.1, BRN, r=0.5)                        # head
+    rbox(m, -1.0, yh + 1.25, -1.28, 1.0, yh + 2.9, -1.15, FACE, r=0.3)                   # face mask
+    rbox(m, -0.75, yh + 1.2, -1.7, 0.75, yh + 1.9, -1.2, FACE, r=0.25)                   # muzzle
+    m.box(-0.3, yh + 1.65, -1.72, -0.12, yh + 1.78, -1.7, K); m.box(0.12, yh + 1.65, -1.72, 0.3, yh + 1.78, -1.7, K)   # nostrils
+    m.box(-0.45, yh + 1.35, -1.72, 0.45, yh + 1.42, -1.7, '#7a3a2a')                     # grin
+    for sd in (-1, 1):
+        m.box(sd * 0.45 - 0.22, yh + 2.2, -1.3, sd * 0.45 + 0.22, yh + 2.65, -1.27, K)   # eyes
+        m.box(sd * 0.45 - 0.12, yh + 2.45, -1.32, sd * 0.45 - 0.02, yh + 2.57, -1.3, '#ffffff')
+        m.box(sd * 0.45 - 0.3, yh + 2.75, -1.3, sd * 0.45 + 0.3, yh + 2.9, -1.27, BRND)  # brows
+        x1, x2 = xs(sd, 1.25, 1.75)
+        rbox(m, x1, yh + 1.8, -0.3, x2, yh + 2.6, 0.3, BRN, r=0.15)                      # ears
+        m.box(min(sd * 1.5, sd * 1.76), yh + 1.95, -0.32, max(sd * 1.5, sd * 1.76), yh + 2.45, 0.0, FACE)
+        x1, x2 = xs(sd, 0.85, 1.3)                                                       # arms hugging the peel
+        m.box(x1, yh + 0.2, -1.25, x2, yh + 0.55, 0.0, BRN)
+        m.box(x1, yh + 0.15, -1.45, x2, yh + 0.6, -1.15, FACE)
+    m.box(-0.5, yh + 3.25, -0.4, 0.5, yh + 3.5, 0.3, BRND)                               # tuft
+
+# --- Lirili Larila: elephant head on a cactus body, sandals, holding a little clock
+@redesign("lirili_larila")
+def _(m):
+    GR, GRD, GRL, CA, CAD, SP, SAN, SAND, K = '#9aa0aa', '#7a808a', '#b6bcc6', '#4f9a3a', '#3b7a2c', '#f2efd8', '#a8743e', '#7a5228', '#16141a'
+    y0 = 4.6
+    for sd in (-1, 1):                                                                   # sandals + feet
+        x = sd * 0.65
+        m.box(x - 0.45, y0, -0.9, x + 0.45, y0 + 0.18, 0.5, SAND)
+        rbox(m, x - 0.4, y0 + 0.18, -0.8, x + 0.4, y0 + 0.6, 0.4, GR, r=0.15)
+        m.box(x - 0.42, y0 + 0.35, -0.5, x + 0.42, y0 + 0.48, -0.3, SAN)                 # strap
+        m.box(x - 0.25, y0 + 0.6, -0.25, x + 0.25, y0 + 1.6, 0.25, CA)                   # cactus legs
+    yb = y0 + 1.5
+    rbox(m, -1.0, yb, -0.8, 1.0, yb + 2.4, 0.8, CA, r=0.35)                              # cactus body
+    for x in (-0.55, 0.0, 0.55):
+        m.box(x - 0.08, yb + 0.1, -0.84, x + 0.08, yb + 2.3, -0.8, CAD)                  # ribs
+    for x, y in ((-0.8, 0.6), (0.3, 1.2), (-0.3, 1.9), (0.8, 0.4), (0.6, 2.0)):
+        m.box(x - 0.05, yb + y, -0.92, x + 0.05, yb + y + 0.1, -0.84, SP)               # spines
+    for sd in (-1, 1):                                                                   # cactus arms bent up
+        x1, x2 = xs(sd, 1.0, 1.7)
+        m.box(x1, yb + 0.9, -0.25, x2, yb + 1.35, 0.25, CA)
+        x1, x2 = xs(sd, 1.3, 1.75)
+        m.box(x1, yb + 1.35, -0.25, x2, yb + 2.3, 0.25, CA)
+    cx_ = 1.55                                                                           # clock in the right arm
+    m.box(cx_ - 0.5, yb + 2.0, -0.55, cx_ + 0.5, yb + 3.0, -0.35, '#d8a030')
+    m.box(cx_ - 0.4, yb + 2.1, -0.58, cx_ + 0.4, yb + 2.9, -0.55, '#fffbe8')
+    m.box(cx_ - 0.04, yb + 2.5, -0.6, cx_ + 0.04, yb + 2.85, -0.58, K); m.box(cx_, yb + 2.46, -0.6, cx_ + 0.3, yb + 2.54, -0.58, K)
+    yh = yb + 2.3                                                                        # elephant head
+    rbox(m, -1.4, yh, -1.3, 1.4, yh + 2.4, 1.1, GR, r=0.55)
+    m.box(-1.1, yh + 2.3, -0.9, 1.1, yh + 2.5, 0.7, GRL)                                 # forehead dome
+    for i, (w, z, y) in enumerate(((0.55, -1.35, 0.6), (0.45, -1.75, 0.05), (0.38, -1.95, -0.5), (0.3, -2.05, -1.0))):   # trunk curling down
+        m.box(-w, yh + y, z - 0.4, w, yh + y + 0.65, z + 0.25, GR if i % 2 == 0 else GRD)
+    m.box(-0.32, yh - 1.15, -2.45, 0.32, yh - 0.85, -1.95, GR)                           # curled tip
+    for sd in (-1, 1):
+        x1, x2 = xs(sd, 1.3, 2.8)                                                        # big floppy ears
+        m.box(x1, yh + 0.2, -0.5, x2, yh + 2.2, -0.2, GR, rot=('y', 22.5 * sd, (sd * 1.3, yh, -0.35)))
+        x1, x2 = xs(sd, 1.5, 2.6)
+        m.box(x1, yh + 0.45, -0.55, x2, yh + 1.95, -0.5, '#d8a0a8', rot=('y', 22.5 * sd, (sd * 1.3, yh, -0.35)))
+        m.box(sd * 0.65 - 0.2, yh + 1.3, -1.36, sd * 0.65 + 0.2, yh + 1.7, -1.3, K)     # eyes
+        m.box(sd * 0.65 - 0.12, yh + 1.5, -1.38, sd * 0.65 - 0.02, yh + 1.62, -1.36, '#ffffff')
+        x1, x2 = xs(sd, 0.6, 0.85)                                                       # tusks
+        m.box(x1, yh + 0.15, -1.5, x2, yh + 0.35, -1.2, SP)
+
+# --- Brr Brr Patapim: tree-forest monkey with a big nose, mossy hat, root feet
+@redesign("brr_patapim")
+def _(m):
+    BK, BKD, BKL, MOSS, MOSSD, NOSE, NOSED, LEAF, K = '#7a5232', '#5a3a22', '#9a6c44', '#5fae46', '#3f8a32', '#e8a07a', '#c87a5a', '#4cae3a', '#16141a'
+    y0 = 4.6
+    for sd in (-1, 1):                                                                   # long root feet
+        x = sd * 0.7
+        m.box(x - 0.3, y0, -1.6, x + 0.3, y0 + 0.3, 0.6, BKD)
+        for dz in (-1.6, -1.1):
+            m.box(x - 0.08 + sd * 0.15, y0, dz - 0.3, x + 0.08 + sd * 0.15, y0 + 0.15, dz, BKD)   # toes
+        m.box(x - 0.25, y0 + 0.3, -0.25, x + 0.25, y0 + 1.6, 0.25, BK)                   # legs
+    yb = y0 + 1.5
+    rbox(m, -1.4, yb, -1.2, 1.4, yb + 2.8, 1.2, BK, r=0.45)                              # trunk-like head-body
+    for x, y in ((-0.9, 0.4), (0.7, 1.0), (-0.4, 2.0), (1.0, 2.2), (0.2, 0.2)):
+        m.box(x - 0.08, yb + y, -1.25, x + 0.08, yb + y + 0.5, -1.2, BKD)                # bark lines
+    for sd in (-1, 1):                                                                   # eyes
+        m.box(sd * 0.55 - 0.3, yb + 1.8, -1.27, sd * 0.55 + 0.3, yb + 2.35, -1.22, '#f6f2e8')
+        m.box(sd * 0.55 - 0.12, yb + 1.85, -1.3, sd * 0.55 + 0.12, yb + 2.15, -1.27, K)
+        m.box(sd * 0.55 - 0.35, yb + 2.4, -1.27, sd * 0.55 + 0.35, yb + 2.55, -1.22, BKD)   # grumpy brows
+        x1, x2 = xs(sd, 1.4, 2.6)                                                        # twig arms with leaves
+        m.box(x1, yb + 1.0, -0.15, x2, yb + 1.3, 0.15, BK, rot=('z', -22.5 * sd, (sd * 1.4, yb + 1.15, 0)))
+        m.box(sd * 2.5 - 0.3, yb + 1.6, -0.3, sd * 2.5 + 0.3, yb + 2.1, 0.3, LEAF)
+    rbox(m, -0.55, yb + 0.7, -2.4, 0.55, yb + 1.9, -1.2, NOSE, r=0.3)                    # big droopy nose
+    m.box(-0.45, yb + 0.6, -2.5, 0.45, yb + 1.0, -1.6, NOSED)
+    m.box(-0.5, yb + 0.3, -1.3, 0.5, yb + 0.45, -1.22, '#3a1d18')                        # mouth
+    yt = yb + 2.75                                                                       # mossy hat
+    rbox(m, -1.9, yt, -1.8, 1.9, yt + 0.35, 1.8, MOSSD, r=0.6)
+    rbox(m, -1.3, yt + 0.35, -1.25, 1.3, yt + 1.2, 1.25, MOSS, r=0.45)
+    m.box(-1.32, yt + 0.4, -1.27, 1.32, yt + 0.6, 1.27, MOSSD)                           # band
+    m.box(0.6, yt + 1.2, -0.2, 0.75, yt + 1.6, -0.05, '#f4f2ee')                         # little mushroom on the hat
+    rbox(m, 0.35, yt + 1.6, -0.45, 1.0, yt + 1.85, 0.2, '#c8312d', r=0.2)
+
+
+# --- Dumpling steamer v3: round bamboo steamer, plump pleated dumplings, lid open, soft slow steam, chopsticks
+def _round_wall(m, y1, y2, R, c, t=0.45, name=None):
+    """Round wall (octagon with chamfered corners) from y1 to y2."""
+    e = R * 0.4142
+    for s_ in (-1, 1):
+        m.box(-e, y1, s_ * R - t / 2, e, y2, s_ * R + t / 2, c)
+        m.box(s_ * R - t / 2, y1, -e, s_ * R + t / 2, y2, e, c)
+    d = R * 0.7071 * 0.92
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            m.box(sx * d - e, y1, sz * d - t / 2, sx * d + e, y2, sz * d + t / 2, c, rot=('y', 45.0 * sx * sz, (sx * d, y1, sz * d)))
+
+def bao(m, x, y, z, r, DU, DUD):
+    """Plump round dumpling with a pleated twist on top."""
+    for hw, h in ((r * 0.85, 0.25 * r), (r, 0.35 * r), (r * 0.95, 0.3 * r), (r * 0.78, 0.25 * r), (r * 0.52, 0.2 * r)):
+        disc(m, x, y, z, hw, h, DU)
+        y += h
+    for j in range(6):                                                                   # pleats swirling to the top
+        a = j * math.pi / 3
+        px, pz = x + 0.35 * r * math.cos(a), z + 0.35 * r * math.sin(a)
+        m.box(px - 0.07, y - 0.25 * r, pz - 0.07, px + 0.07, y + 0.05, pz + 0.07, DUD)
+    m.box(x - 0.14, y, z - 0.14, x + 0.14, y + 0.22, z + 0.14, DU)
+
+@redesign("dumpling_hat")
+def _(m):
+    BB, BBD, BBL, DU, DUD, LEAF = '#d9b072', '#a8803a', '#ecd096', '#fffaf0', '#ebe0c8', '#8cc06a'
+    y0, R = 4.6, 3.4
+    disc(m, 0, y0, 0, R, 0.3, BBD)                                                      # base
+    _round_wall(m, y0 + 0.3, y0 + 1.8, R, BB)
+    for y in (y0 + 0.55, y0 + 1.25):                                                    # woven bands
+        _round_wall(m, y, y + 0.16, R + 0.06, BBD, t=0.5)
+    _round_wall(m, y0 + 1.7, y0 + 1.85, R + 0.05, BBL, t=0.55)                          # rim
+    disc(m, 0, y0 + 1.1, 0, R - 0.2, 0.12, '#c9e0a0')                                   # cabbage-leaf liner
+    for x, z in ((-1.4, -1.3), (1.4, -1.3), (-1.4, 1.3), (1.4, 1.3), (0.0, 0.0)):
+        bao(m, x, y0 + 1.22, z, 1.0 if (x or z) else 1.1, DU, DUD)
+    for sd in (-1, 1):                                                                  # chopsticks resting across the rim
+        m.box(-3.9, y0 + 1.85, sd * 0.25 - 2.2 - 0.07, 1.6, y0 + 2.0, sd * 0.25 - 2.2 + 0.07, '#7a4a28',
+              rot=('y', 22.5, (0, y0 + 1.9, -2.2)))
+    hy, hz = y0 + 1.8, R + 0.1                                                          # lid, hinged open at the back
+    lid = ('x', 40.0, (0, hy, hz))
+    for hw, h, c in ((R + 0.1, 0.45, BB), (R - 0.3, 0.3, BBL), (R - 1.2, 0.25, BB)):
+        for a, b in ((1.0, 0.42), (0.42, 1.0), (0.8, 0.8)):
+            m.box(-hw * a, hy, hz - R - hw * b, hw * a, hy + h, hz - R + hw * b, c, rot=lid)
+        hy += h
+    m.box(-0.7, hy, hz - R - 0.25, 0.7, hy + 0.3, hz - R + 0.25, BBD, rot=lid)          # lid handle
+    ST = '#f4f6fae0'
+    N = 10
+    for k in range(N):                                                                  # soft steam drifting up, slowly
+        P = Pose(m, f"dp{k}")
+        for j, (x, z) in enumerate(((-1.4, -1.3), (1.4, 1.3), (0.2, 0.0), (1.4, -1.3))):
+            tt = ((k / N) + j * 0.27) % 1.0
+            s_ = 0.25 + 0.35 * tt
+            sx = x + 0.5 * math.sin(tt * 5 + j)
+            yy = y0 + 3.0 + 3.6 * tt
+            P.box(sx - s_, yy, z - s_, sx + s_, yy + 1.6 * s_, z + s_, ST)
+    m.animate(('show', 'dp', N), frames=N, frametime=4, interpolate=False)
+
+# --- Onigiri buddy v2: smooth rounded rice triangle with grain texture, nori wrap, cute face
+@redesign("onigiri_hat")
+def _(m):
+    NO, NOL, K = '#1f3a2a', '#2c4e38', '#1a1418'
+    y0 = 4.6
+    def rice(p, n):
+        g = _hash(round(p[0] * 5), round(p[1] * 5), round(p[2] * 5))
+        return '#fbfaf4' if g < 0.6 else ('#efebe0' if g < 0.9 else '#e2dccd')
+    L = 18
+    for k in range(L):
+        t = k / L
+        w = 2.5 * (1 - t) + 0.35                                                         # triangle narrowing upward
+        if k < 2: w -= 0.35 * (2 - k) / 2                                                # rounded bottom corners
+        if k > L - 4: w -= 0.25 * (k - (L - 4))                                          # rounded top
+        d = 1.15 - 0.35 * t
+        sbox(m, -w, y0 + k * 0.28, -d, w, y0 + (k + 1) * 0.28, d, rice, "oni", res=4)
+    def nori(p, n):
+        return NOL if (int(p[0] * 3) + int(p[1] * 3)) % 4 == 0 else NO
+    sbox(m, -1.15, y0 - 0.02, -1.22, 1.15, y0 + 1.9, 1.22, nori, "nori", res=4)          # nori wrap
+    for sd in (-1, 1):
+        m.box(sd * 0.55 - 0.2, y0 + 2.35, -1.06, sd * 0.55 + 0.2, y0 + 2.85, -1.0, K)    # eyes
+        m.box(sd * 0.55 - 0.12, y0 + 2.62, -1.08, sd * 0.55 - 0.02, y0 + 2.75, -1.06, '#ffffff')
+        m.box(sd * 1.0 - 0.25, y0 + 2.1, -1.06, sd * 1.0 + 0.25, y0 + 2.25, -1.0, '#ffa8b8')   # blush
+    m.box(-0.25, y0 + 2.05, -1.07, -0.08, y0 + 2.18, -1.0, K); m.box(0.08, y0 + 2.05, -1.07, 0.25, y0 + 2.18, -1.0, K)
+    m.box(-0.08, y0 + 1.98, -1.07, 0.08, y0 + 2.08, -1.0, K)                             # little 'w' smile
+    m.box(-0.35, y0 + 4.2, -0.45, 0.35, y0 + 4.75, 0.2, '#d8384a')                       # umeboshi peeking out the top
+
+
+# --- Disco ball v3: smooth round mirror ball whose tiles really spin and sparkle (texture animates, no copies),
+#     coloured light spots sweeping over the head
+class FnTex(Tex):
+    """Box texture painted per animation frame by fn(point, normal, frame) -> colour; `turn` (deg about y
+    through `piv`) is applied to sample points, for boxes that are themselves turned."""
+    def __init__(self, box, fn, name, key, res=4, turn=0.0, piv=(0.0, 0.0, 0.0), faces=None):
+        self.box_, self.fn, self.res, self.turn, self.piv = box, fn, res, turn, piv
+        x1, y1, z1, x2, y2, z2 = box
+        self.w, self.h, self.d = max(1, round((x2 - x1) * res)), max(1, round((y2 - y1) * res)), max(1, round((z2 - z1) * res))
+        self.u = self.v = 0; self.a = None; self.skip = set()
+        self.only = set(faces) if faces else None
+        self.key = (name, 'fn', key)
+    def frame_patch(self, f, face, pw, ph):
+        a = _np.zeros((ph, pw, 4), _np.uint8)
+        if self.only and face not in self.only:
+            return a
+        x1, y1, z1, x2, y2, z2 = self.box_
+        L = lambda p, q, t: p + (q - p) * t
+        at, n = {
+            'north': (lambda u, v: (L(x2, x1, u), L(y2, y1, v), z1), (0, 0, -1)),
+            'south': (lambda u, v: (L(x1, x2, u), L(y2, y1, v), z2), (0, 0, 1)),
+            'east':  (lambda u, v: (x2, L(y2, y1, v), L(z2, z1, u)), (1, 0, 0)),
+            'west':  (lambda u, v: (x1, L(y2, y1, v), L(z1, z2, u)), (-1, 0, 0)),
+            'up':    (lambda u, v: (L(x1, x2, u), y2, L(z1, z2, v)), (0, 1, 0)),
+            'down':  (lambda u, v: (L(x1, x2, u), y1, L(z2, z1, v)), (0, -1, 0)),
+        }[face]
+        ca, sa = math.cos(math.radians(self.turn)), math.sin(math.radians(self.turn))
+        px, _, pz = self.piv
+        for j in range(ph):
+            for i in range(pw):
+                x, y, z = at((i + 0.5) / pw, (j + 0.5) / ph)
+                if self.turn:
+                    dx, dz = x - px, z - pz
+                    x, z = px + ca * dx + sa * dz, pz - sa * dx + ca * dz
+                a[j, i] = _rgba(self.fn((x, y, z), n, f))
+        return a
+    def patch(self, face, pw, ph):
+        return self.frame_patch(0, face, pw, ph)
+
+def fn_sphere(m, cx, cy, cz, R, pat, name, layers=12, res=4):
+    """Rounder ball: each layer is an octagon (two crossing slabs + one turned 45 degrees)."""
+    h = 2 * R / layers
+    for i in range(layers):
+        ya, yb = cy - R + i * h, cy - R + (i + 1) * h
+        mid = (ya + yb) / 2 - cy
+        a = math.sqrt(max(R * R - mid * mid, 0.0)) * 1.02
+        b = a * 0.4142
+        def fn(p, n, f):
+            d = _np.array(p) - (cx, cy, cz)
+            return pat(d / (_np.linalg.norm(d) + 1e-9), f)
+        for k, bx in enumerate(((cx - a, ya, cz - b, cx + a, yb, cz + b), (cx - b, ya, cz - a, cx + b, yb, cz + a))):
+            m.box(*bx, FnTex(bx, fn, name, f"l{i}_{k}", res))
+        bx = (cx - a, ya, cz - b, cx + a, yb, cz + b)                                     # the two 45-degree slabs
+        for k, t in ((2, 45.0), (3, -45.0)):
+            m.box(*bx, FnTex(bx, fn, name, f"l{i}_{k}", res, turn=t, piv=(cx, 0, cz)), rot=('y', t, (cx, ya, cz)))
+
+@redesign("disco_ball_hat")
+def _(m):
+    N = 16
+    TL = 0.3
+    L1 = _np.array((-0.4, 0.75, -0.55)); L1 = L1 / _np.linalg.norm(L1)
+    COLS = ['#ff7ad1', '#7af7ff', '#ffe14f', '#b08aff']
+    def pat(d, f):
+        lat = math.asin(max(-1, min(1, d[1])))
+        row = math.floor(lat / TL + 0.5)
+        fy = lat / TL + 0.5 - row
+        latc = row * TL
+        n = max(4, round(2 * math.pi * math.cos(latc) / TL))
+        step = 2 * math.pi / n
+        spin = 2 * math.pi * f / N / 4                                                    # quarter turn per loop: tiles line up again
+        lon = math.atan2(d[2], d[0]) - spin
+        fx = (lon / step) % 1.0
+        if fx < 0.14 or fy < 0.14:
+            return '#2e3038'                                                              # grout
+        col = math.floor(lon / step)
+        lc = (col + 0.5) * step + spin
+        nc = _np.array((math.cos(latc) * math.cos(lc), math.sin(latc), math.cos(latc) * math.sin(lc)))
+        b = max(0.0, float(nc @ L1))
+        hsh = _hash(row, col % n)
+        if b > 0.9:
+            return '#ffffff'                                                              # hot glint where the light hits
+        if hsh > 0.93:
+            return COLS[int(hsh * 1000) % len(COLS)]                                      # coloured reflections
+        return _mix('#7d8494', '#e9edf5', min(1.0, 0.25 + 0.75 * b ** 1.5) * (0.8 + 0.2 * hsh))
+    m.box(-0.8, 4.6, -0.8, 0.8, 4.9, 0.8, '#2a2830')                                     # motor base
+    m.box(-0.55, 4.9, -0.55, 0.55, 5.1, 0.55, '#c9ced8')
+    m.box(-0.12, 5.1, -0.12, 0.12, 5.6, 0.12, '#9aa0aa')                                  # chrome rod
+    fn_sphere(m, 0, 8.1, 0, 2.6, pat, "disco", layers=12, res=4)
+    SPC = ['#ff7ad1', '#7af7ff', '#ffe14f', '#ffffff', '#b08aff', '#ff7ad1', '#7af7ff', '#ffe14f']
+    GLOW.update(SPC)
+    def spots(p, n, f):                                                                   # light dots sweeping round the head
+        x, _, z = p
+        for i, c in enumerate(SPC):
+            a = 2 * math.pi * i / len(SPC) + 2 * math.pi * f / N / 4 * (1 if i % 2 else -1) * 2
+            rr = 2.4 + 1.4 * (i % 3) / 2
+            sx, sz = rr * math.cos(a), rr * math.sin(a)
+            if abs(x - sx) < 0.45 and abs(z - sz) < 0.45:
+                return c
+        return (0, 0, 0, 0)
+    bx = (-4.7, 4.6, -4.7, 4.7, 4.63, 4.7)
+    m.box(*bx, FnTex(bx, spots, "disco", "spots", res=4, faces=('up',)))
+    m.animate(frames=N, frametime=2, interpolate=False)
+
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
 SHRINK = {"frog_buddy": 0.5, "froggie_buddy": 0.5, "froggie_hat": 0.5, "froggie_strawberry": 0.5,
@@ -12593,5 +13497,6 @@ GONE = {"sunglasses", "3d_glasses", "aviator_goggles", "vr_visor", "heart_shades
         "candle_crown", "coral_crown", "cherry_blossom_crown", "end_portal_hat", "phoenix_crest", "oni_horns", "rainbow_arc",
         "oni_half_mask", "masquerade_mask", "fairy_wings_head", "mermaid_tiara", "medal_bronze"}
 GONE |= {n for n, t, tier, fn in D if tier == "hair" and not n.startswith(("afro_", "dreads_"))}
+GONE |= {"neon_cat_ears", "fire_hair", "big_brain", "banana_cat", "fish_slap", "tinfoil_hat", "froglight_crown", "raccoon_buddy", "hamster_buddy"}      # round 18
 D[:] = [d for d in D if d[0] not in GONE]
 D[:] = [(n, t, tier, _fit(n, fn)) for n, t, tier, fn in D]
