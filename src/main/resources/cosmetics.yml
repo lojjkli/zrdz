@@ -654,9 +654,6 @@ medal_gold:
 medal_silver:
   name: "Silver Medal"
   category: "Crowns & Halos"
-medal_bronze:
-  name: "Bronze Medal"
-  category: "Crowns & Halos"
 golden_laurel:
   name: "Golden Laurel"
   category: "Crowns & Halos"
