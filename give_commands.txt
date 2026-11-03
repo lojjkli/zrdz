@@ -213,7 +213,6 @@
 /give @p minecraft:paper[item_model="aconite:void_crown",item_name="Void Crown",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:medal_gold",item_name="Gold Medal",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:medal_silver",item_name="Silver Medal",equippable={slot:"head"}]
-/give @p minecraft:paper[item_model="aconite:medal_bronze",item_name="Bronze Medal",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:golden_laurel",item_name="Golden Laurel",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:trophy_hat",item_name="Trophy Hat",equippable={slot:"head"}]
 /give @p minecraft:paper[item_model="aconite:creeper_buddy",item_name="Creeper Buddy",equippable={slot:"head"}]

@@ -231,6 +231,10 @@ class Model:
         shows = [fx for fx in (self.anim or {}).get('fx', ()) if fx[0] == 'show']
         for i, (w, h, c, d) in enumerate(self._paint_order):
             if isinstance(c, Tex):
+                fp = getattr(c, 'frame_patch', None)
+                if fp is not None:            # textures that change every frame (e.g. sprites moving between slots)
+                    x, y = self._pos[i]
+                    out[y:y + h, x:x + w] = fp(f, d, w, h)
                 for fx in shows:              # 'show': copy k of a textured group is only visible on its frame
                     prefix, n = fx[1], fx[2]
                     seq = fx[3] if len(fx) > 3 else None

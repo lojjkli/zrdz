@@ -12234,6 +12234,117 @@ def _(m):
         m.box(x - 0.15, y - 0.15, z - 0.15, x + 0.15, y + 0.15, z + 0.15, FF)           # fireflies
     m.animate(('twinkle', [FF], 0.8), frames=12, frametime=2)
 
+# ---------------- Totem Halo v2: the TagsSMP Taggy totems flying round the head, rainbow core in the middle ----------------
+_TOT = {n: _np.array(_Image.open(_os.path.join(_os.path.dirname(__file__), "textures", "totems", n + ".png")).convert('RGBA'))
+        for n in ("core", "taggy", "baggy", "daggy", "gaggy", "kli", "laggy", "oaggy", "roggy", "waggy", "yaggy")}
+
+def totem_voxels(m, img, x0, y0, z0, s, t, name):
+    """Sprite extruded into a slab: one box per run of opaque pixels in each row, front/back show the
+    pixels, edges take the colour of the pixel they belong to."""
+    H, W = img.shape[:2]
+    for y in range(H):
+        x = 0
+        while x < W:
+            if img[y, x, 3] < 128:
+                x += 1; continue
+            x1 = x
+            while x < W and img[y, x, 3] >= 128:
+                x += 1
+            w = x - x1
+            ft = FaceTex({'north': (img, x1, y, w, 1), 'south': (img, x1, y, w, 1), 'up': (img, x1, y, w, 1),
+                          'down': (img, x1, y, w, 1), 'east': (img, x1, y, 1, 1), 'west': (img, x - 1, y, 1, 1)},
+                         name, f"r{y}_{x1}", flipx=('south', 'up', 'down'))
+            # pixel (col, row) -> head px; image left is the wearer's right (+x) when seen from the front
+            m.box(x0 + (W / 2 - x) * s, y0 + (H - 1 - y) * s, z0 - t / 2, x0 + (W / 2 - x1) * s, y0 + (H - y) * s, z0 + t / 2, ft)
+
+def totem_card(P, img, s, t, name, key):
+    """Small totem as one thick card: the sprite on front and back (cut out), so it stays light."""
+    H, W = img.shape[:2]
+    ft = FaceTex({'north': (img, 0, 0, W, H), 'south': (img, 0, 0, W, H)}, name, key, flipx=())
+    P.box(-W / 2 * s, 0.0, -t / 2, W / 2 * s, H * s, t / 2, ft)
+
+class SlotTex(Tex):
+    """Card face whose picture can change every animation frame: fn(frame) -> sprite array or None."""
+    def __init__(self, fn, name, key, along_x=True):
+        self.fn, self.h, self.u, self.v, self.a, self.skip = fn, 16, 0, 0, None, set()
+        self.w, self.d = (16, 1) if along_x else (1, 16)
+        self.faces = ('north', 'south') if along_x else ('east', 'west')
+        self.key = (name, 'slot', key)
+    def frame_patch(self, f, face, pw, ph):
+        img = self.fn(f) if face in self.faces else None
+        if img is None:
+            return _np.zeros((ph, pw, 4), _np.uint8)
+        return _np.array(_Image.fromarray(_np.ascontiguousarray(img)).resize((pw, ph), _Image.NEAREST))
+    def patch(self, face, pw, ph):
+        return self.frame_patch(0, face, pw, ph)
+
+@redesign("totem_halo")
+def _(m):
+    """Rainbow core totem in the middle; the ten Taggy totems fly round the head. The cards stay put and
+    the pictures hop from slot to slot each frame, so it is smooth and light (few boxes, small texture)."""
+    totem_voxels(m, _TOT["core"], 0.0, 6.0, 0.0, 0.36, 0.7, "tcore")                    # big rainbow core above the head
+    ring = ("taggy", "baggy", "daggy", "gaggy", "kli", "laggy", "oaggy", "roggy", "waggy", "yaggy")
+    M = 40                                                                               # slots round the ring = frames
+    gap = M // len(ring)
+    R, s = 6.2, 0.16
+    for j in range(M):
+        def fn(f, j=j):
+            k = (j - f) % M
+            return _TOT[ring[k // gap]] if k % gap == 0 else None
+        phi = 2 * math.pi * j / M
+        x, z = R * math.cos(phi), R * math.sin(phi)
+        y = 5.4 + 0.6 * math.sin(phi * 3)                                                # they ride a gentle wave
+        for c, extra in ((0, 0.0), (1, 90.0)):                                           # crossed cards: seen from every side
+            A = (math.degrees(math.atan2(-math.cos(phi), -math.sin(phi))) + extra + 90) % 180 - 90   # double-sided: mod 180
+            if abs(A) <= 45:                                                              # card along x, turned A
+                b = (x - 8 * s, y, z - 0.01, x + 8 * s, y + 16 * s, z + 0.01); along = True; r = A
+            else:                                                                         # card along z, turned the rest
+                b = (x - 0.01, y, z - 8 * s, x + 0.01, y + 16 * s, z + 8 * s); along = False; r = A - 90 if A > 0 else A + 90
+            r = round(r, 2)
+            m.box(*b, SlotTex(fn, "tslot", f"{j}_{c}", along), rot=('y', r, (x, y, z)) if r else None)
+    m.animate(frames=M, frametime=2, interpolate=False)
+
+# ---------------- Wisp Lantern v2: glass lantern swinging from a hook, a living wisp swirling inside ----------------
+@redesign("wisp_lantern")
+def _(m):
+    I, ID, IL, GLS, W1, W2, W3 = '#3a3540', '#26222c', '#6a6570', '#bfefff50', '#7ad8ff', '#c8f4ff', '#ffffff'
+    GLOW.update({W1, W2, W3, '#9be7ff'})
+    rbox(m, 2.8, 4.6, -1.0, 4.7, 5.2, 1.0, I, r=0.4)                                     # clip on the head
+    m.box(3.9, 5.2, -0.25, 4.4, 9.6, 0.25, I)                                            # rod up
+    m.box(3.9, 9.6, -0.25, 6.9, 10.1, 0.25, I)                                           # arm out
+    m.box(6.6, 9.2, -0.15, 6.9, 9.6, 0.15, IL)                                           # hook
+    N = 12
+    hx, hy = 6.75, 9.2
+    for k in range(N):
+        P = Pose(m, f"wl{k}")
+        sw = round(10.0 * math.sin(2 * math.pi * k / N), 2)                              # lantern swinging
+        rot = ('z', sw, (hx, hy, 0.0)) if sw else None
+        B = lambda x1, y1, z1, x2, y2, z2, c: P.box(x1, y1, z1, x2, y2, z2, c, rot=rot)
+        cx, yb = hx, 4.9
+        B(cx - 0.1, yb + 3.7, -0.1, cx + 0.1, hy, 0.1, IL)                               # chain
+        B(cx - 1.4, yb + 3.2, -1.4, cx + 1.4, yb + 3.7, 1.4, I)                          # cap
+        B(cx - 0.8, yb + 3.7, -0.8, cx + 0.8, yb + 3.95, 0.8, ID)
+        B(cx - 1.4, yb, -1.4, cx + 1.4, yb + 0.4, 1.4, I)                                # base
+        for sx in (-1, 1):                                                               # corner posts
+            for sz in (-1, 1):
+                B(cx + sx * 1.25 - 0.15, yb + 0.4, sz * 1.25 - 0.15, cx + sx * 1.25 + 0.15, yb + 3.2, sz * 1.25 + 0.15, ID)
+        B(cx - 1.2, yb + 0.4, -1.2, cx + 1.2, yb + 3.2, 1.2, GLS)                        # glass
+        ph = 2 * math.pi * k / N
+        wy = yb + 1.8 + 0.25 * math.sin(ph * 2)                                          # the wisp: flickering flame-ball
+        ww = 0.65 + 0.12 * math.sin(ph * 3)
+        B(cx - ww, wy - 0.6, -ww, cx + ww, wy + 0.5, ww, W1)
+        B(cx - ww * 0.6 + 0.15 * math.sin(ph), wy + 0.5, -ww * 0.6, cx + ww * 0.6 + 0.15 * math.sin(ph), wy + 1.0, ww * 0.6, W2)
+        B(cx - 0.18, wy - 0.05, -ww - 0.02, cx + 0.18, wy + 0.25, -ww, W3)               # little eyes
+        for j in range(3):                                                               # sparks circling it
+            a = ph * 2 + j * 2 * math.pi / 3
+            B(cx + 0.95 * math.cos(a) - 0.1, wy + 0.3 * math.sin(a * 2) - 0.1, 0.95 * math.sin(a) - 0.1,
+              cx + 0.95 * math.cos(a) + 0.1, wy + 0.3 * math.sin(a * 2) + 0.1, 0.95 * math.sin(a) + 0.1, W3)
+        for j in range(2):                                                               # wisps escaping upward
+            t = ((k / N) + j * 0.5) % 1.0
+            P.box(cx + 1.6 * math.cos(j * 3 + t * 4) - 0.15, 10.2 + 2.0 * t, 0.8 * math.sin(j * 3 + t * 4) - 0.15,
+                  cx + 1.6 * math.cos(j * 3 + t * 4) + 0.15, 10.5 + 2.0 * t, 0.8 * math.sin(j * 3 + t * 4) + 0.15, '#9be7ff')
+    m.animate(('show', 'wl', N), frames=N, frametime=2, interpolate=False)
+
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
 SHRINK = {"frog_buddy": 0.7, "froggie_buddy": 0.7, "froggie_hat": 0.7, "froggie_strawberry": 0.7,
@@ -12284,7 +12395,7 @@ GONE = {"sunglasses", "3d_glasses", "aviator_goggles", "vr_visor", "heart_shades
         "bone_crown", "ice_crown", "fire_crown", "netherite_crown",
         "ice_queen_crown", "snowflake_crown", "shamrock_crown", "birthday_crown", "marquee_crown", "glitch_crown",
         "candle_crown", "coral_crown", "cherry_blossom_crown", "end_portal_hat", "phoenix_crest", "oni_horns", "rainbow_arc",
-        "oni_half_mask", "masquerade_mask", "fairy_wings_head", "mermaid_tiara"}
+        "oni_half_mask", "masquerade_mask", "fairy_wings_head", "mermaid_tiara", "medal_bronze"}
 GONE |= {n for n, t, tier, fn in D if tier == "hair" and not n.startswith(("afro_", "dreads_"))}
 D[:] = [d for d in D if d[0] not in GONE]
 D[:] = [(n, t, tier, _fit(n, fn)) for n, t, tier, fn in D]
