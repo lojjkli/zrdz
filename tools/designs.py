@@ -10620,7 +10620,7 @@ BABY = {k: _tex(f"baby_{k}.png") for k in ("pig", "cow", "moo", "sheep", "chick"
                                              "villager", "piglin", "bee", "gsquid")}
 _RSIGN = {'x': -1, 'y': -1, 'z': -1}     # Bedrock rotation -> item-model rotation
 
-def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(), move=None):
+def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(), move=None, fine=False):
     """Bedrock bones -> head px: x = x0 + X*s, y = y0 + Y*s, z = z0 + Z*s (feet at y0).
     pose = {bone: (axis, deg)} overrides that bone's rotation (children follow if they have none of their own).
     move = {bone: (dx, dy, dz)} shifts a bone (and its children) in Bedrock px."""
@@ -10662,7 +10662,8 @@ def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(),
                 rot = (ax, _snap(_RSIGN[ax] * a), J(p[0] + off[0], p[1] + off[1], p[2] + off[2]))
             elif rots:
                 (ax, a), p = rots[0]
-                rot = (ax, _snap(a), J(p[0] + off[0], p[1] + off[1], p[2] + off[2]))
+                a = round(max(-45.0, min(45.0, a)), 2) if fine else _snap(a)
+                rot = (ax, a, J(p[0] + off[0], p[1] + off[1], p[2] + off[2]))
             if rot and rot[1] == 0.0:
                 rot = None
             m.box(min(q1[0], q2[0]), min(q1[1], q2[1]), min(q1[2], q2[2]), max(q1[0], q2[0]), max(q1[1], q2[1]),
@@ -11345,6 +11346,46 @@ def _(m):
         for s in (-1, 1):
             angel_wing(_Shift(P, dy=-8.5, dz=-1.75), s, a)
     m.animate(('show', 'ag', N), frames=N, frametime=2, interpolate=False)
+
+# ---------------- baby animals: small, smooth idle animations ----------------
+# bone -> (axis, base angle, swing, phase): angle = base + swing * sin(2*pi*k/N + phase)
+IDLE = {
+    "pig_buddy":        {'head': ('y', 0.0, 30.0, 0.0)},                                   # looks around
+    "cow_buddy":        {'head': ('x', -25.0, 15.0, 0.0)},                                 # grazing, nodding down to the grass
+    "mooshroom_buddy":  {'head': ('y', -10.0, 30.0, 0.0)},
+    "sheep_buddy":      {'head': ('y', 0.0, 30.0, 0.0)},
+    "chick_buddy":      {'wing0': ('z', -27.5, 17.5, 0.0), 'wing1': ('z', 27.5, -17.5, 0.0)},  # flapping its little wings
+    "wolf_pup":         {'head': ('z', 0.0, 22.0, 0.0)},                                   # curious head tilt
+    "ocelot_buddy":     {'head': ('y', -15.0, 30.0, 0.0)},
+    "panda_buddy":      {'head': ('z', 0.0, 20.0, 0.0)},                                   # sways its head
+    "polar_bear_cub":   {'head': ('y', 0.0, 30.0, 0.0)},
+    "villager_buddy":   {'head': ('y', 0.0, 25.0, 0.0)},
+    "piglin_buddy":     {'head': ('y', -22.5, 12.0, 0.0)},                                 # keeps admiring its gold
+    "glow_squid_buddy": {'tentacle1': ('z', 22.5, 15.0, 0.0), 'tentacle5': ('z', -22.5, -15.0, 0.0),
+                         'tentacle3': ('x', -22.5, 15.0, 1.6), 'tentacle7': ('x', 22.5, -15.0, 1.6)},
+}
+
+def _idle(old, spec, N=16):
+    def fn(m):
+        global bmob
+        real = bmob
+        def frames(m2, *a, pose=None, name=None, **k):
+            for f in range(N):
+                ps = dict(pose or {})
+                for bone, (ax, base, amp, ph) in spec.items():
+                    ps[bone] = (ax, base + amp * math.sin(2 * math.pi * f / N + ph))
+                real(m2, *a, pose=ps, name=f"ia{f}", fine=True, **k)
+        bmob = frames
+        try:
+            old(m)                                                    # extras (grass, bamboo, gold...) stay still
+        finally:
+            bmob = real
+        m.animate(('show', 'ia', N), frames=N, frametime=2, interpolate=False)
+    return fn
+
+_cur = dict((n, f) for n, _, _, f in D)
+for _n, _sp in IDLE.items():
+    redesign(_n)(_idle(_cur[_n], _sp))
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
