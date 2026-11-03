@@ -12543,8 +12543,8 @@ def _(m):
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
-SHRINK = {"frog_buddy": 0.7, "froggie_buddy": 0.7, "froggie_hat": 0.7, "froggie_strawberry": 0.7,
-          "froggie_mushroom": 0.7, "froggie_princess": 0.7, "froggie_flower_crown": 0.7}
+SHRINK = {"frog_buddy": 0.5, "froggie_buddy": 0.5, "froggie_hat": 0.5, "froggie_strawberry": 0.5,
+          "froggie_mushroom": 0.5, "froggie_princess": 0.7, "froggie_flower_crown": 0.5}
 
 THIN = {"headband_flame": 2, "fire_hair": 2}
 BANDS = {n: (1.5, 2.9) for n in ("headband_red", "headband_black", "headband_aconite", "headband_rainbow", "headband_galaxy",
