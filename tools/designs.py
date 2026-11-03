@@ -12544,10 +12544,15 @@ def _(m):
     m.animate(('show', 'fp', N), frames=N, frametime=3, interpolate=False)
 
 # ---------------- round 18: slow idles with long holds (mcmeta frame times), no copies wasted on pauses ----------------
+class _Times(list):
+    sub = 1
+
 def timeline(*keys, steps=3, step_t=2):
     """keys: (state, hold_ticks[, tween_steps]) looping. States are {name: value}; between keys `steps`
     eased in-between states of step_t ticks each. Returns (unique states, [(state index, ticks), ...])."""
-    uniq, idx, times = [], {}, []
+    sub = int(_os.environ.get('ACONITE_SUB', '1'))    # preview only: SUBx finer time steps (60 fps previews)
+    uniq, idx, times = [], {}, _Times()
+    times.sub = sub
     def put(st, t):
         k = tuple(sorted((a, round(b, 2)) for a, b in st.items() if round(b, 2) != 0))
         if k not in idx:
@@ -12560,9 +12565,9 @@ def timeline(*keys, steps=3, step_t=2):
     n = len(keys)
     for j, key in enumerate(keys):
         st, hold = key[0], key[1]
-        put(st, hold)
+        put(st, hold * sub)
         nx = keys[(j + 1) % n]
-        ns = nx[2] if len(nx) > 2 else steps
+        ns = (nx[2] if len(nx) > 2 else steps) * sub
         for i in range(1, ns):
             u = i / ns; u = u * u * (3 - 2 * u)
             names = set(st) | set(nx[0])

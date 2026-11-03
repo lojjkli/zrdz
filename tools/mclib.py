@@ -425,7 +425,7 @@ def rotmat(axis, ang):
 
 _FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 80)), label=None, ss=3, plain=False):
+def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 80)), label=None, ss=3, plain=False, alpha=False):
     ya, pa = math.radians(yaw), math.radians(pitch)
     cam = np.array([math.sin(ya) * math.cos(pa), math.sin(pa), -math.cos(ya) * math.cos(pa)])
     fwd = -cam
@@ -527,6 +527,13 @@ def render(elements, size=512, yaw=-32, pitch=24, bg=((126, 100, 170), (48, 30, 
         tile = out[y0:y1, x0:x1]
         tint = px[..., :3].astype(np.float32) * min(1.2, sh + 0.15)
         tile[m] = tile[m] * (1 - a[m, None]) + tint[m] * a[m, None]
+    if alpha:   # transparent background (previews for the website)
+        al = mask.astype(np.float32) * 255
+        for _, (x0, y0, x1, y1, m, px, z), sh in glass:
+            a = px[..., 3].astype(np.float32) * ((z < zb[y0:y1, x0:x1] - 1e-4) | ~mask[y0:y1, x0:x1])
+            al[y0:y1, x0:x1][m] = np.maximum(al[y0:y1, x0:x1][m], a[m])
+        rgba = np.dstack([np.clip(out, 0, 255), al]).astype(np.uint8)
+        return Image.fromarray(rgba, 'RGBA').resize((size, size), Image.LANCZOS)
     img = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)).resize((size, size), Image.LANCZOS)
     if label:
         d = ImageDraw.Draw(img)
