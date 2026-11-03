@@ -107,11 +107,19 @@ class Model:
         self.anim = dict(fx=fx, frames=frames, frametime=frametime, interpolate=interpolate, times=times)
         return self
 
+    def play_order(self):
+        """Strip frame order. A `times` timeline is baked in: each pose is repeated for its hold, so the
+        animation plays the same on every client (no reliance on the mcmeta frames list)."""
+        if not self.anim.get('times'):
+            return list(range(self.anim['frames']))
+        ft = self.anim['frametime']
+        out = []
+        for i, t in self.anim['times']:
+            out += [i] * max(1, int(round(t / ft)))
+        return out
+
     def mcmeta(self):
-        a = {"frametime": self.anim['frametime'], "interpolate": self.anim['interpolate']}
-        if self.anim.get('times'):
-            a["frames"] = [{"index": i, "time": t} for i, t in self.anim['times']]
-        return {"animation": a}
+        return {"animation": {"frametime": self.anim['frametime'], "interpolate": self.anim['interpolate']}}
 
     def frame_tint(self, c, f):
         """RGBA a colour should be painted with on frame f, or None to keep it."""
@@ -260,7 +268,10 @@ class Model:
 
     def anim_strip(self):
         """Vertical strip of all frames, for an animated .png + .mcmeta."""
-        return Image.fromarray(np.concatenate([self.frame_atlas(f) for f in range(self.anim['frames'])], 0), 'RGBA')
+        cache = {}
+        for f in set(self.play_order()):
+            cache[f] = self.frame_atlas(f)
+        return Image.fromarray(np.concatenate([cache[f] for f in self.play_order()], 0), 'RGBA')
 
     def texture(self):
         return self.bake()

@@ -10624,7 +10624,7 @@ BABY = {k: _tex(f"baby_{k}.png") for k in ("pig", "cow", "moo", "sheep", "chick"
                                              "villager", "piglin", "bee", "gsquid")}
 _RSIGN = {'x': -1, 'y': -1, 'z': -1}     # Bedrock rotation -> item-model rotation
 
-def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(), move=None, fine=False):
+def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(), move=None, fine=False, only=None):
     """Bedrock bones -> head px: x = x0 + X*s, y = y0 + Y*s, z = z0 + Z*s (feet at y0).
     pose = {bone: (axis, deg)} overrides that bone's rotation (children follow if they have none of their own).
     move = {bone: (dx, dy, dz)} shifts a bone (and its children) in Bedrock px."""
@@ -10648,6 +10648,8 @@ def bmob(m, geo, img, s, x0=0.0, y0=4.6, z0=0.0, name="mob", pose=None, hide=(),
     for b in bones.values():
         ch = chain(b)
         if any(c['name'] in hide for c in ch):
+            continue
+        if only is not None and not any(c['name'] in only for c in ch):
             continue
         off = [sum(move.get(c['name'], (0, 0, 0))[i] for c in ch) for i in range(3)]
         rots = [(brot(c), c['pivot']) for c in ch if brot(c)]
@@ -12781,7 +12783,7 @@ def _(m):
         else:
             times.append((i, t))
     m.animate(('show', 'bh', len(YAW), [c[0] for c in combos]), ('show', 'bw', len(WA), [c[1] for c in combos]),
-              frames=len(combos), frametime=2, interpolate=False, times=times)
+              frames=len(combos), frametime=3, interpolate=False, times=times)
 
 # --- Froggie Princess v2: slow and calm. Long rests, soft blinks, a proper little hop (no croak)
 @redesign("froggie_princess")
@@ -12810,7 +12812,7 @@ def _(m):
         if dy > 0.9:                                                                                # sparkles pop off the crown
             for sx, sy in ((2.7, base - 3.0), (-2.9, base - 2.6)):
                 J(sx - 0.25, sy, cz - hw, 0.5, 0.12, 0.12, '#fff6b0'); J(sx - 0.06, sy - 0.2, cz - hw, 0.12, 0.5, 0.12, '#fff6b0')
-    m.animate(('show', 'fp', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+    m.animate(('show', 'fp', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
 
 # --- Sword through head v2: the real Minecraft diamond sword item (16x16 sprite, 1 px thick), stuck through sideways
 SWORD_IMG = _np.array(_Image.open(_os.path.join(_os.path.dirname(__file__), "textures", "diamond_sword.png")).convert('RGBA'))
@@ -12858,7 +12860,7 @@ def _mob_idle(old, keys, axis='y'):
             old(m)
         finally:
             mob = real
-        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
     return fn
 
 _cur = dict((n, f) for n, _, _, f in D)
@@ -12887,7 +12889,7 @@ def _(m):
                       'down': (PUMPKIN_T, 0, 0, 16, 16)}, nm, "pk")
         ang = round(st.get('head', 0.0), 2)
         m.box(-r, hy, -r, r, hy + 2 * r, r, pk, rot=('y', ang, (0, hy, 0)) if ang else None)
-    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
 
 @redesign("snowman_hat")
 def _(m):
@@ -12917,7 +12919,7 @@ def _(m):
         for sd in (-1, 1):                                                                # stick arms, one waves
             ang = 22.5 * sd + (22.5 * sd * wv if sd > 0 else 0.0)
             P.box(*xs(sd, 2.6, 4.6)[:1], 6.4, -0.15, xs(sd, 2.6, 4.6)[1], 6.7, 0.15, '#6b4326', rot=('z', round(ang, 2), (sd * 2.6, 6.5, 0)))
-    m.animate(('show', 'sn', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+    m.animate(('show', 'sn', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
 
 # --- Bat buddy v2: chibi bat, big head and ears, sparkly eyes, smooth wings that stretch and flap now and then
 def _bat_wing_img():
@@ -12938,7 +12940,7 @@ def _bat_wing_img():
                 a[y, x] = BONE
     return a
 
-BAT_WING = _bat_wing_img()
+BAT_WING = _bat_wing_img()[::2, ::2].copy()
 
 @redesign("bat_buddy")
 def _(m):
@@ -12969,7 +12971,7 @@ def _(m):
         P = Pose(m, nm)
         ang = round(10.0 + 32.0 * st.get('w', 0.0), 2)
         for sd in (-1, 1):                                                               # wings
-            ft = FaceTex({'north': (BAT_WING, 0, 0, 30, 22), 'south': (BAT_WING, 0, 0, 30, 22)}, nm, f"w{sd}",
+            ft = FaceTex({'north': (BAT_WING, 0, 0, 15, 11), 'south': (BAT_WING, 0, 0, 15, 11)}, nm, f"w{sd}",
                          flipx=('north',) if sd > 0 else ('south',))
             x1, x2 = sorted((sd * 1.0, sd * 4.6))
             sp = (sd * 1.0, y0 + 2.1, 0.2)
@@ -12982,7 +12984,7 @@ def _(m):
                 P.box(sd * 0.7 - 0.38, y0 + 3.15, -1.46, sd * 0.7 + 0.38, y0 + 3.95, -1.4, K)    # big shiny eyes
                 P.box(sd * 0.7 - 0.25, y0 + 3.6, -1.48, sd * 0.7 - 0.05, y0 + 3.8, -1.46, '#ffffff')
                 P.box(sd * 0.7 + 0.1, y0 + 3.3, -1.48, sd * 0.7 + 0.2, y0 + 3.4, -1.46, '#ffffff')
-    m.animate(('show', 'bt', len(states)), frames=len(states), frametime=2, interpolate=False, times=times)
+    m.animate(('show', 'bt', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
 
 # --- Shiba buddy: ears sit properly on the head (were floating)
 _shiba_old = dict((n, f) for n, _, _, f in D)["shiba_buddy"]
@@ -13444,6 +13446,227 @@ def _(m):
     bx = (-4.7, 4.6, -4.7, 4.7, 4.63, 4.7)
     m.box(*bx, FnTex(bx, spots, "disco", "spots", res=4, faces=('up',)))
     m.animate(frames=N, frametime=2, interpolate=False)
+
+# ---------------- round 19: long, varied idles baked into the strip (plays the same on every client);
+#                  only the moving parts are copied per pose so textures stay small ----------------
+def acts(*a, rest=36):
+    """Timeline keys: a rest between every action. Action = (state, hold) or a list of keys."""
+    keys = []
+    for x in a:
+        keys.append(({}, rest))
+        keys += x if isinstance(x, list) else [x]
+    return keys
+
+def _pick(st, bone):
+    """State values are keyed 'bone:axis'; one rotation per bone, so the biggest one wins."""
+    best = None
+    for k, v in st.items():
+        b, _, ax = k.partition(':')
+        if b == bone and (best is None or abs(v) > abs(best[1])):
+            best = (ax, v)
+    return best
+
+def _idle4(old, bones, base, keys, keep, steps=3):
+    states, times = timeline(*keys, steps=steps)
+    def fn(m):
+        global bmob
+        real = bmob
+        def frames(m2, *a, pose=None, name=None, **k):
+            bp = {b: v for b, v in (pose or {}).items() if keep or 'leg' not in b.lower()}
+            if not keep:
+                bp.pop('tail', None); bp.pop('tail1', None)
+            stp = dict(bp)
+            for b in bones:
+                if b in base:
+                    stp[b] = base[b]
+            real(m2, *a, pose=stp, name="mobst", fine=True, hide=tuple(bones), **k)     # still parts, drawn once
+            for f, st in enumerate(states):
+                ps = dict(stp)
+                for b in bones:
+                    r = _pick(st, b)
+                    if r and round(r[1], 2):
+                        ax, v = r
+                        b0 = base.get(b)
+                        ang = (b0[1] if b0 and b0[0] == ax else 0.0) + v
+                        ps[b] = (ax, round(ang, 2))
+                real(m2, *a, pose=ps, name=f"ic{f}", fine=True, only=tuple(bones), **k)
+        bmob = frames
+        try:
+            old(m)
+        finally:
+            bmob = real
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+    return fn
+
+LOOK_L = lambda b='head', a=35, h=30: [({f'{b}:y': a}, h)]
+LOOK_R = lambda b='head', a=35, h=30: [({f'{b}:y': -a}, h)]
+TILT = lambda b='head', a=20, h=30: [({f'{b}:z': a}, h)]
+NIBBLE = lambda b='head', a=-30, n=3: [({f'{b}:x': a}, 9)] + sum([[({f'{b}:x': a + 7}, 3, 2), ({f'{b}:x': a}, 6, 2)] for _ in range(n)], [])
+NOD = lambda b='head', a=18: [({f'{b}:x': a}, 6), ({f'{b}:x': 0.01}, 3, 2), ({f'{b}:x': a}, 6, 2)]
+WAG = lambda b='tail', a=30, n=4: sum([[({f'{b}:z': a}, 3, 1), ({f'{b}:z': -a}, 3, 1)] for _ in range(n)], [])
+
+IDLE4 = {
+    "pig_buddy":       (('head',), {}, acts(LOOK_L(), LOOK_R(), NIBBLE(a=-25), TILT(a=18), rest=40)),
+    "sheep_buddy":     (('head',), {}, acts(LOOK_L(), NIBBLE(a=-35, n=4), LOOK_R(), TILT(), rest=40)),
+    "cow_buddy":       (('head',), {}, acts(NIBBLE(a=-30, n=4), LOOK_L(a=30), NIBBLE(a=-30, n=3), LOOK_R(a=30), rest=36)),
+    "mooshroom_buddy": (('head',), {}, acts(LOOK_R(), NIBBLE(a=-28), LOOK_L(), TILT(a=-18), rest=40)),
+    "polar_bear_cub":  (('head',), {}, acts(LOOK_L(h=45), TILT(a=-20), LOOK_R(h=45), NOD(a=-15), rest=44)),
+    "villager_buddy":  (('head',), {}, acts(LOOK_L(a=30), NOD(a=15), LOOK_R(a=30), TILT(a=15), rest=40)),
+    "ocelot_buddy":    (('head', 'tail1'), {}, acts(LOOK_L(), [({'tail1:z': 25}, 10, 4), ({'tail1:z': -25}, 10, 4)], LOOK_R(), TILT(a=-18), rest=40)),
+    "wolf_pup":        (('head', 'tail'), {}, acts(TILT(a=25), WAG(), LOOK_L(a=30), TILT(a=-25), WAG(n=3), LOOK_R(a=30), rest=35)),
+    "chick_buddy":     (('wing0', 'wing1'), {'wing0': ('z', -5.0), 'wing1': ('z', 5.0)},
+                        acts(sum([[({'wing0:z': -40, 'wing1:z': 40}, 3, 1), ({}, 3, 1)] for _ in range(3)], []),
+                             sum([[({'wing0:z': -40, 'wing1:z': 40}, 3, 1), ({}, 3, 1)] for _ in range(2)], []), rest=56)),
+    "panda_buddy":     (('head',), {}, acts([({'head:z': 18}, 40, 4)], NOD(a=-14), [({'head:z': -18}, 40, 4)], rest=36)),
+    "piglin_buddy":    (('head',), {'head': ('y', -22.5)}, acts(NOD(a=15), LOOK_R(a=20, h=40), NOD(a=15), rest=48)),
+    "glow_squid_buddy": (('tentacle1', 'tentacle5', 'tentacle3', 'tentacle7'),
+                         {'tentacle1': ('z', 22.5), 'tentacle5': ('z', -22.5), 'tentacle3': ('x', -22.5), 'tentacle7': ('x', 22.5)},
+                         [({'tentacle1:z': 12, 'tentacle5:z': -12, 'tentacle3:x': -12, 'tentacle7:x': 12}, 24, 5),
+                          ({'tentacle1:z': -12, 'tentacle5:z': 12, 'tentacle3:x': 12, 'tentacle7:x': -12}, 24, 5)]),
+}
+
+for _n, (_bn, _bs, _ks) in IDLE4.items():
+    redesign(_n)(_idle4(_ORIG_ANIMAL[_n], _bn, _bs, _ks, _n in KEEP_POSE, steps=2 if _n == "villager_buddy" else 3))
+
+@redesign("snow_golem_buddy")
+def _(m):
+    """Snow golem: body drawn once; the pumpkin head and the waving arm are copied per pose."""
+    s = 0.2
+    states, times = timeline(*acts([({'head:y': 30}, 36)], [({'arm:z': 1}, 6, 2), ({'arm:z': -1}, 6, 2), ({'arm:z': 1}, 6, 2)],
+                                   [({'head:y': -30}, 36)], rest=44), steps=2)
+    hy = 4.6 + (24 - 4) * s
+    r = 3.75 * s * 2.2
+    body = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
+            dict(piv=(0, 24, 0), box=(-6, -12, -6, 12, 12, 12), uv=(0, 36), inf=-0.5),
+            dict(piv=(-5, 6, 1), box=(-11, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 45.0))]
+    mob(m, MOBTX['snow'], body, s, name="mobst")
+    for f, st in enumerate(states):
+        nm = f"ic{f}"
+        wave = st.get('arm:z', 0.0)
+        mob(m, MOBTX['snow'], [dict(piv=(5, 6, 1), box=(-1, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5,
+                                    rot=('z', round(-45.0 + 12 * wave, 2)))], s, name=nm)
+        pk = FaceTex({'north': (PUMPKIN_F, 0, 0, 16, 16), 'side': (PUMPKIN_S, 0, 0, 16, 16), 'up': (PUMPKIN_T, 0, 0, 16, 16),
+                      'down': (PUMPKIN_T, 0, 0, 16, 16)}, nm, "pk")
+        pk.px = 0.5                                                                      # tiny in game: half the texels is plenty
+        ang = round(st.get('head:y', 0.0), 2)
+        m.box(-r, hy, -r, r, hy + 2 * r, r, pk, rot=('y', ang, (0, hy, 0)) if ang else None)
+    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+
+# vanilla-mob buddies: body drawn once, only the head copied per pose
+def _mob_idle2(old, keys):
+    states, times = timeline(*keys)
+    def fn(m):
+        global mob
+        real = mob
+        def frames(m2, img, parts, s, *a, **k):
+            k.pop('pose', None); k.pop('head_rot', None)
+            body = [dict(p) for p in parts if not p.get('head')]
+            heads = [dict(p) for p in parts if p.get('head')]
+            real(m2, img, body, s, *a, **dict(k, name="mobst"))
+            for f, st in enumerate(states):
+                r = _pick(st, 'head')
+                hr = (r[0], round(r[1], 2)) if r and round(r[1], 2) else None
+                real(m2, img, [dict(p) for p in heads], s, *a, **dict(k, name=f"ic{f}", head_rot=hr))
+        mob = frames
+        try:
+            old(m)
+        finally:
+            mob = real
+        m.animate(('show', 'ic', len(states)), frames=len(states), frametime=3, interpolate=False, times=times)
+    return fn
+
+redesign("creeper_buddy")(_mob_idle2(_ORIG_ANIMAL["creeper_buddy"], acts(LOOK_L(), [({'head:x': -18}, 40)], LOOK_R(), TILT(a=15), rest=44)))
+redesign("iron_golem_buddy")(_mob_idle2(_ORIG_ANIMAL["iron_golem_buddy"], acts(LOOK_L(a=30, h=45), NOD(a=12), LOOK_R(a=30, h=45), rest=48)))
+redesign("slime_buddy")(_mob_idle(_ORIG_ANIMAL["slime_buddy"], [({}, 110), ({'_hop': 0.5}, 2, 1), ({'_hop': 0.9}, 4, 1), ({'_hop': 0.5}, 2, 1),
+                                                             ({}, 8, 1), ({'_hop': 0.5}, 2, 1), ({'_hop': 0.9}, 4, 1), ({'_hop': 0.5}, 2, 1)]))
+
+# --- Baby ender dragon v5: baby again (chubby, big round sparkly ender-purple eyes, small smooth wings),
+#     calm slow flaps with long rests, glances round now and then
+def _baby_wing_img():
+    W, H = 16, 12
+    a = _np.zeros((H, W, 4), _np.uint8)
+    MEM, MEMD, BONE = _rgba('#4b3f5e'), _rgba('#3d3350'), _rgba('#1d1924')
+    for x in range(W):
+        u = x / (W - 1)
+        depth = 11.5 * (1 - 0.45 * u) - 2.0 * abs(math.sin(u * math.pi * 2))           # two soft scallops
+        for y in range(H):
+            if y <= depth:
+                a[y, x] = MEM if (x // 5 + y // 4) % 2 else MEMD
+        a[0, x] = BONE
+    for xf in (7, 15):
+        for y in range(H):
+            x = int(xf - y * 0.35)
+            if 0 <= x < W and a[y, x, 3]:
+                a[y, x] = BONE
+    return a
+
+BABY_WING = _baby_wing_img()
+
+@redesign("baby_dragon")
+def _(m):
+    y = 4.0
+    m.box(-1.5, y + 0.9, -0.5, 1.5, y + 3.2, 2.5, DR_B)                          # chubby body
+    m.box(-1.2, y + 0.85, -0.3, 1.2, y + 0.95, 2.2, DR_D)                        # belly plate
+    for sx in (-1, 1):                                                           # stubby legs
+        for z1 in (-0.2, 1.6):
+            m.box(sx * 0.7 - 0.4, y + 0.6, z1, sx * 0.7 + 0.4, y + 1.0, z1 + 0.75, DR_B)
+    for i, z in enumerate((0.3, 1.2)):                                           # two little back spikes
+        m.box(-0.15, y + 3.2, z, 0.15, y + 3.55 - 0.1 * i, z + 0.4, DR_S)
+    tz, ty = 2.5, y + 1.6
+    for r_, l in ((0.55, 1.0), (0.4, 0.9), (0.28, 0.8)):                        # short tail
+        m.box(-r_, ty - r_, tz, r_, ty + r_, tz + l, DR_B)
+        tz += l; ty += 0.15
+    m.box(-0.15, ty + 0.1, tz - 0.5, 0.15, ty + 0.5, tz - 0.15, DR_S)
+    hy = y + 2.5
+    YAW = [0.0, 15.0, 30.0, -15.0, -30.0]
+    for k, yaw in enumerate(YAW):                                                # big baby head, copied per glance
+        P = Pose(m, f"bh{k}")
+        hr = ('y', yaw, (0.0, hy, -0.4)) if yaw else None
+        B = lambda x1, y1, z1, x2, y2, z2, c: P.box(x1, y1, z1, x2, y2, z2, c, rot=hr)
+        B(-2.0, hy, -3.8, 2.0, hy + 3.6, -0.2, DR_B)                             # round-ish big head
+        B(-1.7, hy + 3.6, -3.5, 1.7, hy + 3.8, -0.5, DR_B)
+        B(-1.0, hy + 0.15, -4.5, 1.0, hy + 1.2, -3.8, DR_B)                      # tiny snout
+        for sx in (-1, 1):
+            B(sx * 0.5 - 0.12, hy + 0.85, -4.55, sx * 0.5 + 0.12, hy + 1.05, -4.5, '#0c0a10')    # nostrils
+            B(sx * 1.0 - 0.6, hy + 1.6, -3.86, sx * 1.0 + 0.6, hy + 2.9, -3.8, EYE_L)            # big round eye
+            B(sx * 1.0 - 0.6 + 0.15, hy + 1.6, -3.88, sx * 1.0 + 0.45, hy + 2.3, -3.86, EYE_M)   # magenta lower half
+            B(sx * 1.0 - 0.4, hy + 2.4, -3.9, sx * 1.0 - 0.1, hy + 2.7, -3.88, '#ffffff')         # sparkle
+            B(sx * 1.0 + 0.15, hy + 1.85, -3.9, sx * 1.0 + 0.3, hy + 2.0, -3.88, '#ffffff')
+            B(sx * 1.55 - 0.3, hy + 1.2, -3.84, sx * 1.55 + 0.3, hy + 1.4, -3.8, '#7a5a9a')       # soft blush
+            B(sx * 1.1 - 0.2, hy + 3.8, -1.6, sx * 1.1 + 0.2, hy + 4.4, -1.2, DR_S)              # nub horns
+    WA = [-6.0, 10.0, 24.0, 36.0]
+    for k, ang in enumerate(WA):                                                 # small smooth wings
+        nm = f"bw{k}"
+        for sx in (-1, 1):
+            sp = (sx * 1.4, y + 2.9, 0.2)
+            x1, x2 = sorted((sx * 1.4, sx * 4.2))
+            ft = FaceTex({'up': (BABY_WING, 0, 0, 16, 12), 'down': (BABY_WING, 0, 0, 16, 12)}, nm, f"w{sx}",
+                         flipx=('up', 'down') if sx < 0 else ())
+            m.box(x1, y + 2.86, 0.2, x2, y + 2.94, 2.3, ft, rot=('z', round(sx * ang, 2), sp))
+    beat = [(1, 3), (2, 3), (3, 6), (2, 3), (1, 3), (0, 6)]                       # one slow, soft flap
+    seq = []
+    def flaps(n, head):
+        for _ in range(n):
+            seq.extend((head, w, t) for w, t in beat)
+    def turn(path, hold):
+        for h in path[:-1]:
+            seq.append((h, 1, 3))
+        seq.append((path[-1], 1, hold))
+    seq.append((0, 1, 60)); flaps(2, 0); seq.append((0, 1, 60))
+    turn([1, 2], 45); turn([1, 0], 50)
+    flaps(1, 0); seq.append((0, 1, 70))
+    turn([3, 4], 45); turn([3, 0], 40)
+    combos, times = [], []
+    for h, w, t in seq:
+        if (h, w) not in combos:
+            combos.append((h, w))
+        i = combos.index((h, w))
+        if times and times[-1][0] == i:
+            times[-1] = (i, times[-1][1] + t)
+        else:
+            times.append((i, t))
+    m.animate(('show', 'bh', len(YAW), [c[0] for c in combos]), ('show', 'bw', len(WA), [c[1] for c in combos]),
+              frames=len(combos), frametime=3, interpolate=False, times=times)
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
