@@ -2066,12 +2066,12 @@ import os as _os
 FROG_TEX = _os.path.join(_os.path.dirname(__file__), "textures", "froggie_frog.png")
 BOW, BOW_D, BOW_L, LASH, BLUSH = '#ff8fc2', '#e0609c', '#ffd0e6', '#2a1a12', '#ff9fb4'
 
-def vanilla_frog(m, x0=0.0, y0=4.6, z0=0.0, s=0.8, girly=True, tongue=False, tex=FROG_TEX, bow=True):
+def vanilla_frog(m, x0=0.0, y0=4.6, z0=0.0, s=0.8, girly=True, tongue=False, tex=FROG_TEX, bow=True, name="frog", blink=False):
     """Vanilla frog at scale s (head pixels per frog pixel). Java model space (Y down, feet at Y=24,
     face toward -Z, X mirrored) -> head pixels. y0 = where the feet touch."""
     def J(X, Y, Z, w, h, d, c, rot=None):
         m.box(x0 - (X + w) * s, y0 + (24 - Y - h) * s, z0 + Z * s, x0 - X * s, y0 + (24 - Y) * s, z0 + (Z + d) * s, c, rot=rot)
-    T = lambda u, v, w, h, d, skip=(): Tex(tex, u, v, w, h, d, skip, "frog")
+    T = lambda u, v, w, h, d, skip=(): Tex(tex, u, v, w, h, d, skip, name)
     J(-3.5, 20, -4, 7, 3, 9, T(3, 1, 7, 3, 9))            # body / lower jaw
     J(-3.5, 21, -4, 7, 0, 9, T(23, 22, 7, 0, 9))          # mouth plane (dark)
     J(-3.5, 18, -4, 7, 3, 9, T(0, 13, 7, 3, 9))           # head
@@ -2096,6 +2096,10 @@ def vanilla_frog(m, x0=0.0, y0=4.6, z0=0.0, s=0.8, girly=True, tongue=False, tex
         top = 18 - eh
         for cx in eyes:
             o = -1 if cx < 0 else 1                                       # outward along Java X
+            if blink:                                                     # eyelid closed: green lid + happy lash line
+                J(cx - ew / 2 - 0.02, top - 0.02, ez - 0.14, ew + 0.04, eh + 0.04, 0.1, '#63902e')
+                J(cx - 1.2, top + eh * 0.55, ez - 0.2, 2.4, 0.3, 0.06, LASH)
+                continue
             J(cx - 1.35, top + 0.35, ez - 0.08, 2.7, eh - 0.4, 0.08, '#1d1222')          # big glossy pupil
             J(cx - 1.1, top + 0.55, ez - 0.13, 0.75, 0.75, 0.05, '#ffffff')              # big sparkle (Froggie keeps her white eye shine)
             J(cx + 0.45, top + 1.55, ez - 0.13, 0.4, 0.4, 0.05, '#ffffff')               # small sparkle
@@ -12505,6 +12509,37 @@ def _idle2(old, spec, keep, N=24):
 _cur = dict((n, f) for n, _, _, f in D)
 for _n, _sp in IDLE2.items():
     redesign(_n)(_idle2(_ORIG_ANIMAL[_n], _sp, _n in KEEP_POSE))
+
+# ---------------- round 17: Froggie Princess cute idle (hop, blink, croak, crown sparkle) ----------------
+@redesign("froggie_princess")
+def _(m):
+    N = 16
+    G, GD, GEM, GEM2 = '#f2c33a', '#b8861c', '#ff6fb5', '#7fd6ff'
+    for k in range(N):
+        hop = 0.9 * math.sin(math.pi * k / 4) if 0 <= k <= 4 else 0.0           # a happy little hop
+        blink = k in (7, 14)
+        puff = {9: 0.6, 10: 1.2, 11: 0.7}.get(k, 0.0)            # croak: throat sac puffs out
+        P = Pose(m, f"fp{k}", dy=hop)
+        J = vanilla_frog(P, 0, 4.6, -0.2, s=0.8, bow=False, name=f"fp{k}", blink=blink)
+        cz, hw, base = -1.3, 2.0, 15.5
+        J(-hw, base - 1.2, cz - hw, 2 * hw, 1.2, 0.35, G); J(-hw, base - 1.2, cz + hw - 0.35, 2 * hw, 1.2, 0.35, G)   # crown band
+        J(-hw, base - 1.2, cz - hw, 0.35, 1.2, 2 * hw, G); J(hw - 0.35, base - 1.2, cz - hw, 0.35, 1.2, 2 * hw, G)
+        for x, z in ((-hw, cz - hw), (hw - 0.45, cz - hw), (-hw, cz + hw - 0.45), (hw - 0.45, cz + hw - 0.45), (-0.225, cz - hw),
+                     (-0.225, cz + hw - 0.45), (-hw, cz - 0.225), (hw - 0.45, cz - 0.225)):
+            J(x, base - 2.1, z, 0.45, 0.9, 0.45, G)                                    # prongs
+            J(x + 0.05, base - 2.45, z + 0.05, 0.35, 0.35, 0.35, GD)
+        J(-0.4, base - 0.95, cz - hw - 0.07, 0.8, 0.6, 0.07, '#ffd0ea' if k in (2, 3) else GEM)   # front gem glints
+        for x in (-1.45, 0.95):
+            J(x, base - 0.9, cz - hw - 0.06, 0.5, 0.45, 0.06, GEM2)
+        J(-hw + 0.35, base - 0.3, cz - hw + 0.35, 2 * hw - 0.7, 0.3, 2 * hw - 0.7, '#e0609c')   # velvet cushion
+        if k in (2, 3, 4):                                                            # sparkle pops off the crown
+            t = (k - 2) / 2
+            sx, sy = 2.6 + 0.4 * t, base - 2.8 - 0.8 * t
+            J(sx - 0.25, sy, cz - hw, 0.5, 0.12, 0.12, '#fff6b0'); J(sx - 0.06, sy - 0.2, cz - hw, 0.12, 0.5, 0.12, '#fff6b0')
+        if puff:
+            w = 1.6 + 0.8 * puff
+            J(-w / 2, 21.6 - 0.4 * puff, -4.0 - 1.1 * puff, w, 1.2 + 0.5 * puff, 1.1 * puff, '#f1e6c8')   # croak bubble
+    m.animate(('show', 'fp', N), frames=N, frametime=3, interpolate=False)
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
