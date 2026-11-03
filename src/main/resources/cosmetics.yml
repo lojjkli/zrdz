@@ -63,21 +63,15 @@ demon_horns:
 ram_horns:
   name: "Ram Horns"
   category: "Ears & Horns"
-oni_horns:
-  name: "Oni Horns"
-  category: "Ears & Horns"
 dragon_horns:
   name: "Dragon Horns"
   category: "Ears & Horns"
 unicorn_horn:
   name: "Unicorn Horn"
-  category: "Ears & Horns"
+  category: "Animated"
 crystal_horns:
   name: "Amethyst Horns"
   category: "Ears & Horns"
-bone_crown:
-  name: "Bone Crown"
-  category: "Crowns & Halos"
 halo:
   name: "Halo"
   category: "Animated"
@@ -93,12 +87,6 @@ gold_crown:
 diamond_crown:
   name: "Diamond Crown"
   category: "Crowns & Halos"
-ice_crown:
-  name: "Frost Crown"
-  category: "Crowns & Halos"
-fire_crown:
-  name: "Blaze Crown"
-  category: "Animated"
 tiara:
   name: "Tiara"
   category: "Crowns & Halos"
@@ -107,9 +95,9 @@ laurel_wreath:
   category: "Crowns & Halos"
 aconite_crown:
   name: "Aconite Crown"
-  category: "Aconite & Froggie"
+  category: "Animated"
 aconite_hairpin:
-  name: "Aconite Hairpin"
+  name: "Aconite Flower"
   category: "Aconite & Froggie"
 aconite_bloom_hat:
   name: "Aconite Bloom Hat"
@@ -135,9 +123,6 @@ pumpkin_hat:
 cloud_hat:
   name: "Rain Cloud"
   category: "Fantasy"
-rainbow_arc:
-  name: "Rainbow"
-  category: "Fantasy"
 top_hat:
   name: "Top Hat"
   category: "Hats & Caps"
@@ -146,7 +131,7 @@ gentleman:
   category: "Hats & Caps"
 wizard_hat:
   name: "Wizard Hat"
-  category: "Fantasy"
+  category: "Animated"
 witch_hat:
   name: "Witch Hat"
   category: "Fantasy"
@@ -224,7 +209,7 @@ cake_hat:
   category: "Food"
 tnt_hat:
   name: "TNT Hat"
-  category: "Blocks & Items"
+  category: "Animated"
 slime_buddy:
   name: "Slime Buddy"
   category: "Buddies"
@@ -237,18 +222,6 @@ frog_buddy:
 pumpkin_head:
   name: "Jack o' Lantern Head"
   category: "Holiday"
-sunglasses:
-  name: "Shades"
-  category: "Animated"
-3d_glasses:
-  name: "3D Glasses"
-  category: "Face"
-aviator_goggles:
-  name: "Aviator Goggles"
-  category: "Face"
-vr_visor:
-  name: "Neon Visor"
-  category: "Animated"
 ninja_headband:
   name: "Ninja Headband"
   category: "Hair & Headbands"
@@ -264,9 +237,6 @@ cat_headphones:
 samurai_kabuto:
   name: "Samurai Kabuto"
   category: "Fantasy"
-phoenix_crest:
-  name: "Phoenix Crest"
-  category: "Crowns & Halos"
 knight_plume:
   name: "Plumed Circlet"
   category: "Crowns & Halos"
@@ -281,7 +251,7 @@ bubble_halo:
   category: "Animated"
 sky_island:
   name: "Floating Island"
-  category: "Fantasy"
+  category: "Animated"
 aconite_halo:
   name: "Aconite Halo"
   category: "Animated"
@@ -297,9 +267,6 @@ ghost_sheet:
 coquette_bow:
   name: "Coquette Bow"
   category: "Hair & Headbands"
-heart_shades:
-  name: "Heart Shades"
-  category: "Face"
 kitsune_mask:
   name: "Kitsune Mask"
   category: "Face"
@@ -333,9 +300,6 @@ butterfly_clips:
 star_clips:
   name: "Star Clips"
   category: "Hair & Headbands"
-cherry_blossom_crown:
-  name: "Cherry Blossom Crown"
-  category: "Crowns & Halos"
 heart_halo:
   name: "Heart Halo"
   category: "Animated"
@@ -354,9 +318,6 @@ neon_horns:
 bear_beanie:
   name: "Bear Beanie"
   category: "Hats & Caps"
-deal_with_it:
-  name: "Deal With It Shades"
-  category: "Memes"
 chicken_jockey:
   name: "Chicken Jockey"
   category: "Memes"
@@ -380,9 +341,6 @@ shiba_buddy:
   category: "Buddies"
 fish_slap:
   name: "Fish On Head"
-  category: "Memes"
-groucho_disguise:
-  name: "Disguise Glasses"
   category: "Memes"
 clown_wig:
   name: "Clown Wig"
@@ -410,7 +368,7 @@ six_seven:
   category: "Memes"
 six_seven_hands:
   name: "6-7 Hands"
-  category: "Memes"
+  category: "Animated"
 tralalero:
   name: "Tralalero Shark"
   category: "Memes"
@@ -434,10 +392,10 @@ dubai_chocolate:
   category: "Memes"
 aura_farmer:
   name: "Aura Farmer"
-  category: "Memes"
+  category: "Animated"
 googly_eyes:
   name: "Googly Eyes"
-  category: "Memes"
+  category: "Animated"
 plunger:
   name: "Plunger"
   category: "Memes"
@@ -465,9 +423,6 @@ big_brain:
 duck_floatie:
   name: "Duck Floatie"
   category: "Memes"
-engineer_goggles:
-  name: "Engineer's Goggles"
-  category: "Face"
 froggie_strawberry:
   name: "Froggie Strawberry Hat"
   category: "Aconite & Froggie"
@@ -506,7 +461,7 @@ raccoon_buddy:
   category: "Buddies"
 warden_tendrils:
   name: "Warden Tendrils"
-  category: "Ears & Horns"
+  category: "Animated"
 totem_halo:
   name: "Totem Halo"
   category: "Animated"
@@ -543,9 +498,6 @@ lirili_larila:
 brr_patapim:
   name: "Brr Brr Patapim"
   category: "Memes"
-cappuccino_assassino:
-  name: "Cappuccino Assassino"
-  category: "Memes"
 lightbulb_idea:
   name: "Lightbulb Idea"
   category: "Memes"
@@ -579,9 +531,6 @@ hot_dog_hat:
 pizza_slice:
   name: "Pizza Slice"
   category: "Food"
-snorkel_mask:
-  name: "Snorkel Mask"
-  category: "Face"
 angler_light:
   name: "Angler Light"
   category: "Hats & Caps"
@@ -681,21 +630,15 @@ jelly_slime:
 bunny_buddy:
   name: "Bunny Buddy"
   category: "Buddies"
-eye_patch:
-  name: "Eye Patch"
-  category: "Face"
 pirate_head:
   name: "Pirate Head"
   category: "Fantasy"
 pirate_parrot:
   name: "Pirate Parrot"
   category: "Buddies"
-netherite_crown:
-  name: "Netherite Crown"
-  category: "Crowns & Halos"
 emerald_crown:
   name: "Emerald Crown"
-  category: "Crowns & Halos"
+  category: "Animated"
 soul_crown:
   name: "Soul Fire Crown"
   category: "Animated"
@@ -840,15 +783,9 @@ brewing_hat:
 portal_halo:
   name: "Nether Portal Halo"
   category: "Animated"
-end_portal_hat:
-  name: "End Portal Crown"
-  category: "Fantasy"
 conduit_hat:
   name: "Conduit Hat"
   category: "Animated"
-spyglass_monocle:
-  name: "Spyglass"
-  category: "Face"
 golden_apple_hat:
   name: "Enchanted Golden Apple"
   category: "Food"
@@ -935,7 +872,7 @@ cherry_clips:
   category: "Food"
 dumpling_hat:
   name: "Dumpling Steamer"
-  category: "Food"
+  category: "Animated"
 onigiri_hat:
   name: "Onigiri Buddy"
   category: "Food"
@@ -1017,42 +954,12 @@ diving_helmet:
 aviator_cap:
   name: "Aviator Cap"
   category: "Hats & Caps"
-monocle:
-  name: "Monocle"
-  category: "Face"
-round_glasses:
-  name: "Round Glasses"
-  category: "Face"
-nerd_glasses:
-  name: "Nerd Glasses"
-  category: "Face"
-star_glasses:
-  name: "Star Glasses"
-  category: "Animated"
-shutter_shades:
-  name: "Shutter Shades"
-  category: "Animated"
-cyber_visor:
-  name: "Cyber Visor"
-  category: "Animated"
-ski_goggles:
-  name: "Ski Goggles"
-  category: "Face"
-swim_goggles:
-  name: "Swim Goggles"
-  category: "Face"
-hypno_glasses:
-  name: "Hypno Glasses"
-  category: "Animated"
-pixel_shades:
-  name: "Pixel Shades"
-  category: "Face"
 laser_eyes:
   name: "Laser Eyes"
   category: "Animated"
 crying_tears:
   name: "Crying Tears"
-  category: "Memes"
+  category: "Animated"
 curly_mustache:
   name: "Curly Mustache"
   category: "Face"
@@ -1071,18 +978,6 @@ war_paint:
 surgical_mask:
   name: "Surgical Mask"
   category: "Face"
-gas_mask:
-  name: "Gas Mask"
-  category: "Face"
-hockey_mask:
-  name: "Hockey Mask"
-  category: "Face"
-oni_half_mask:
-  name: "Oni Half Mask"
-  category: "Face"
-masquerade_mask:
-  name: "Masquerade Mask"
-  category: "Face"
 hero_mask:
   name: "Hero Mask"
   category: "Face"
@@ -1094,9 +989,6 @@ nose_ring:
   category: "Face"
 elf_ears:
   name: "Elf Ears"
-  category: "Ears & Horns"
-fairy_wings_head:
-  name: "Fairy Wings"
   category: "Ears & Horns"
 mage_circlet:
   name: "Mage Circlet"
@@ -1119,9 +1011,6 @@ crusader_helm:
 spartan_helm:
   name: "Spartan Helm"
   category: "Fantasy"
-mermaid_tiara:
-  name: "Mermaid Tiara"
-  category: "Crowns & Halos"
 necromancer_hood:
   name: "Necromancer Hood"
   category: "Fantasy"
@@ -1155,12 +1044,9 @@ dragon_egg_hat:
 griffin_feather_hat:
   name: "Griffin Feather Hat"
   category: "Fantasy"
-ice_queen_crown:
-  name: "Ice Queen Crown"
-  category: "Crowns & Halos"
 forest_antlers:
   name: "Forest Antlers"
-  category: "Ears & Horns"
+  category: "Animated"
 jinn_lamp_hat:
   name: "Jinn Lamp"
   category: "Fantasy"
@@ -1188,9 +1074,6 @@ candy_cane_horns:
 mistletoe_hat:
   name: "Mistletoe Hat"
   category: "Holiday"
-snowflake_crown:
-  name: "Snowflake Crown"
-  category: "Animated"
 new_year_tiara:
   name: "New Year Tiara"
   category: "Holiday"
@@ -1205,9 +1088,6 @@ cupid_halo:
   category: "Holiday"
 leprechaun_hat:
   name: "Leprechaun Hat"
-  category: "Holiday"
-shamrock_crown:
-  name: "Shamrock Crown"
   category: "Holiday"
 jack_lantern_hat:
   name: "Jack-o'-Lantern Buddy"
@@ -1233,9 +1113,6 @@ turkey_hat:
 firework_hat:
   name: "Firework Hat"
   category: "Animated"
-birthday_crown:
-  name: "Birthday Crown"
-  category: "Animated"
 lunar_dragon_hat:
   name: "Lunar Dragon Hat"
   category: "Holiday"
@@ -1248,75 +1125,6 @@ afro_black:
 afro_rainbow:
   name: "Rainbow Afro"
   category: "Animated"
-mohawk_green:
-  name: "Green Mohawk"
-  category: "Hair & Headbands"
-spiky_anime_hair:
-  name: "Spiky Anime Hair"
-  category: "Hair & Headbands"
-twin_tails:
-  name: "Twin Tails"
-  category: "Hair & Headbands"
-space_buns:
-  name: "Space Buns"
-  category: "Hair & Headbands"
-long_hair_brown:
-  name: "Long Brown Hair"
-  category: "Hair & Headbands"
-pompadour:
-  name: "Pompadour"
-  category: "Hair & Headbands"
-mullet:
-  name: "Mullet"
-  category: "Hair & Headbands"
-ponytail_blonde:
-  name: "Blonde Ponytail"
-  category: "Hair & Headbands"
-braids_red:
-  name: "Red Braids"
-  category: "Hair & Headbands"
-curly_hair:
-  name: "Curly Hair"
-  category: "Hair & Headbands"
-bob_cut:
-  name: "Bob Cut"
-  category: "Hair & Headbands"
-emo_fringe:
-  name: "Emo Fringe"
-  category: "Hair & Headbands"
-man_bun:
-  name: "Man Bun"
-  category: "Hair & Headbands"
-bowl_cut:
-  name: "Bowl Cut"
-  category: "Hair & Headbands"
-rainbow_hair:
-  name: "Rainbow Hair"
-  category: "Animated"
-wolf_cut:
-  name: "Wolf Cut"
-  category: "Hair & Headbands"
-pigtail_bows:
-  name: "Pigtail Bows"
-  category: "Hair & Headbands"
-side_ponytail:
-  name: "Side Ponytail"
-  category: "Hair & Headbands"
-viking_beard:
-  name: "Viking Beard"
-  category: "Hair & Headbands"
-wizard_beard:
-  name: "Wizard Beard"
-  category: "Hair & Headbands"
-pink_waves:
-  name: "Pink Waves"
-  category: "Hair & Headbands"
-silver_hair:
-  name: "Silver Hair"
-  category: "Hair & Headbands"
-ginger_curls:
-  name: "Ginger Curls"
-  category: "Hair & Headbands"
 ladybug_buddy:
   name: "Ladybug Buddy"
   category: "Buddies"
@@ -1404,12 +1212,6 @@ rgb_headset:
 loading_halo:
   name: "Loading Halo"
   category: "Animated"
-marquee_crown:
-  name: "Marquee Crown"
-  category: "Animated"
-heartbeat_visor:
-  name: "Heartbeat Visor"
-  category: "Animated"
 lava_lamp_hat:
   name: "Lava Lamp"
   category: "Animated"
@@ -1431,17 +1233,11 @@ neon_cat_ears:
 pulsing_heart_hat:
   name: "Pulsing Heart"
   category: "Animated"
-glitch_crown:
-  name: "Glitch Crown"
-  category: "Animated"
 firefly_jar_hat:
   name: "Firefly Jar"
   category: "Animated"
 snow_globe_hat:
   name: "Snow Globe"
-  category: "Animated"
-candle_crown:
-  name: "Candle Crown"
   category: "Animated"
 sparkler_headband:
   name: "Sparkler Headband"
@@ -1461,9 +1257,6 @@ cauldron_bubbles_hat:
 ufo_lights_hat:
   name: "Flashing UFO"
   category: "Animated"
-dj_deck_hat:
-  name: "DJ Deck"
-  category: "Animated"
 rainbow_cloud_hat:
   name: "Rainbow Cloud"
   category: "Animated"
@@ -1481,7 +1274,7 @@ drum_hat:
   category: "Hats & Caps"
 vinyl_halo:
   name: "Vinyl Halo"
-  category: "Crowns & Halos"
+  category: "Animated"
 lighthouse_hat:
   name: "Lighthouse"
   category: "Animated"
@@ -1491,9 +1284,6 @@ pufferfish_buddy:
 shark_fin_hat:
   name: "Shark Fin"
   category: "Buddies"
-coral_crown:
-  name: "Coral Crown"
-  category: "Crowns & Halos"
 rocket_hat:
   name: "Rocket"
   category: "Animated"
@@ -1523,10 +1313,7 @@ pencil_ear:
   category: "Hats & Caps"
 paint_bucket_hat:
   name: "Paint Bucket"
-  category: "Face"
-tiny_tent_hat:
-  name: "Camping Tent"
-  category: "Animated"
+  category: "Hats & Caps"
 piano_keys_headband:
   name: "Piano Headband"
   category: "Hair & Headbands"
