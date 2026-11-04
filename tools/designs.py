@@ -9342,7 +9342,7 @@ ALLAY_IMG = _tex("allay.png")
 @redesign("allay_buddy")
 def _(m):
     s = 0.55
-    WINGS = [round(22.5 * (1 - math.cos(2 * math.pi * k / 8)), 2) for k in range(8)]   # smooth flap
+    WINGS = [round(22.5 * (1 - math.cos(2 * math.pi * k / 32)), 2) for k in range(32)]   # smooth flap
     N = len(WINGS)
     for k in range(N):
         nm = f"al{k}"
@@ -9369,11 +9369,11 @@ def _(m):
             m.box(px - 0.04, py - 6 * s, pz, px + 0.04, py - 1 * s, pz + 8 * s, wt,
                   rot=('y', -ang, (px, py, pz)) if ang else None)
         for j in range(2):                                                          # sparkles trailing
-            t = ((k + j * 4) % N) / N
+            t = ((k + j * N // 2) % N) / N
             P = Pose(m, nm)
             x, z = (1.8 - 3.6 * j) * (1 - t * 0.3), 2.0 + 1.6 * t
             P.box(x - 0.18, 6.4 - 1.0 * t, z - 0.18, x + 0.18, 6.76 - 1.0 * t, z + 0.18, '#b8fbff')
-    m.animate(('show', 'al', N), frames=N, frametime=2, interpolate=False)
+    m.animate(('show', 'al', N), frames=N, frametime=1, interpolate=False)
 
 # ---------------- Enderman Buddy: teleports around the top of the head ----------------
 def chibi_enderman(m, y0=4.6):
@@ -10594,7 +10594,7 @@ def _(m):
 @redesign("parrot_buddy")
 def _(m):
     """Vanilla parrot perched upright, bobbing its head."""
-    BOB = [round(-0.25 * (1 - math.cos(2 * math.pi * k / 8)), 3) for k in range(8)]   # smooth bob
+    BOB = [round(-0.25 * (1 - math.cos(2 * math.pi * k / 16)), 3) for k in range(16)]   # smooth bob, 20 fps
     for k, b in enumerate(BOB):
         nm = f"pa{k}"
         hy = 15.69 + b
@@ -10608,7 +10608,7 @@ def _(m):
              dict(piv=(0, hy - 1.75, -5.21), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(16, 7), head=True),
              dict(piv=(1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18)), dict(piv=(-1, 22, -1.05), box=(-0.5, 0, -0.5, 1, 2, 1), uv=(14, 18))]
         mob(m, MOBTX['parrot'], P, 0.55, z0=0.4, name=nm)
-    m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=2, interpolate=False)
+    m.animate(('show', 'pa', len(BOB)), frames=len(BOB), frametime=1, interpolate=False)
 
 # ---------------- new (2026) baby mob models: Bedrock geometry + baby textures ----------------
 import json as _json
@@ -10748,7 +10748,7 @@ def _(m):
 
 @redesign("bee_buddy")
 def _(m):
-    N = 6
+    N = 24                                        # wings buzz every tick, slow smooth 1.2 s bob
     for k in range(N):
         flap = 22.5 if k % 2 else -22.5
         bob = 0.35 * math.sin(2 * math.pi * k / N)
@@ -13538,11 +13538,11 @@ for _n, (_bn, _bs, _ks) in IDLE4.items():
 @redesign("snow_golem_buddy")
 def _(m):
     """Snow golem: body drawn once; the pumpkin head and the waving arm are copied per pose."""
-    s = 0.2
+    s = 0.28                                                       # a bit bigger, vanilla proportions
     states, times = timeline(*acts([({'head:y': 30}, 16)], [({'arm:z': 1}, 3, 4), ({'arm:z': -1}, 3, 4), ({'arm:z': 1}, 3, 4)],
                                    [({'head:y': -30}, 16)], rest=24), steps=6, step_t=1)
     hy = 4.6 + (24 - 4) * s
-    r = 3.75 * s * 2.2
+    r = 4.4 * s                                                    # pumpkin a touch bigger than the 8px head, narrower than the body
     body = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
             dict(piv=(0, 24, 0), box=(-6, -12, -6, 12, 12, 12), uv=(0, 36), inf=-0.5),
             dict(piv=(-5, 6, 1), box=(-11, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 45.0))]
@@ -13815,6 +13815,11 @@ def _(m):
             for sx, sy_ in ((2.7, base - 3.0), (-2.9, base - 2.6)):
                 J(sx - 0.25, sy_, cz - hw, 0.5, 0.12, 0.12, '#fff6b0'); J(sx - 0.06, sy_ - 0.2, cz - hw, 0.12, 0.5, 0.12, '#fff6b0')
     m.animate(('show', 'fp', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
+
+redesign("glow_squid_buddy")(_idle4(_ORIG_ANIMAL["glow_squid_buddy"], IDLE4["glow_squid_buddy"][0], IDLE4["glow_squid_buddy"][1],
+    [({'tentacle1:z': 12, 'tentacle5:z': -12, 'tentacle3:x': -12, 'tentacle7:x': 12}, 14, 16),
+     ({'tentacle1:z': -12, 'tentacle5:z': 12, 'tentacle3:x': 12, 'tentacle7:x': -12}, 14, 16)],
+    "glow_squid_buddy" in KEEP_POSE, steps=16, step_t=1, ft=1))                  # slow smooth tentacle sway at 20 fps
 
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
