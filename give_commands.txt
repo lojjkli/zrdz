@@ -233,7 +233,6 @@
 /give @p minecraft:paper[minecraft:item_model="aconite:anvil_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Anvil Hat"]
 /give @p minecraft:paper[minecraft:item_model="aconite:bell_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Village Bell Hat"]
 /give @p minecraft:paper[minecraft:item_model="aconite:lantern_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Lantern Hat"]
-/give @p minecraft:paper[minecraft:item_model="aconite:soul_lantern_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Soul Lantern Rod"]
 /give @p minecraft:paper[minecraft:item_model="aconite:campfire_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Campfire Hat"]
 /give @p minecraft:paper[minecraft:item_model="aconite:honey_drip_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Honey Block Hat"]
 /give @p minecraft:paper[minecraft:item_model="aconite:sponge_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Wet Sponge Hat"]
@@ -417,3 +416,4 @@
 /give @p minecraft:paper[minecraft:item_model="aconite:hot_air_balloon_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Hot Air Balloon"]
 /give @p minecraft:paper[minecraft:item_model="aconite:tiny_island_hat",minecraft:equippable={slot:"head"},minecraft:item_name="Tiny Island"]
 /give @p minecraft:paper[minecraft:item_model="aconite:fat_ender_dragon",minecraft:equippable={slot:"head"},minecraft:item_name="Fat Ender Dragon"]
+/give @p minecraft:paper[minecraft:item_model="aconite:mystic_crown",minecraft:equippable={slot:"head"},minecraft:item_name="Mystic Crown"]
