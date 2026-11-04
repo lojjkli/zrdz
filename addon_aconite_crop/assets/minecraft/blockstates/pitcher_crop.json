@@ -1,0 +1,34 @@
+{
+ "variants": {
+  "age=0,half=lower": {
+   "model": "aconite:block/aconite_stage0"
+  },
+  "age=0,half=upper": {
+   "model": "aconite:block/empty"
+  },
+  "age=1,half=lower": {
+   "model": "aconite:block/aconite_stage1"
+  },
+  "age=1,half=upper": {
+   "model": "aconite:block/empty"
+  },
+  "age=2,half=lower": {
+   "model": "aconite:block/aconite_stage2"
+  },
+  "age=2,half=upper": {
+   "model": "aconite:block/empty"
+  },
+  "age=3,half=lower": {
+   "model": "aconite:block/aconite_stage4_bottom"
+  },
+  "age=3,half=upper": {
+   "model": "aconite:block/aconite_stage4_top"
+  },
+  "age=4,half=lower": {
+   "model": "aconite:block/aconite_stage5_bottom"
+  },
+  "age=4,half=upper": {
+   "model": "aconite:block/aconite_stage5_top"
+  }
+ }
+}
