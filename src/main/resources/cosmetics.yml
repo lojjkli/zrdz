@@ -314,7 +314,7 @@ bear_beanie:
   category: "Hats & Caps"
 chicken_jockey:
   name: "Chicken Jockey"
-  category: "Memes"
+  category: "Animated"
 lava_chicken:
   name: "Lava Chicken"
   category: "Memes"
@@ -347,7 +347,7 @@ taggy_headphones:
   category: "Animated"
 six_seven:
   name: "6-7"
-  category: "Memes"
+  category: "Animated"
 six_seven_hands:
   name: "6-7 Hands"
   category: "Animated"
@@ -359,7 +359,7 @@ tung_tung:
   category: "Memes"
 ballerina_cappuccina:
   name: "Ballerina Cappuccina"
-  category: "Memes"
+  category: "Animated"
 bombardiro:
   name: "Bombardiro Croc"
   category: "Memes"
@@ -713,9 +713,6 @@ bell_hat:
   category: "Blocks & Items"
 lantern_hat:
   name: "Lantern Hat"
-  category: "Animated"
-soul_lantern_hat:
-  name: "Soul Lantern Rod"
   category: "Animated"
 campfire_hat:
   name: "Campfire Hat"
@@ -1265,4 +1262,7 @@ tiny_island_hat:
   category: "Hats & Caps"
 fat_ender_dragon:
   name: "Fat Ender Dragon"
+  category: "Animated"
+mystic_crown:
+  name: "Mystic Crown"
   category: "Animated"
