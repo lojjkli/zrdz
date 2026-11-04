@@ -14054,8 +14054,14 @@ def _(m):
     sz, sh = 0.2, 0.3
     J = lambda S, x0, y0, zz: (lambda X, Y, Z: (x0 + X * S, y0 + Y * S, zz + Z * S))
     C = J(s, 0.0, 4.6, z0)
-    yc = 4.6 - 5 * s + 0.05                                                                   # sitting chicken (legs tucked in)
+    yc = 4.6 + 0.05                                                                           # standing on its legs
     C = J(s, 0.0, yc, z0)
+    LG, LGD = '#f0a640', '#c9812a'
+    for lx in (-1.5, 1.5):                                                                     # orange chicken legs + toes
+        x, z = lx * s, z0 - 0.5 * s
+        m.box(x - 0.16, yc, z - 0.16, x + 0.16, yc + 5 * s + 0.1, z + 0.16, LG)
+        m.box(x - 0.5, 4.6, z - 0.75, x + 0.5, 4.75, z + 0.2, LGD)
+        m.box(x - 0.14, 4.6, z - 0.95, x + 0.14, 4.75, z - 0.7, LGD)
     m.box(*C(-3, 5, -4), *C(3, 11, 4), TexX90(Tex(CHKN, 0, 9, 6, 8, 6, (), "ckb")))               # body (turned like vanilla)
     seat = yc + 11 * s
     zz = z0 + 1.5 * s                                                                         # on the chicken's back
