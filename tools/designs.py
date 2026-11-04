@@ -13821,6 +13821,89 @@ redesign("glow_squid_buddy")(_idle4(_ORIG_ANIMAL["glow_squid_buddy"], IDLE4["glo
      ({'tentacle1:z': -12, 'tentacle5:z': 12, 'tentacle3:x': 12, 'tentacle7:x': -12}, 14, 16)],
     "glow_squid_buddy" in KEEP_POSE, steps=16, step_t=1, ft=1))                  # slow smooth tentacle sway at 20 fps
 
+# ---------------- round 22: slime buddy v3 - faces front, centred, real squishy hops ----------------
+@redesign("slime_buddy")
+def _(m):
+    P0 = [dict(piv=(0, 0, 0), box=(-3, 17, -3, 6, 6, 6), uv=(0, 16)),                 # inner core
+          dict(piv=(0, 0, 0), box=(-3.25, 18, -3.5, 2, 2, 2), uv=(32, 0)),             # eyes
+          dict(piv=(0, 0, 0), box=(1.25, 18, -3.5, 2, 2, 2), uv=(32, 4)),
+          dict(piv=(0, 0, 0), box=(0, 21, -3.5, 1, 1, 1), uv=(32, 8)),                 # mouth
+          dict(piv=(0, 0, 0), box=(-4, 16, -4, 8, 8, 8), uv=(0, 0))]                   # see-through outer cube
+    one = lambda st, t=1: (st, t, 1)
+    air = [0.0, 0.7, 1.3, 1.75, 2.05, 2.2, 2.2, 2.05, 1.75, 1.3, 0.7]                  # gravity arc
+    sq = [0.14, 0.12, 0.08, 0.04, 0.0, -0.03, -0.03, 0.0, 0.04, 0.08, 0.12]          # stretched up and down, round at the top
+    def hop():
+        k = [({'_sq': -0.12}, 1, 3), ({'_sq': -0.24}, 2, 2)]                           # sink down...
+        k += [one({'_hop': h, '_sq': q}) for h, q in zip(air, sq)]
+        k += [one({'_sq': -0.28}, 2), one({'_sq': -0.14}), one({'_sq': 0.08}), one({'_sq': -0.04}), ({}, 1, 3)]   # splat, wobble
+        return k
+    keys = [({}, 36, 3)] + hop() + [({}, 6, 3)] + hop() + [({}, 50, 3), ({'_sq': 0.05}, 6, 6), ({'_sq': -0.05}, 6, 6)]   # 2 hops, then a jiggle
+    states, times = timeline(*keys, step_t=1)
+    for f, st in enumerate(states):
+        sy = 1.0 + st.get('_sq', 0.0)
+        Pz = Pose(m, f"ic{f}", dy=st.get('_hop', 0.0), sy=sy, fy=4.6, sxz=1.0 - 0.6 * (sy - 1.0))
+        mob(Pz, MOBTX['slime'], [dict(p) for p in P0], 0.45, z0=0.0, name=f"ic{f}")
+    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
+
+# ---------------- round 22: made-up animals rebuilt as the real Minecraft mobs (vanilla baby models + textures) ----------------
+VTX = {k: _tex(f"{k}.png") for k in ("baby_axolotl", "baby_fox_sleep", "baby_goat", "baby_llama", "baby_rabbit", "baby_strider",
+                                    "baby_camel", "baby_armadillo", "baby_turtle", "baby_dolphin", "sniffer", "shulker", "phantom",
+                                    "breeze", "pufferfish")}
+
+def _vfit(geo, size=7.0, tall=7.5):
+    """Scale + offsets so the model is about `size` px long, centred on the head, feet on the head top."""
+    xs, ys, zs = [], [], []
+    for b in _geo(geo):
+        for c in b.get('cubes', []):
+            (X, Y, Z), (w, h, d) = c['origin'], c['size']
+            xs += [X, X + w]; ys += [Y, Y + h]; zs += [Z, Z + d]
+    sc = min(size / max(max(xs) - min(xs), max(zs) - min(zs)), tall / (max(ys) - min(ys)))
+    return sc, -(min(xs) + max(xs)) / 2 * sc, 4.6 - min(ys) * sc, -(min(zs) + max(zs)) / 2 * sc
+
+def _vbuddy(geo, tex, size=7.0, tall=7.5, pose=None, hide=(), dy=0.0):
+    def fn(m):
+        sc, x0, y0, z0 = _vfit(geo, size, tall)
+        bmob(m, geo, VTX[tex], sc, x0=x0, y0=y0 + dy, z0=z0, pose=dict(pose or {}), **({"hide": hide} if hide else {}))
+    return fn
+
+_NOROT = lambda *b: {n: ('y', 0.0) for n in b}
+VBUD = {   # name: (geo, texture, size, tall, still pose, moving bones, base angles, keys)
+    "axolotl_buddy":   ("baby_axolotl", "baby_axolotl", 7.0, 7.5, _NOROT('right_leg'), ('head', 'tail'), {},
+                        acts(L_(a=25), [({'tail:y': 25}, 6, 6), ({'tail:y': -25}, 6, 6)], R_(a=25), rest=24)),
+    "sleepy_fox":      ("baby_fox", "baby_fox_sleep", 6.5, 7.5, {}, ('head', 'tail'), {},
+                        acts([({'head:x': 12}, 30, 12)], [({'tail:y': 20}, 10, 10), ({'tail:y': -20}, 10, 10)], rest=40)),
+    "goat_buddy":      ("baby_goat", "baby_goat", 6.5, 7.5, {}, ('head',), {'head': ('x', -25.0)},
+                        acts(L_(a=30), ND(a=18), R_(a=30), rest=26)),
+    "llama_buddy":     ("baby_llama", "baby_llama", 6.0, 7.5, {}, ('head',), {}, acts(L_(a=30), T_(a=15), R_(a=30), rest=26)),
+    "bunny_buddy":     ("baby_rabbit", "baby_rabbit", 6.0, 7.0, _NOROT('leftBackLeg', 'rightBackLeg'), ('head', 'right_ear', 'left_ear'), {},
+                        acts(L_(a=25), [({'right_ear:x': -20}, 3, 3), ({}, 3, 3), ({'left_ear:x': -20}, 3, 3)], R_(a=25), rest=24)),
+    "strider_buddy":   ("baby_strider", "baby_strider", 6.0, 7.5, {}, ('bristle0', 'bristle1', 'bristle2'), {},
+                        [({'bristle0:x': 20, 'bristle1:x': 20, 'bristle2:x': 20}, 6, 10), ({'bristle0:x': -20, 'bristle1:x': -20, 'bristle2:x': -20}, 6, 10)]),
+    "camel_buddy":     ("baby_camel", "baby_camel", 7.0, 7.5, {}, ('head',), {}, acts(L_(a=25, h=24), ND(a=12), R_(a=25, h=24), rest=30)),
+    "armadillo_buddy": ("baby_armadillo", "baby_armadillo", 6.5, 7.0, {}, ('head',), {}, acts(L_(a=30), T_(a=15), R_(a=30), rest=24)),
+    "turtle_buddy":    ("baby_turtle", "baby_turtle", 5.5, 7.0, {}, ('head',), {}, acts(L_(a=30, h=24), R_(a=30, h=24), rest=36)),
+    "dolphin_buddy":   ("baby_dolphin", "baby_dolphin", 7.0, 7.5, {'left_fin': ('z', 45.0), 'right_fin': ('z', -45.0), 'back_fin': ('x', 45.0)},
+                        ('tail',), {}, [({'tail:x': 18}, 4, 8), ({'tail:x': -18}, 4, 8)]),
+    "sniffer_buddy":   ("sniffer", "sniffer", 7.0, 7.5, {}, ('head',), {}, acts(ND(a=-18), L_(a=25), ND(a=-18), R_(a=25), rest=24)),
+    "phantom_buddy":   ("phantom", "phantom", 8.0, 7.5, {}, ('wing0', 'wing1'), {},
+                        [({'wing0:z': 30, 'wing1:z': -30}, 3, 8), ({'wing0:z': -25, 'wing1:z': 25}, 3, 8)]),
+    "breeze_buddy":    ("breeze", "breeze", 6.0, 7.0, {}, ('rods',), {}, [({'rods:y': 40}, 1, 20), ({'rods:y': -40}, 1, 20)]),
+    "pufferfish_buddy": ("pufferfish_large", "pufferfish", 6.0, 6.0, {}, ('leftFin', 'rightFin'), {},
+                        [({'leftFin:y': 30, 'rightFin:y': -30}, 2, 4), ({'leftFin:y': -10, 'rightFin:y': 10}, 2, 4)]),
+}
+for _n, (_g, _t, _sz, _tl, _ps, _bn, _bs, _ks) in VBUD.items():
+    redesign(_n)(_idle4(_vbuddy(_g, _t, _sz, _tl, _ps), _bn, _bs, _ks, True, steps=6, step_t=1, ft=1))
+
+@redesign("shulker_buddy")
+def _(m):
+    """Vanilla shulker: shell drawn once, the lid peeks open and shut (head inside shows)."""
+    sc, x0, y0, z0 = _vfit("shulker", 4.5, 5.0)
+    bmob(m, "shulker", VTX['shulker'], sc, x0=x0, y0=y0, z0=z0, hide=('lid',), name="mobst")
+    states, times = timeline(({}, 40, 6), ({'_o': 5.0}, 24, 8), ({}, 20, 6), ({'_o': 3.0}, 6, 4), ({}, 4, 4), ({'_o': 3.0}, 6, 4), step_t=1)
+    for f, st in enumerate(states):
+        bmob(m, "shulker", VTX['shulker'], sc, x0=x0, y0=y0, z0=z0, only=('lid',), move={'lid': (0, st.get('_o', 0.0), 0)}, name=f"ic{f}")
+    m.animate(('show', 'ic', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
+
 LOWER = {"lightbulb_idea", "enchanted_book_hat", "six_seven", "ghost_buddy", "conduit_hat", "bee_buddy",
          "cloud_hat", "butterfly_buddy", "dizzy_stars", "snow_golem_buddy"}          # sat too high, now rest on the head
 SHRINK = {"frog_buddy": 0.5, "froggie_buddy": 0.5, "froggie_hat": 0.5, "froggie_strawberry": 0.5,
