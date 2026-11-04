@@ -308,7 +308,7 @@ allay_buddy:
   category: "Animated"
 sniffer_buddy:
   name: "Sniffer Buddy"
-  category: "Buddies"
+  category: "Animated"
 duck_buddy:
   name: "Duck Buddy (Shades)"
   category: "Buddies"
@@ -422,13 +422,13 @@ froggie_flower_crown:
   category: "Aconite & Froggie"
 axolotl_buddy:
   name: "Axolotl Buddy"
-  category: "Buddies"
+  category: "Animated"
 bee_buddy:
   name: "Bee Buddy"
   category: "Animated"
 sleepy_fox:
   name: "Sleepy Fox"
-  category: "Buddies"
+  category: "Animated"
 cat_loaf:
   name: "Cat Loaf"
   category: "Buddies"
@@ -461,10 +461,10 @@ turtle_helmet:
   category: "Blocks & Items"
 armadillo_buddy:
   name: "Armadillo Buddy"
-  category: "Buddies"
+  category: "Animated"
 breeze_buddy:
   name: "Breeze Buddy"
-  category: "Buddies"
+  category: "Animated"
 planet_orbit:
   name: "Planet Orbit"
   category: "Fantasy"
@@ -590,7 +590,7 @@ dreads_updo:
   category: "Hair & Headbands"
 turtle_buddy:
   name: "Turtle Buddy"
-  category: "Buddies"
+  category: "Animated"
 turtle_stack:
   name: "Turtle Stack"
   category: "Buddies"
@@ -608,7 +608,7 @@ jelly_slime:
   category: "Buddies"
 bunny_buddy:
   name: "Bunny Buddy"
-  category: "Buddies"
+  category: "Animated"
 pirate_head:
   name: "Pirate Head"
   category: "Fantasy"
@@ -668,13 +668,13 @@ bat_buddy:
   category: "Animated"
 strider_buddy:
   name: "Strider Buddy"
-  category: "Buddies"
+  category: "Animated"
 goat_buddy:
   name: "Goat Buddy"
-  category: "Buddies"
+  category: "Animated"
 camel_buddy:
   name: "Camel Buddy"
-  category: "Buddies"
+  category: "Animated"
 panda_buddy:
   name: "Panda Buddy"
   category: "Animated"
@@ -686,7 +686,7 @@ glow_squid_buddy:
   category: "Animated"
 dolphin_buddy:
   name: "Dolphin Buddy"
-  category: "Buddies"
+  category: "Animated"
 snow_golem_buddy:
   name: "Snow Golem Buddy"
   category: "Animated"
@@ -698,16 +698,16 @@ villager_buddy:
   category: "Animated"
 llama_buddy:
   name: "Llama Buddy"
-  category: "Buddies"
+  category: "Animated"
 piglin_buddy:
   name: "Piglin Buddy"
   category: "Animated"
 shulker_buddy:
   name: "Shulker Buddy"
-  category: "Buddies"
+  category: "Animated"
 phantom_buddy:
   name: "Phantom Buddy"
-  category: "Buddies"
+  category: "Animated"
 ocelot_buddy:
   name: "Ocelot Buddy"
   category: "Animated"
@@ -1250,7 +1250,7 @@ lighthouse_hat:
   category: "Animated"
 pufferfish_buddy:
   name: "Pufferfish Buddy"
-  category: "Buddies"
+  category: "Animated"
 shark_fin_hat:
   name: "Shark Fin"
   category: "Buddies"
