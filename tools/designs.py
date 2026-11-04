@@ -13946,11 +13946,15 @@ def _(m):
 TURT = _tex("sea_turtle.png")
 
 def _turtle_adult(m):
-    s, z0 = 0.24, -0.96
-    J = lambda x1, y1, z1, x2, y2, z2: (x1 * s, 4.6 + y1 * s, z0 + z1 * s, x2 * s, 4.6 + y2 * s, z0 + z2 * s)
-    m.box(*J(-9.5, 3, -7, 9.5, 9, 13), TexX90(Tex(TURT, 6, 37, 19, 20, 6, (), "tsh")))          # shell
-    m.box(*J(-5.5, 0, -7, 5.5, 3, 11), TexX90(Tex(TURT, 30, 1, 11, 18, 3, (), "tbl")))          # belly plate
-    bmob(m, "turtle_nb", TURT, s, y0=4.6, z0=z0)
+    s, z0 = 0.22, -0.9
+    y0 = 4.6 + 0.45 * s
+    J = lambda x1, y1, z1, x2, y2, z2: (x1 * s, y0 + y1 * s, z0 + z1 * s, x2 * s, y0 + y2 * s, z0 + z2 * s)
+    m.box(*J(-5.5, 0, -7, 5.5, 3, 11), TexX90(Tex(TURT, 30, 1, 11, 18, 3, (), "tbl")))          # pale belly plate
+    m.box(*J(-9.5, 2.5, -7, 9.5, 7.5, 13), TexX90(Tex(TURT, 6, 37, 19, 20, 6, (), "tsh")))      # shell, sitting on the body
+    top = (TURT, 37, 43, 19, 20)
+    m.box(*J(-7.5, 7.5, -5, 7.5, 9.5, 11), FaceTex({'up': top, 'north': (TURT, 12, 37, 19, 6), 'south': (TURT, 12, 37, 19, 6),
+                                                    'east': (TURT, 37, 43, 4, 20), 'west': (TURT, 52, 43, 4, 20)}, "tdm", "dome"))   # domed top
+    bmob(m, "turtle_nb", TURT, s, y0=y0, z0=z0, move={'head': (0, 2.0, -0.5)})
 
 redesign("turtle_buddy")(_idle4(_turtle_adult, ('head', 'leg2', 'leg3'), {},
                                 acts(L_(a=30, h=24), [({'leg2:y': 22, 'leg3:y': -22}, 4, 6), ({'leg2:y': -18, 'leg3:y': 18}, 4, 6),
@@ -13983,21 +13987,21 @@ def _(m):
                   rot=('y', r, (cx, cy, cz)) if r else None)
     m.animate(('show', 'bz', N), frames=N, frametime=1, interpolate=False)
 
-LEGA = 45.0
+LEGA = 10.0
 CHKN, ZOMB = _tex("chicken_be.png"), _tex("zombie.png")
 
 @redesign("chicken_jockey")
 def _(m):
     """Vanilla chicken with a baby zombie riding it: the chicken flaps and pecks, the zombie bounces along."""
-    s, z0 = 0.36, 0.7
-    sz, sh = s * 0.5, s * 0.75
+    s, z0 = 0.46, 0.5
+    sz, sh = 0.2, 0.3
     J = lambda S, x0, y0, zz: (lambda X, Y, Z: (x0 + X * S, y0 + Y * S, zz + Z * S))
     C = J(s, 0.0, 4.6, z0)
     yc = 4.6 - 5 * s + 0.05                                                                   # sitting chicken (legs tucked in)
     C = J(s, 0.0, yc, z0)
     m.box(*C(-3, 5, -4), *C(3, 11, 4), TexX90(Tex(CHKN, 0, 9, 6, 8, 6, (), "ckb")))               # body (turned like vanilla)
     seat = yc + 11 * s
-    zz = z0 + 0.8 * s
+    zz = z0 + 1.5 * s                                                                         # on the chicken's back
     keys = [({}, 24), ({'w': 1}, 2, 2), ({}, 2, 2), ({'w': 1}, 2, 2), ({}, 2, 2), ({'w': 1}, 2, 2), ({}, 18, 2),
             ({'h': 1}, 4, 3), ({}, 3, 2), ({'h': 1}, 3, 2), ({}, 20, 3), ({'t': 1}, 20, 6), ({}, 10, 6)]
     states, times = timeline(*keys, step_t=1)
@@ -14009,16 +14013,16 @@ def _(m):
         hp = {'head': ('x', round(35.0 * hd, 2))} if hd else ({'head': ('y', round(25.0 * tl, 2))} if tl else {})
         bmob(m, "chicken_nb", CHKN, s, y0=yc, z0=z0, only=('head',), name=nm, fine=True, pose=hp)
         dy = 0.25 * w
-        Z = J(sz, 0.0, seat - 10 * sz + dy, zz)
-        bmob(m, "zombie", ZOMB, sz, y0=seat - 10 * sz + dy, z0=zz, name=nm,
+        Z = J(sz, 0.0, seat - 12 * sz + dy, zz)
+        bmob(m, "zombie", ZOMB, sz, y0=seat - 12 * sz + dy, z0=zz, name=nm,
              hide=('head', 'rightArm', 'leftArm', 'rightLeg', 'leftLeg'))
-        neck = seat + 14 * sz + dy
+        neck = seat + 12 * sz + dy
         bmob(m, "zombie", ZOMB, sh, y0=neck - 24 * sh, z0=zz, only=('head',), name=nm, fine=True,
              pose={'head': ('y', round(-20.0 * tl, 2))} if tl else {})
         for sd, x1 in ((1, -8), (-1, 4)):                                                       # arms straight out front
             m.box(*Z(x1, 20, -10), *Z(x1 + 4, 24, 2), TexXm90(Tex(ZOMB, 40, 16, 4, 12, 4, (), nm)))
-        bmob(m, "zombie", ZOMB, sz, y0=seat - 10 * sz + dy, z0=zz, name=nm, fine=True, only=('rightLeg', 'leftLeg'),   # legs astride
-             pose={'rightLeg': ('x', LEGA), 'leftLeg': ('x', LEGA)}, move={'rightLeg': (-5.0, 2.0, 0), 'leftLeg': (5.0, 2.0, 0)})
+        bmob(m, "zombie", ZOMB, sz, y0=seat - 12 * sz + dy, z0=zz, name=nm, fine=True, only=('rightLeg', 'leftLeg'),   # legs down both sides
+             pose={'rightLeg': ('z', LEGA), 'leftLeg': ('z', -LEGA)}, move={'rightLeg': (-7.2, 0, -1.0), 'leftLeg': (7.2, 0, -1.0)})
     m.animate(('show', 'cj', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 TNT_S, TNT_T, TNT_B = _tex("tnt_side.png"), _tex("tnt_top.png"), _tex("tnt_bottom.png")
