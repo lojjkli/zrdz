@@ -13156,7 +13156,7 @@ def _(m):
         yb = y0 + 0.3 + sum(hh for _, hh in ((0.8, 0.5), (1.15, 0.6), (1.35, 0.7), (1.45, 0.6))[:i])
         rbox(m, -hw, yb, -hw, hw, yb + h, hw, Y if i % 2 == 0 else YD, r=hw / 3, top=False)
     yp = y0 + 2.7
-    for k, (dx, dz, ax, sg) in enumerate(((0, -1, 'x', -1), (0, 1, 'x', 1), (-1, 0, 'z', 1), (1, 0, 'z', -1))):   # four peel flaps
+    for k, (dx, dz, ax, sg) in enumerate(((0, 1, 'x', 1), (-1, 0, 'z', 1), (1, 0, 'z', -1))):   # peel flaps (front one folded away so the face shows)
         for j in range(3):                                                               # each flap curls outward
             off = 1.25 + 0.35 * j
             cx, cz = dx * off, dz * off
@@ -13484,8 +13484,7 @@ def _idle4(old, bones, base, keys, keep, steps=3, step_t=2, ft=3):
                 bp.pop('tail', None); bp.pop('tail1', None)
             stp = dict(bp)
             for b in bones:
-                if b in base:
-                    stp[b] = base[b]
+                stp[b] = base.get(b, ('y', 0.0))        # moving bones rest upright (no leftover still-pose tilt that snaps)
             real(m2, *a, pose=stp, name="mobst", fine=True, hide=tuple(bones), **k)     # still parts, drawn once
             for f, st in enumerate(states):
                 ps = dict(stp)
@@ -13538,11 +13537,11 @@ for _n, (_bn, _bs, _ks) in IDLE4.items():
 @redesign("snow_golem_buddy")
 def _(m):
     """Snow golem: body drawn once; the pumpkin head and the waving arm are copied per pose."""
-    s = 0.28                                                       # a bit bigger, vanilla proportions
+    s = 0.2
     states, times = timeline(*acts([({'head:y': 30}, 16)], [({'arm:z': 1}, 3, 4), ({'arm:z': -1}, 3, 4), ({'arm:z': 1}, 3, 4)],
                                    [({'head:y': -30}, 16)], rest=24), steps=6, step_t=1)
     hy = 4.6 + (24 - 4) * s
-    r = 4.4 * s                                                    # pumpkin a touch bigger than the 8px head, narrower than the body
+    r = 3.75 * s * 2.2
     body = [dict(piv=(0, 13, 0), box=(-5, -10, -5, 10, 10, 10), uv=(0, 16), inf=-0.5),
             dict(piv=(0, 24, 0), box=(-6, -12, -6, 12, 12, 12), uv=(0, 36), inf=-0.5),
             dict(piv=(-5, 6, 1), box=(-11, 0, -1, 12, 2, 2), uv=(32, 0), inf=-0.5, rot=('z', 45.0))]
@@ -13554,7 +13553,6 @@ def _(m):
                                     rot=('z', round(-45.0 + 12 * wave, 2)))], s, name=nm)
         pk = FaceTex({'north': (PUMPKIN_F, 0, 0, 16, 16), 'side': (PUMPKIN_S, 0, 0, 16, 16), 'up': (PUMPKIN_T, 0, 0, 16, 16),
                       'down': (PUMPKIN_T, 0, 0, 16, 16)}, nm, "pk")
-        pk.px = 0.5                                                                      # tiny in game: half the texels is plenty
         ang = round(st.get('head:y', 0.0), 2)
         m.box(-r, hy, -r, r, hy + 2 * r, r, pk, rot=('y', ang, (0, hy, 0)) if ang else None)
     m.animate(('show', 'ic', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
@@ -13697,7 +13695,7 @@ IDLE5 = {
                         acts(sum([[({'wing0:z': -40, 'wing1:z': 40}, 1, 2), ({}, 1, 2)] for _ in range(3)], []),
                              sum([[({'wing0:z': -40, 'wing1:z': 40}, 1, 2), ({}, 1, 2)] for _ in range(2)], []), rest=34)),
     "panda_buddy":     (('head',), {}, acts([({'head:z': 18}, 20, 8)], ND(a=-14), [({'head:z': -18}, 20, 8)], rest=20)),
-    "piglin_buddy":    (('head',), {'head': ('y', -22.5)}, acts(ND(a=15), R_(a=20, h=20), ND(a=15), rest=28)),
+    "piglin_buddy":    (('head',), {}, acts(ND(a=15), R_(a=20, h=20), ND(a=15), L_(a=20, h=20), rest=28)),
 }
 
 for _n, (_bn, _bs, _ks) in IDLE5.items():
@@ -13761,7 +13759,7 @@ def _(m):
     # head track (yaw index per tick); the wings never stop
     def glance(idx, hold):
         return idx + [idx[-1]] * hold + idx[::-1][1:] + [0]
-    head = [0] * 40 + glance([1, 2, 3, 4, 5], 26) + [0] * 30 + glance([6, 7, 8, 9, 10], 26)
+    head = [0] * 70 + glance([1, 2, 3, 4], 16) + [0] * 70 + glance([6, 7, 8, 9], 16)     # stares forward; a rare small glance
     L = -(-len(head) // 16) * 16
     head += [0] * (L - len(head))
     seq = [(head[t], beat[t % 16]) for t in range(L)]
@@ -13956,6 +13954,8 @@ GONE = {"sunglasses", "3d_glasses", "aviator_goggles", "vr_visor", "heart_shades
         "candle_crown", "coral_crown", "cherry_blossom_crown", "end_portal_hat", "phoenix_crest", "oni_horns", "rainbow_arc",
         "oni_half_mask", "masquerade_mask", "fairy_wings_head", "mermaid_tiara", "medal_bronze"}
 GONE |= {n for n, t, tier, fn in D if tier == "hair" and not n.startswith(("afro_", "dreads_"))}
+GONE |= {"grass_block_hat", "cloud_hat", "bird_nest", "turtle_stack", "turtle_egg_hat", "pirate_parrot", "caterpillar_buddy", "seal_buddy", "otter_buddy",
+         "sloth_buddy", "koala_buddy", "red_panda_buddy"}      # round 24
 GONE |= {"neon_cat_ears", "fire_hair", "big_brain", "banana_cat", "fish_slap", "tinfoil_hat", "froglight_crown", "raccoon_buddy", "hamster_buddy"}      # round 18
 D[:] = [d for d in D if d[0] not in GONE]
 D[:] = [(n, t, tier, _fit(n, fn)) for n, t, tier, fn in D]
