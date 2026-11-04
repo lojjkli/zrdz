@@ -1,0 +1,22 @@
+name: AconiteCosmetics
+version: '${project.version}'
+main: com.lojjkli.aconite.AconitePlugin
+api-version: '1.21'
+description: Aconite cosmetics and the aconite flower.
+commands:
+  cosmetics:
+    description: Open the cosmetics menu.
+    usage: /cosmetics
+    aliases: [cos, hats]
+    permission: aconite.cosmetics
+  aconite:
+    description: Admin commands for Aconite.
+    usage: /aconite <give|reload>
+    permission: aconite.admin
+permissions:
+  aconite.cosmetics:
+    description: Use the cosmetics menu.
+    default: true
+  aconite.admin:
+    description: Give items and reload.
+    default: op
