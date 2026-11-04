@@ -13951,6 +13951,29 @@ def _turt_clean(a):
         top = top[top[:, 3] > 0]
         if len(top):
             a[v + d:v + d + h, u:u + 2 * d + 2 * w] = _np.median(top, 0).astype(_np.uint8)
+    rim = a[37:43, 12:50].reshape(-1, 4)
+    grn = rim[(rim[:, 1].astype(int) > rim[:, 0].astype(int) + 20) & (rim[:, 3] > 0)]
+    dg = _np.median(grn, 0).astype(_np.uint8)
+    for y in range(37, 43):                                                              # rim all green (no tan blocks)
+        for x in range(12, 50):
+            px = a[y, x]
+            if px[3] == 0 or int(px[1]) <= int(px[0]) + 20:
+                a[y, x] = dg
+    def _greenify(y1, y2, x1, x2):
+        r = a[y1:y2, x1:x2].reshape(-1, 4)
+        g = r[(r[:, 1].astype(int) > r[:, 0].astype(int) + 20) & (r[:, 3] > 0)]
+        if not len(g):
+            return
+        med = _np.median(g, 0).astype(_np.uint8)
+        for yy in range(y1, y2):
+            for xx in range(x1, x2):
+                px = a[yy, xx]
+                if px[3] > 0 and int(px[1]) <= int(px[0]) + 20 and not (px[0] > 200 and px[1] > 200) and max(px[:3]) > 70:   # keep the eye
+                    a[yy, xx] = med
+    _greenify(6, 11, 2, 26)                                                              # head sides: no tan chin bar
+    _greenify(0, 6, 8, 14)
+    for u, v, w, d in ((0, 23, 4, 10), (0, 12, 4, 10), (26, 30, 13, 5), (26, 24, 13, 5)):
+        _greenify(v, v + d, u + d, u + d + 2 * w)                                        # flipper tops: no tan specks
     strip = a[37:43, 12:31]                                                              # scute rim (front of the shell)
     side = _np.array(_Image.fromarray(_np.ascontiguousarray(strip)).resize((20, 6), _Image.NEAREST))
     a[43:63, 6:12] = _np.rot90(side, -1); a[43:63, 31:37] = _np.rot90(side, 1)            # same rim on the left and right
@@ -13964,9 +13987,8 @@ def _turtle_adult(m):
     s, z0 = 0.22, -0.9
     y0 = 4.6 + 0.45 * s
     J = lambda x1, y1, z1, x2, y2, z2: (x1 * s, y0 + y1 * s, z0 + z1 * s, x2 * s, y0 + y2 * s, z0 + z2 * s)
-    m.box(*J(-5.5, 0, -7, 5.5, 3, 11), TexX90(Tex(TURT, 30, 1, 11, 18, 3, (), "tbl")))          # pale belly plate
-    m.box(*J(-9.5, 2.5, -7, 9.5, 8.5, 13), TexX90(Tex(TURT, 6, 37, 19, 20, 6, (), "tsh")))      # shell, sitting on the body
-    bmob(m, "turtle_nb", TURT, s, y0=y0, z0=z0, move={'head': (0, 1.5, 0.3)})
+    m.box(*J(-9.5, 0.5, -7, 9.5, 6.5, 13), TexX90(Tex(TURT, 6, 37, 19, 20, 6, (), "tsh")))      # shell, sitting low on its flippers
+    bmob(m, "turtle_nb", TURT, s, y0=y0, z0=z0, move={'head': (0, 0.5, 0.3)})
 
 redesign("turtle_buddy")(_idle4(_turtle_adult, ('head', 'leg2', 'leg3'), {},
                                 acts(L_(a=30, h=24), [({'leg2:y': 22, 'leg3:y': -22}, 4, 6), ({'leg2:y': -18, 'leg3:y': 18}, 4, 6),
@@ -14005,6 +14027,24 @@ def _whiter(a, k=0.45):
     a[g, :3] = (a[g, :3] + (255 - a[g, :3].astype(float)) * k).astype(_np.uint8)
     return a
 
+def _limb(m, a, b, img, u, v, name, one=False):
+    """A 4x12x4 Java limb pointing forward (-z): every face sampled from the limb's own texture, shoulder/hip at the back."""
+    (x1, y1, z1), (x2, y2, z2) = a, b
+    def fn(p, n):
+        x, y, z = p
+        if n[2] < 0:                                                                   # front end = hand / foot
+            i, j = int((x2 - x) / (x2 - x1 + 1e-9) * 3.99), int((y2 - y) / (y2 - y1 + 1e-9) * 3.99)
+            return tuple(img[v + 4 + 4 + j // 2, u + 4 + i]) if one else tuple(img[v + j, u + 8 + i])
+        if n[2] > 0:                                                                   # back end = shoulder / hip top
+            i, j = int((x2 - x) / (x2 - x1 + 1e-9) * 3.99), int((y2 - y) / (y2 - y1 + 1e-9) * 3.99)
+            return tuple(img[v + j, u + 4 + i])
+        t = int((z2 - z) / (z2 - z1 + 1e-9) * 11.99)                                   # 0 at the shoulder, 11 at the hand
+        c = (x - x1) / (x2 - x1 + 1e-9) if n[1] != 0 else (y2 - y) / (y2 - y1 + 1e-9)
+        k = int(c * 3.99)
+        col = 4 if one else {(0, 1, 0): 4, (0, -1, 0): 12, (1, 0, 0): 0, (-1, 0, 0): 8}[tuple(int(q) for q in n)]
+        return tuple(img[v + 4 + t, u + col + k])
+    sbox(m, x1, y1, z1, x2, y2, z2, fn, name, res=8)
+
 CHKN, ZOMB = _whiter(_tex("chicken_be.png")), _tex("zombie.png")
 
 @redesign("chicken_jockey")
@@ -14037,10 +14077,10 @@ def _(m):
         bmob(m, "zombie", ZOMB, sh, y0=neck - 24 * sh, z0=zz, only=('head',), name=nm, fine=True,
              pose={'head': ('y', round(-20.0 * tl, 2))} if tl else {})
         for sd, x1 in ((1, -8), (-1, 4)):                                                       # arms straight out front
-            m.box(*Z(x1, 20, -10), *Z(x1 + 4, 24, 2), TexQ(TexX90(TexQ(Tex(ZOMB, 40, 16, 4, 12, 4, (), nm), 2, nm), nm), 2, nm))
+            _limb(m, Z(x1, 20, -10), Z(x1 + 4, 24, 2), ZOMB, 40, 16, nm)
         for x1, ox in ((-3.9, -0.15), (-0.1, 0.15)):                                             # short legs forward along its back
             a_, b_ = Z(x1, 12, -6), Z(x1 + 4, 16, 2)
-            m.box(a_[0] + ox, a_[1], a_[2], b_[0] + ox, b_[1], b_[2], TexQ(TexX90(TexQ(Tex(ZOMB, 0, 16, 4, 12, 4, (), nm), 2, nm), nm), 2, nm))
+            _limb(m, (a_[0] + ox, a_[1], a_[2]), (b_[0] + ox, b_[1], b_[2]), ZOMB, 0, 16, nm, one=True)
     m.animate(('show', 'cj', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 TNT_S, TNT_T, TNT_B = _tex("tnt_side.png"), _tex("tnt_top.png"), _tex("tnt_bottom.png")
