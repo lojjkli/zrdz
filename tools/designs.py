@@ -14045,7 +14045,11 @@ def _limb(m, a, b, img, u, v, name, one=False):
         return tuple(img[v + 4 + t, u + col + k])
     sbox(m, x1, y1, z1, x2, y2, z2, fn, name, res=8)
 
-CHKN, ZOMB = _whiter(_tex("chicken_be.png")), _tex("zombie.png")
+def _zomb_clean(a):
+    a = a.copy(); a[28:32, 16:40, :3] = (70, 58, 165); a[28:32, 16:40, 3] = 255     # straight trouser waistband (no jagged hem)
+    return a
+
+CHKN, ZOMB = _whiter(_tex("chicken_be.png")), _zomb_clean(_tex("zombie.png"))
 
 @redesign("chicken_jockey")
 def _(m):
