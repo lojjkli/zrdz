@@ -13943,18 +13943,30 @@ def _(m):
              pose={'rightWing': ('y', a), 'leftWing': ('y', -a)})
     m.animate(('show', 'bt', N), frames=N, frametime=1, interpolate=False)
 
-TURT = _tex("sea_turtle.png")
+def _turt_clean(a):
+    """Vanilla turtle texture, tidied for a small hat: no stretched 1-texel side rows, one clean shell rim, a pale belly."""
+    a = a.copy()
+    for u, v, w, h, d in ((0, 23, 4, 1, 10), (0, 12, 4, 1, 10), (26, 30, 13, 1, 5), (26, 24, 13, 1, 5)):     # flipper edges
+        top = a[v:v + d, u + d:u + d + w].reshape(-1, 4)
+        top = top[top[:, 3] > 0]
+        if len(top):
+            a[v + d:v + d + h, u:u + 2 * d + 2 * w] = _np.median(top, 0).astype(_np.uint8)
+    strip = a[37:43, 12:31]                                                              # scute rim (front of the shell)
+    side = _np.array(_Image.fromarray(_np.ascontiguousarray(strip)).resize((20, 6), _Image.NEAREST))
+    a[43:63, 6:12] = _np.rot90(side, -1); a[43:63, 31:37] = _np.rot90(side, 1)            # same rim on the left and right
+    pl = a[46:60, 16:27].reshape(-1, 4); pale = _np.median(pl[pl[:, 3] > 0], 0).astype(_np.uint8)
+    a[1:4, 33:55] = pale; a[4:22, 30:33] = pale; a[4:22, 44:47] = pale                     # belly plate edges pale too
+    return a
+
+TURT = _turt_clean(_tex("sea_turtle.png"))
 
 def _turtle_adult(m):
     s, z0 = 0.22, -0.9
     y0 = 4.6 + 0.45 * s
     J = lambda x1, y1, z1, x2, y2, z2: (x1 * s, y0 + y1 * s, z0 + z1 * s, x2 * s, y0 + y2 * s, z0 + z2 * s)
     m.box(*J(-5.5, 0, -7, 5.5, 3, 11), TexX90(Tex(TURT, 30, 1, 11, 18, 3, (), "tbl")))          # pale belly plate
-    m.box(*J(-9.5, 2.5, -7, 9.5, 7.5, 13), TexX90(Tex(TURT, 6, 37, 19, 20, 6, (), "tsh")))      # shell, sitting on the body
-    top = (TURT, 37, 43, 19, 20)
-    m.box(*J(-7.5, 7.5, -5, 7.5, 9.5, 11), FaceTex({'up': top, 'north': (TURT, 12, 37, 19, 6), 'south': (TURT, 12, 37, 19, 6),
-                                                    'east': (TURT, 37, 43, 4, 20), 'west': (TURT, 52, 43, 4, 20)}, "tdm", "dome"))   # domed top
-    bmob(m, "turtle_nb", TURT, s, y0=y0, z0=z0, move={'head': (0, 2.0, -0.5)})
+    m.box(*J(-9.5, 2.5, -7, 9.5, 8.5, 13), TexX90(Tex(TURT, 6, 37, 19, 20, 6, (), "tsh")))      # shell, sitting on the body
+    bmob(m, "turtle_nb", TURT, s, y0=y0, z0=z0, move={'head': (0, 1.5, 0.3)})
 
 redesign("turtle_buddy")(_idle4(_turtle_adult, ('head', 'leg2', 'leg3'), {},
                                 acts(L_(a=30, h=24), [({'leg2:y': 22, 'leg3:y': -22}, 4, 6), ({'leg2:y': -18, 'leg3:y': 18}, 4, 6),
@@ -13988,7 +14000,12 @@ def _(m):
     m.animate(('show', 'bz', N), frames=N, frametime=1, interpolate=False)
 
 LEGA = 10.0
-CHKN, ZOMB = _tex("chicken_be.png"), _tex("zombie.png")
+def _whiter(a, k=0.45):
+    a = a.copy(); g = (a[..., 0] == a[..., 1]) & (a[..., 1] == a[..., 2]) & (a[..., 3] > 0)
+    a[g, :3] = (a[g, :3] + (255 - a[g, :3].astype(float)) * k).astype(_np.uint8)
+    return a
+
+CHKN, ZOMB = _whiter(_tex("chicken_be.png")), _tex("zombie.png")
 
 @redesign("chicken_jockey")
 def _(m):
@@ -14020,9 +14037,10 @@ def _(m):
         bmob(m, "zombie", ZOMB, sh, y0=neck - 24 * sh, z0=zz, only=('head',), name=nm, fine=True,
              pose={'head': ('y', round(-20.0 * tl, 2))} if tl else {})
         for sd, x1 in ((1, -8), (-1, 4)):                                                       # arms straight out front
-            m.box(*Z(x1, 20, -10), *Z(x1 + 4, 24, 2), TexXm90(Tex(ZOMB, 40, 16, 4, 12, 4, (), nm)))
-        bmob(m, "zombie", ZOMB, sz, y0=seat - 12 * sz + dy, z0=zz, name=nm, fine=True, only=('rightLeg', 'leftLeg'),   # legs down both sides
-             pose={'rightLeg': ('z', LEGA), 'leftLeg': ('z', -LEGA)}, move={'rightLeg': (-7.2, 0, -1.0), 'leftLeg': (7.2, 0, -1.0)})
+            m.box(*Z(x1, 20, -10), *Z(x1 + 4, 24, 2), TexQ(TexX90(TexQ(Tex(ZOMB, 40, 16, 4, 12, 4, (), nm), 2, nm), nm), 2, nm))
+        for x1, ox in ((-3.9, -0.15), (-0.1, 0.15)):                                             # short legs forward along its back
+            a_, b_ = Z(x1, 12, -6), Z(x1 + 4, 16, 2)
+            m.box(a_[0] + ox, a_[1], a_[2], b_[0] + ox, b_[1], b_[2], TexQ(TexX90(TexQ(Tex(ZOMB, 0, 16, 4, 12, 4, (), nm), 2, nm), nm), 2, nm))
     m.animate(('show', 'cj', len(states)), frames=len(states), frametime=1, interpolate=False, times=times)
 
 TNT_S, TNT_T, TNT_B = _tex("tnt_side.png"), _tex("tnt_top.png"), _tex("tnt_bottom.png")
